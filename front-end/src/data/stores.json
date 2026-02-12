@@ -1,0 +1,50 @@
+[
+    {
+        "name": "路易莎咖啡 Louisa Coffee",
+        "image": "https://lh5.googleusercontent.com/p/AF1QipM-pX9W-sYqGk_dYlF5_oXhCgJgKkX5mF-X_v_8=w408-h306-k-no",
+        "hours": "07:00 - 21:00",
+        "description": "提供優質咖啡與輕食，舒適的環境適合工作與聚會。提供插座與 Wifi。"
+    },
+    {
+        "name": "星巴克 Starbucks",
+        "image": "https://lh5.googleusercontent.com/p/AF1QipN3t8_q5_yQhXv9_oXhCgJgKkX5mF-X_v_8=w408-h306-k-no",
+        "hours": "07:00 - 22:00",
+        "description": "全球知名連鎖咖啡店，提供各式風味咖啡與星冰樂。"
+    },
+    {
+        "name": "Cama Café",
+        "image": "",
+        "hours": "07:30 - 20:00",
+        "description": "堅持手工挑豆，新鮮烘焙，提供最優質的咖啡享受。"
+    },
+    {
+        "name": "85度C",
+        "image": "",
+        "hours": "24小時營業",
+        "description": "提供咖啡、蛋糕、烘焙麵包，平價美味的選擇。"
+    },
+    {
+        "name": "彼得好咖啡",
+        "image": "",
+        "hours": "08:00 - 18:00",
+        "description": "在地深耕的咖啡品牌，提供親切服務與好喝的咖啡。"
+    },
+    {
+        "name": "客美多咖啡 Komeda's Coffee",
+        "image": "",
+        "hours": "07:30 - 21:00",
+        "description": "來自名古屋的早餐文化，點飲料送早餐吐司聞名。"
+    },
+    {
+        "name": "伯朗咖啡館",
+        "image": "",
+        "hours": "08:00 - 20:00",
+        "description": "台灣在地咖啡品牌，提供寬敞座位與多樣餐點。"
+    },
+    {
+        "name": "怡客咖啡",
+        "image": "",
+        "hours": "07:00 - 22:30",
+        "description": "提供義式咖啡與無國界料理，舒適自在的空間。"
+    }
+]

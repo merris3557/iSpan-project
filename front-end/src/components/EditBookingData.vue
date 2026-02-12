@@ -3,7 +3,10 @@ import { ref } from 'vue';
 import BaseButton from '@/components/common/BaseButton.vue';
 
 // 接收父層傳來的資料(dataList)
-const props = defineProps(['bookings']);
+const props = defineProps({
+    bookings: { type: Array, default: () => [] },
+    role: { type: String, default: 'shop' }
+});
 
 // 紀錄哪一行正在編輯
 const editingId = ref(null);
@@ -28,19 +31,34 @@ const saveEdit = () => {
 const cancelEdit = () => {
     editingId.value = null;
 };
+
+
+// 日期選擇限制
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate());
+// 使用在地時間格式化 (YYYY-MM-DD)
+const year = tomorrow.getFullYear();
+const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+const day = String(tomorrow.getDate()).padStart(2, '0');
+
+const minDate = `${year}-${month}-${day}`;
+
 </script>
 
 <template>
     <div class="booking-table-container">
-        <h2 class="text-gdg h4 mb-3">訂位清單</h2>
+        <h2 class="text-gdg h4 mb-3">
+            {{ role === 'shop' ? '門店預約管理' : '我的訂位紀錄' }}
+        </h2>
         <table class="table table-hover gdg-table">
             <thead>
                 <tr>
                     <th style="width: 100px;">訂位編號</th>
+                    <th v-if="role === 'user'" style="width: 150px;">餐廳</th>
                     <th>姓名</th>
                     <th>電話</th>
                     <th style="width: 160px;">日期</th>
-                    <th style="width: 130px;">用餐開始時間</th>
+                    <th style="width: 130px;">時間</th>
                     <th style="width: 80px;">人數</th>
                     <th style="width: 180px;">操作</th>
                 </tr>
@@ -49,27 +67,46 @@ const cancelEdit = () => {
                 <tr v-for="item in bookings" :key="item.id">
                     <template v-if="editingId === item.id">
                         <td>{{ item.id }}</td>
-                        <td>{{ item.name }}</td>
-                        <td>{{ item.phone }}</td>
+
+                        <td v-if="role === 'user'">{{ item.restaurant }}</td>
+
                         <td>
-                            <input type="date" v-model="tempEditItem.date"
+                            <input v-if="role === 'user'" v-model="tempEditItem.name"
                                 class="form-control form-control-sm table-input" />
+                            <span v-else>{{ item.name }}</span>
+                        </td>
+
+                        <td>
+                            <input v-if="role === 'user'" v-model="tempEditItem.phone"
+                                class="form-control form-control-sm table-input" />
+                            <span v-else>{{ item.phone }}</span>
+                        </td>
+
+                        <td>
+                            <input v-if="role === 'shop'" type="date" v-model="tempEditItem.date"
+                                class="form-control form-control-sm table-input" :min="minDate"
+                                @change="resetTime" />
+                            <span v-else>{{ item.date }}</span>
                         </td>
                         <td>
-                            <input type="time" v-model="tempEditItem.time"
+                            <input v-if="role === 'shop'" type="time" v-model="tempEditItem.time"
                                 class="form-control form-control-sm table-input" />
+                            <span v-else>{{ item.time }}</span>
                         </td>
+
                         <td>{{ item.people }}</td>
+
                         <td>
                             <div class="d-flex gap-2">
-                                <BaseButton color="gdg" size="sm" @click="saveEdit">儲存</BaseButton>
-                                <BaseButton color="outline-gdg" size="sm" @click="cancelEdit">取消</BaseButton>
+                                <BaseButton color="outline-gdg" size="sm" @click="saveEdit">儲存</BaseButton>
+                                <BaseButton color="outline-danger" size="sm" @click="cancelEdit">取消</BaseButton>
                             </div>
                         </td>
                     </template>
 
                     <template v-else>
                         <td>{{ item.id }}</td>
+                        <td v-if="role === 'user'">{{ item.restaurant }}</td>
                         <td>{{ item.name }}</td>
                         <td>{{ item.phone }}</td>
                         <td>{{ item.date }}</td>
@@ -77,8 +114,10 @@ const cancelEdit = () => {
                         <td>{{ item.people }}</td>
                         <td>
                             <div class="d-flex gap-2">
-                                <BaseButton color="outline-gdg" size="sm" @click="startEdit(item)">修改</BaseButton>
-                                <BaseButton color="danger" size="sm" @click="$emit('delete', item.id)">刪除</BaseButton>
+                                <BaseButton color="gdg" size="sm" @click="startEdit(item)">修改</BaseButton>
+                                <BaseButton color="danger" size="sm" @click="$emit('delete', item)">
+                                    刪除
+                                </BaseButton>
                             </div>
                         </td>
                     </template>

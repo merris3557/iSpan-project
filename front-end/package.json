@@ -12,6 +12,7 @@
     "axios": "^1.13.3",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
+    "leaflet": "^1.9.4",
     "pinia": "^3.0.4",
     "router": "^2.2.0",
     "sweetalert2": "^11.26.18",

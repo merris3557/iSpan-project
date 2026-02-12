@@ -49,7 +49,7 @@ const durationOptions = [60, 90, 120, 150, 180];
 
 .border-gdg:focus {
     border-color: #776f54;
-    box-shadow: 0 0 0 0.25Ref rgba(159, 149, 114, 0.25);
+    box-shadow: 0 0 0 0.25 rgba(159, 149, 114, 0.25);
 }
 
 .custom-select {

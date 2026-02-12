@@ -16,6 +16,4 @@ import BaseButton from '@/components/common/BaseButton.vue';
   </div>
 </template>
 
-<style scoped>
-/* 保持乾淨 */
-</style>
+<style scoped></style>

@@ -9,6 +9,7 @@ $gdg-bg-light: rgba(160, 150, 115, 0.05);
     background-color: $gdg-gold;
     color: #fff;
     border: 1px solid $gdg-gold;
+    // border-radius: 10px;
     transition: all 0.3s ease-out;
 
     &:hover {
@@ -22,6 +23,7 @@ $gdg-bg-light: rgba(160, 150, 115, 0.05);
     background-color: transparent;
     color: $gdg-gold;
     border: 1px solid $gdg-gold;
+    // border-radius: 10px;
     transition: all 0.3s ease-out;
 
     &:hover {
@@ -122,4 +124,221 @@ $gdg-bg-light: rgba(160, 150, 115, 0.05);
 // Global reset/font
 body {
     background-color: #fff;
+}
+
+.page-title-gdg {
+    color: $gdg-gold;
+    font-family: 'Noto Serif TC', serif;
+    font-size: 3.25rem;
+    font-weight: 700;
+    padding-top: 20px;
+    text-align: center;
+    letter-spacing: 0.15em;
+}
+
+.page-description-gdg {
+    color: $gdg-gold-dark;
+    font-family: 'Noto Serif TC', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-align: center;
+    letter-spacing: 0.1em;
+}
+
+.page-container-gdg {
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 0 20px;
+    width: 100%;
+    height: 100vh;
+    /* Occupy full viewport height */
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.map-layout-gdg {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    flex: 1;
+    /* 關鍵：自動撐開佔滿剩餘高度 */
+    min-height: 0;
+    /* 關鍵：防止內容溢出導致高度崩潰 */
+    margin-bottom: 20px;
+    margin-top: 5px;
+}
+
+/* 調整地圖容器 */
+.map-main-wrapper {
+    flex: 7;
+    /* 增加地圖權重，讓它變寬 */
+    border-radius: 8px;
+    overflow: hidden;
+    height: 100%;
+}
+
+/* 調整卡片容器 */
+.map-sidebar-wrapper {
+    flex: 2.5;
+    /* 縮小卡片比例，從原來的 3 降到 2.5 或更低 */
+    height: 100%;
+    overflow-y: auto;
+    /* 確保卡片清單過長時可以自己滾動，不撐開頁面 */
+}
+
+/* Ensure children fill the height */
+.map-view {
+    width: 100%;
+    height: 100% !important;
+    /* Force full height */
+    min-height: 0 !important;
+    /* Override previous min-height */
+}
+
+// ========================================
+// Admin Panel Theme Colors
+// ========================================
+$admin-primary: #1e3c72;
+$admin-primary-dark: #2a5298;
+$admin-sidebar-bg: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
+$admin-content-bg: #f5f6fa;
+$admin-card-bg: #ffffff;
+$admin-border: #e5e7eb;
+$admin-text-primary: #1f2937;
+$admin-text-secondary: #6b7280;
+$admin-text-muted: #9ca3af;
+
+// Admin Status Colors
+$status-success: #10b981;
+$status-warning: #f59e0b;
+$status-danger: #ef4444;
+$status-info: #3b82f6;
+$status-pending: #fbbf24;
+
+// Admin Utilities
+.bg-admin-primary {
+    background-color: $admin-primary !important;
+}
+
+.bg-admin-content {
+    background-color: $admin-content-bg !important;
+}
+
+.text-admin-primary {
+    color: $admin-primary !important;
+}
+
+.text-admin-secondary {
+    color: $admin-text-secondary !important;
+}
+
+// Admin Card Styles
+.admin-card {
+    background: $admin-card-bg;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+}
+
+// Admin Button Styles
+.btn-admin-primary {
+    background-color: $admin-primary;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background-color: $admin-primary-dark;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(30, 60, 114, 0.3);
+    }
+}
+
+.btn-admin-outline {
+    background-color: transparent;
+    color: $admin-primary;
+    border: 1px solid $admin-primary;
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background-color: $admin-primary;
+        color: #fff;
+    }
+}
+
+// Admin Form Styles
+.admin-form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid $admin-border;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+
+    &:focus {
+        outline: none;
+        border-color: $admin-primary;
+        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+    }
+}
+
+// Admin Table Styles
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: $admin-card-bg;
+
+    thead {
+        background-color: #f9fafb;
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: $admin-text-secondary;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid $admin-border;
+        }
+    }
+
+    tbody {
+        tr {
+            border-bottom: 1px solid $admin-border;
+            transition: background-color 0.2s ease;
+
+            &:hover {
+                background-color: #f9fafb;
+            }
+        }
+
+        td {
+            padding: 1rem;
+            font-size: 0.875rem;
+            color: $admin-text-primary;
+        }
+    }
+}
+
+// Map Styles
+.map-view {
+    width: 100%;
+    height: 100%;
+    min-height: 500px; // Ensure visibility
+    border-radius: 12px;
+    z-index: 1; // Ensure it sits below overlays if any
 }

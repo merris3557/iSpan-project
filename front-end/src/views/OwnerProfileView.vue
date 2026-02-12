@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import SelectLabel from '@/components/SelectLabel.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
+import Swal from 'sweetalert2';
 
 const isEditing = ref(false);
 
@@ -19,7 +20,11 @@ const removeLabel = (index) => {
 };
 
 const handleSave = () => {
-  alert('儲存成功！');
+  Swal.fire({
+    icon: 'success',
+    title: '成功儲存資訊！',
+    confirmButtonText: '確定',
+  });
   isEditing.value = false;
 };
 </script>
@@ -64,14 +69,13 @@ const handleSave = () => {
     <div class="mt-4">
       <h2 class="text-gdg h4 mb-3">訂位編輯系統</h2>
       <RouterLink :to="{ name: 'Seats' }" v-slot="{ navigate }">
-        <BaseButton color="outline-gdg" @click="navigate">點擊進入系統</BaseButton>
+        <BaseButton color="gdg" @click="navigate">點擊進入系統</BaseButton>
       </RouterLink>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* 保持乾淨 */
 .border-gdg {
   border-color: #9f9572 !important;
 }

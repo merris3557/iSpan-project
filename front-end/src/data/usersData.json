@@ -1,0 +1,272 @@
+[
+    {
+        "id": 1,
+        "username": "johnd",
+        "email": "john@gmail.com",
+        "password": "m38rmF$",
+        "phone": "0912345678",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 2,
+        "username": "alice_w",
+        "email": "alice.w@yahoo.com",
+        "password": "P@ssw0rd1",
+        "phone": "0921456789",
+        "isStoreOwner": true,
+        "isBanned": false
+    },
+    {
+        "id": 3,
+        "username": "bob_builder",
+        "email": "bob.build@gmail.com",
+        "password": "B0b!7890",
+        "phone": "0935123456",
+        "isStoreOwner": false,
+        "isBanned": true
+    },
+    {
+        "id": 4,
+        "username": "charlie_z",
+        "email": "czhang@outlook.com",
+        "password": "Ch#rlie22",
+        "phone": "0987654321",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 5,
+        "username": "david_king",
+        "email": "dking@gmail.com",
+        "password": "K!ngDvd99",
+        "phone": "0911223344",
+        "isStoreOwner": true,
+        "isBanned": false
+    },
+    {
+        "id": 6,
+        "username": "eve_star",
+        "email": "eve.star@me.com",
+        "password": "St@r_Eve1",
+        "phone": "0955667788",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 7,
+        "username": "frank_t",
+        "email": "frank.t@gmail.com",
+        "password": "Fr@nk_123",
+        "phone": "0918273645",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 8,
+        "username": "grace_p",
+        "email": "gp_01@yahoo.com",
+        "password": "Gr@ce!888",
+        "phone": "0922334455",
+        "isStoreOwner": true,
+        "isBanned": false
+    },
+    {
+        "id": 9,
+        "username": "hank_m",
+        "email": "hank.m@outlook.com",
+        "password": "H@nk_M445",
+        "phone": "0933445566",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 10,
+        "username": "ivy_lin",
+        "email": "ivy.lin@gmail.com",
+        "password": "Ivy_L_098",
+        "phone": "0966778899",
+        "isStoreOwner": false,
+        "isBanned": true
+    },
+    {
+        "id": 11,
+        "username": "jack_chen",
+        "email": "jack.c@gmail.com",
+        "password": "J@ck_C777",
+        "phone": "0977889900",
+        "isStoreOwner": true,
+        "isBanned": false
+    },
+    {
+        "id": 12,
+        "username": "kelly_ho",
+        "email": "kho@yahoo.com",
+        "password": "K3lly_H0!",
+        "phone": "0988990011",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 13,
+        "username": "leo_wu",
+        "email": "leo.wu@gmail.com",
+        "password": "L30_Wu_99",
+        "phone": "0912123123",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 14,
+        "username": "mia_lee",
+        "email": "mialee@outlook.com",
+        "password": "M!a_Lee88",
+        "phone": "0923234234",
+        "isStoreOwner": true,
+        "isBanned": false
+    },
+    {
+        "id": 15,
+        "username": "noah_k",
+        "email": "noah.k@gmail.com",
+        "password": "N0ah_K_11",
+        "phone": "0934345345",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 16,
+        "username": "olivia_s",
+        "email": "osmith@me.com",
+        "password": "Oli_Sm!th",
+        "phone": "0945456456",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 17,
+        "username": "paul_v",
+        "email": "paul.v@gmail.com",
+        "password": "P@ul_V_22",
+        "phone": "0956567567",
+        "isStoreOwner": true,
+        "isBanned": false
+    },
+    {
+        "id": 18,
+        "username": "quinn_r",
+        "email": "quinn.r@yahoo.com",
+        "password": "Qu!nn_R33",
+        "phone": "0967678678",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 19,
+        "username": "ryan_h",
+        "email": "rh@gmail.com",
+        "password": "Ry@n_H_44",
+        "phone": "0978789789",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 20,
+        "username": "sara_m",
+        "email": "sara.m@outlook.com",
+        "password": "S@ra_M_55",
+        "phone": "0989890890",
+        "isStoreOwner": true,
+        "isBanned": true
+    },
+    {
+        "id": 21,
+        "username": "tom_b",
+        "email": "tomb@gmail.com",
+        "password": "T0m_B_666",
+        "phone": "0910111222",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 22,
+        "username": "uma_x",
+        "email": "uma.x@yahoo.com",
+        "password": "Um@_X_777",
+        "phone": "0920222333",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 23,
+        "username": "vince_l",
+        "email": "vince.l@gmail.com",
+        "password": "V!nce_L88",
+        "phone": "0930333444",
+        "isStoreOwner": true,
+        "isBanned": false
+    },
+    {
+        "id": 24,
+        "username": "wendy_c",
+        "email": "wc@outlook.com",
+        "password": "W3ndy_C99",
+        "phone": "0940444555",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 25,
+        "username": "xander_y",
+        "email": "xy@gmail.com",
+        "password": "X@nder_Y0",
+        "phone": "0950555666",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 26,
+        "username": "yuna_p",
+        "email": "yunap@me.com",
+        "password": "Yun@_P_12",
+        "phone": "0960666777",
+        "isStoreOwner": true,
+        "isBanned": false
+    },
+    {
+        "id": 27,
+        "username": "zoe_a",
+        "email": "zoe.a@gmail.com",
+        "password": "Z0e_A_345",
+        "phone": "0970777888",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 28,
+        "username": "adam_f",
+        "email": "af@yahoo.com",
+        "password": "Ad@m_F_56",
+        "phone": "0980888999",
+        "isStoreOwner": false,
+        "isBanned": false
+    },
+    {
+        "id": 29,
+        "username": "bella_g",
+        "email": "bg@gmail.com",
+        "password": "B3ll@_G78",
+        "phone": "0990999000",
+        "isStoreOwner": true,
+        "isBanned": false
+    },
+    {
+        "id": 30,
+        "username": "cody_h",
+        "email": "cody.h@outlook.com",
+        "password": "C0dy_H!10",
+        "phone": "0911000111",
+        "isStoreOwner": false,
+        "isBanned": false
+    }
+]

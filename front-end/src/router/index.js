@@ -14,7 +14,28 @@ const routes = [
     name: 'Login',
     component: () => import('@/views/LoginView.vue'),
   },
-
+  {
+    path: '/forgot-password',
+    name: 'ForgetPassword',
+    component: () => import('@/views/ForgetPasswordView.vue'),
+    meta: { layout: 'blank' }
+  },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: () => import('@/views/ResetPasswordView.vue'),
+    meta: { layout: 'blank' }
+  },
+  {
+    path: '/userInfo',
+    name: 'UserInfo',
+    component: () => import('@/views/UserInfoView.vue'),
+  },
+  {
+    path: '/storeRegistration',
+    name: 'StoreRegistration',
+    component: () => import('@/views/StoreRegistrationView.vue'),
+  },
   {
     path: '/shopStore',
     component: () => import('@/views/shopStore.vue'),
@@ -95,6 +116,99 @@ const routes = [
     path: '/checkOut',
     component: () => import('@/views/checkOut.vue'),
     name: 'checkOut',
+  },
+  // Admin Routes
+  {
+    path: '/admin',
+    component: () => import('@/layouts/admin.vue'),
+    children: [
+      {
+        path: '',
+        name: 'AdminDashboard',
+        component: () => import('@/views/ERPTransferView.vue')
+      },
+      {
+        path: 'frontend/banners',
+        name: 'AdminFrontendBanners',
+        component: () => import('@/views/AdminDashboard.vue') // placeholder
+      },
+      {
+        path: 'frontend/content',
+        name: 'AdminFrontendContent',
+        component: () => import('@/views/AdminDashboard.vue') // placeholder
+      },
+      {
+        path: 'news/list',
+        name: 'AdminNewsList',
+        component: () => import('@/views/AdminDashboard.vue') // placeholder
+      },
+      {
+        path: 'news/create',
+        name: 'AdminNewsCreate',
+        component: () => import('@/views/AdminDashboard.vue') // placeholder
+      },
+      {
+        path: 'knowledge/list',
+        name: 'AdminKnowledgeList',
+        component: () => import('@/views/AdminDashboard.vue') // placeholder
+      },
+      {
+        path: 'knowledge/categories',
+        name: 'AdminKnowledgeCategories',
+        component: () => import('@/views/AdminDashboard.vue') // placeholder
+      },
+      {
+        path: 'products/list',
+        name: 'AdminProductsList',
+        component: () => import('@/views/AdminDashboard.vue') // placeholder
+      },
+      {
+        path: 'products/create',
+        name: 'AdminProductsCreate',
+        component: () => import('@/views/AdminDashboard.vue') // placeholder
+      },
+      {
+        path: 'products/categories',
+        name: 'AdminProductsCategories',
+        component: () => import('@/views/AdminDashboard.vue') // placeholder
+      },
+      {
+        path: 'sales/orders',
+        name: 'AdminSalesOrders',
+        component: () => import('@/views/AdminDashboard.vue') // placeholder
+      },
+      {
+        path: 'sales/reports',
+        name: 'AdminSalesReports',
+        component: () => import('@/views/AdminDashboard.vue') // placeholder
+      },
+      {
+        path: 'users/list',
+        name: 'AdminUsersList',
+        component: () => import('@/views/UserListView.vue')
+      },
+      {
+        path: 'users/storeRegistration',
+        name: 'StoreRegistrationCheck',
+        component: () => import('@/views/StoreRegistrationCheckView.vue')
+      }
+      ,
+      {
+        path: 'backEnd/productsList',
+        name: 'BackEndProductsList',
+        component: () => import('@/views/BackEndProductsList.vue') // placeholder
+      },
+      {
+        path: 'backEnd/productsStock',
+        name: 'BackEndProductsStock',
+        component: () => import('@/views/BackEndproductsStock.vue') // placeholder
+      },
+    ]
+  },
+  {
+    path: '/getusertest',
+    name: 'GetUserTest',
+    component: () => import('@/views/GetUserTestView.vue')
   }
 
 ];

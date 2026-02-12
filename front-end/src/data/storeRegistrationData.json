@@ -1,0 +1,142 @@
+[
+    {
+        "id": 1,
+        "email": "few4@gmail.com",
+        "name": "merry",
+        "applytime": "2026-02-06 16:30:20",
+        "status": "未處理"
+    },
+    {
+        "id": 2,
+        "email": "john.doe@example.com",
+        "name": "John Doe",
+        "applytime": "2026-02-06 16:45:10",
+        "status": "已結案"
+    },
+    {
+        "id": 3,
+        "email": "alice_w@gmail.com",
+        "name": "Alice Wang",
+        "applytime": "2026-02-06 17:00:05",
+        "status": "退回中"
+    },
+    {
+        "id": 4,
+        "email": "bob.smith@company.tw",
+        "name": "Bob Smith",
+        "applytime": "2026-02-06 17:15:45",
+        "status": "未處理"
+    },
+    {
+        "id": 5,
+        "email": "charlie88@yahoo.com",
+        "name": "Charlie Chen",
+        "applytime": "2026-02-06 17:30:12",
+        "status": "已結案"
+    },
+    {
+        "id": 6,
+        "email": "david.lee@outlook.com",
+        "name": "David Lee",
+        "applytime": "2026-02-06 17:45:30",
+        "status": "未處理"
+    },
+    {
+        "id": 7,
+        "email": "emily_h@gmail.com",
+        "name": "Emily Huang",
+        "applytime": "2026-02-06 18:00:00",
+        "status": "退回中"
+    },
+    {
+        "id": 8,
+        "email": "frankie_lin@gmail.com",
+        "name": "Frankie Lin",
+        "applytime": "2026-02-06 18:15:22",
+        "status": "已結案"
+    },
+    {
+        "id": 9,
+        "email": "grace_ko@example.com",
+        "name": "Grace Ko",
+        "applytime": "2026-02-06 18:30:11",
+        "status": "未處理"
+    },
+    {
+        "id": 10,
+        "email": "henry_wu@gmail.com",
+        "name": "Henry Wu",
+        "applytime": "2026-02-06 18:45:55",
+        "status": "未處理"
+    },
+    {
+        "id": 11,
+        "email": "iris_tsai@yahoo.com",
+        "name": "Iris Tsai",
+        "applytime": "2026-02-06 19:00:40",
+        "status": "已結案"
+    },
+    {
+        "id": 12,
+        "email": "jack_ma@company.tw",
+        "name": "Jack Ma",
+        "applytime": "2026-02-06 19:15:18",
+        "status": "退回中"
+    },
+    {
+        "id": 13,
+        "email": "kevin_ho@gmail.com",
+        "name": "Kevin Ho",
+        "applytime": "2026-02-06 19:30:05",
+        "status": "未處理"
+    },
+    {
+        "id": 14,
+        "email": "linda_p@outlook.com",
+        "name": "Linda Pan",
+        "applytime": "2026-02-06 19:45:50",
+        "status": "已結案"
+    },
+    {
+        "id": 15,
+        "email": "mike_c@gmail.com",
+        "name": "Mike Chang",
+        "applytime": "2026-02-06 20:00:12",
+        "status": "未處理"
+    },
+    {
+        "id": 16,
+        "email": "nancy_y@example.com",
+        "name": "Nancy Yeh",
+        "applytime": "2026-02-06 20:15:33",
+        "status": "退回中"
+    },
+    {
+        "id": 17,
+        "email": "oscar_l@gmail.com",
+        "name": "Oscar Liu",
+        "applytime": "2026-02-06 20:30:45",
+        "status": "已結案"
+    },
+    {
+        "id": 18,
+        "email": "peter_chen@yahoo.com",
+        "name": "Peter Chen",
+        "applytime": "2026-02-06 20:45:00",
+        "status": "未處理"
+    },
+    {
+        "id": 19,
+        "email": "queen_w@gmail.com",
+        "name": "Queen Wang",
+        "applytime": "2026-02-06 21:00:15",
+        "status": "未處理"
+    },
+    {
+        "id": 20,
+        "email": "richard_l@company.tw",
+        "name": "Richard Lin",
+        "applytime": "2026-02-06 21:15:28",
+        "status": "已結案"
+    }
+]
