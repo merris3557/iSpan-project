@@ -205,32 +205,67 @@ public class BookingService {
         return resp;
     }
 
-
-    // 取得使用者的訂位紀錄
+    // ----------使用者訂位管理----------
     // 1. 獲取使用者的所有訂位列表
     public List<BookingResponseDto> getBookingsByUser(Long userId) {
         return bookingRepository.findByUserId(userId).stream()
                 .map(this::convertToResponse)
                 .toList();
     }
+
     // 2. 更新訂位資訊（僅限姓名與電話）
     @Transactional
     public BookingResponseDto updateBooking(Integer bookingId, BookingUpdateDto dto) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("找不到該訂位紀錄"));
-        
+
         booking.setGuestName(dto.getGuestName());
         booking.setGuestPhone(dto.getGuestPhone());
-        
+
         return convertToResponse(bookingRepository.save(booking));
     }
+
     // 3. 取消訂位（軟刪除，將狀態改為 false）
     @Transactional
     public void cancelBooking(Integer bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("找不到該訂位紀錄"));
-        
+
         booking.setStatus(false);
         bookingRepository.save(booking);
+    }
+
+    // ----------店家訂位管理----------
+    // 1. 取得特定店家的訂位紀錄
+    public List<BookingResponseDto> getBookingsByStore(Integer storeId) {
+        return bookingRepository.findByStoreId(storeId).stream()
+                .map(this::convertToResponse)
+                .toList();
+    }
+
+    // 2. 店家更新訂位資訊（可修改日期與時間）
+    @Transactional
+    public BookingResponseDto updateBookingByShop(Integer bookingId, BookingUpdateDto dto) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("找不到該訂位紀錄"));
+        // 更新日期
+        if (dto.getBookingDate() != null) {
+            booking.setBookingDate(dto.getBookingDate());
+        }
+        // 更新開始時間，並自動重算結束時間
+        if (dto.getStartTime() != null) {
+            booking.setStartTime(dto.getStartTime());
+
+            // 取得該店家的用餐限時 (timeLimit)
+            Integer timeLimit = booking.getStore().getTimeLimit();
+            // 重算結束時間：開始時間 + 用餐限時
+            booking.setEndTime(dto.getStartTime().plusMinutes(timeLimit));
+        }
+        // 如果店家也想順便改姓名電話（雖然 UI 目前分開，但 DTO 有支援就順便補上）
+        if (dto.getGuestName() != null)
+            booking.setGuestName(dto.getGuestName());
+        if (dto.getGuestPhone() != null)
+            booking.setGuestPhone(dto.getGuestPhone());
+        return convertToResponse(bookingRepository.save(booking));
     }
 }

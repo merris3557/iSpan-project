@@ -48,7 +48,7 @@ const minDate = `${year}-${month}-${day}`;
 <template>
     <div class="booking-table-container">
         <h2 class="text-gdg h4 mb-3">
-            {{ role === 'shop' ? '門店預約管理' : '我的訂位紀錄' }}
+            {{ role === 'shop' ? '門店預約管理' : '' }}
         </h2>
         <table class="table table-hover gdg-table">
             <thead>

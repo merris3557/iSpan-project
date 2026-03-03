@@ -80,4 +80,20 @@ public class BookingController {
         return ResponseEntity.ok(ApiResponse.success("訂位已取消", null));
     }
 
+    // ----------店家訂位管理----------
+    // 1. 取得特定店家的訂位紀錄
+    @GetMapping("/store/{storeId}")
+    public ResponseEntity<ApiResponse<List<BookingResponseDto>>> getBookingsByStore(@PathVariable Integer storeId) {
+        List<BookingResponseDto> response = bookingService.getBookingsByStore(storeId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // 2. 店家更新訂位資訊（可修改日期與時間）
+    @PutMapping("/store/{bookingId}")
+    public ResponseEntity<ApiResponse<BookingResponseDto>> updateBookingByShop(
+            @PathVariable Integer bookingId,
+            @RequestBody BookingUpdateDto dto) {
+        BookingResponseDto response = bookingService.updateBookingByShop(bookingId, dto);
+        return ResponseEntity.ok(ApiResponse.success("店家更新成功", response));
+    }
 }
