@@ -95,4 +95,50 @@ public class MailService {
             e.printStackTrace();
         }
     }
+
+    public void replyNotification(String toEmail, String caseNumber, String replyContent) {
+        MimeMessage message = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom("afterrr5pm@gmail.com");
+            helper.setTo(toEmail);
+            helper.setSubject("【饗島】您的回饋反映已有回覆 - " + caseNumber);
+
+            String htmlContent = "<html>" +
+                    "<body style='margin: 0; padding: 0; background-color: #f9f9f9; font-family: Arial, sans-serif;'>" +
+                    "  <table width='100%' border='0' cellpadding='0' cellspacing='0'>" +
+                    "    <tr><td style='padding: 20px 0;'>" +
+                    "      <table align='center' width='600' style='background-color: #ffffff; border: 1px solid #eeeeee; border-collapse: collapse;'>"
+                    +
+                    "        " +
+                    "        <tr><td align='center' style='padding: 30px; background-color: #9f9572;'>" +
+                    "          <img src='你的Logo網址' width='100' style='filter: brightness(0) invert(1);'>" +
+                    "        </td></tr>" +
+                    "        " +
+                    "        <tr><td style='padding: 40px 30px; background-color: rgba(160, 150, 115, 0.05);'>" +
+                    "          <h2 style='color: #776f54;'>客服回覆通知</h2>" +
+                    "          <p style='color: #555;'>親愛的用戶您好，關於您的案件 <strong>" + caseNumber
+                    + "</strong>，客服人員已處理完畢：</p>" +
+                    "          <div style='background: #ffffff; padding: 20px; border-left: 4px solid #9f9572; margin: 20px 0; color: #333; font-style: italic;'>"
+                    +
+                    "            " + replyContent + // 這裡放入管理員寫的回覆內容
+                    "          </div>" +
+                    "          <p style='font-size: 14px; color: #777;'>若您對回覆內容有任何疑問，歡迎再次聯繫我們。</p>" +
+                    "        </td></tr>" +
+                    "        " +
+                    "        <tr><td style='padding: 20px; text-align: center; font-size: 12px; color: #999;'>" +
+                    "          &copy; 2026 饗島 Taste Land. 此為系統自動發送。" +
+                    "        </td></tr>" +
+                    "      </table>" +
+                    "    </td></tr>" +
+                    "  </table>" +
+                    "</body>" +
+                    "</html>";
+
+            helper.setText(htmlContent, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
 }

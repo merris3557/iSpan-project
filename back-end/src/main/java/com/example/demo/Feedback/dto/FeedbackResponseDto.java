@@ -5,6 +5,8 @@ import lombok.Data;
 @Data
 public class FeedbackResponseDto {
 
+    private Long id;
+
     private String name;
 
     private String phone;
