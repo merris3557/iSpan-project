@@ -1,6 +1,8 @@
 package com.example.demo.admin.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import com.example.demo.admin.AdminPosition;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,8 +18,8 @@ public class AdminRegistrationRequest {
     @NotBlank(message = "Name is required")
     private String name;
 
-    @NotBlank(message = "Position is required")
-    private String position;
+    @NotNull(message = "Position is required")
+    private AdminPosition position;
 
     @NotBlank(message = "Email is required")
     @jakarta.validation.constraints.Email(message = "Invalid email format")

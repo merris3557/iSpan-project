@@ -54,7 +54,7 @@ public class AdminService {
         String accessToken = tokenProvider.generateAccessToken(
                 admin.getAccount(),
                 "ADMIN",
-                admin.getPosition());
+                admin.getPosition() != null ? admin.getPosition().name() : null);
         String refreshToken = tokenProvider.generateRefreshToken(admin.getAccount());
 
         // 5. 在 console 顯示登入資訊（測試用）

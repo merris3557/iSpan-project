@@ -24,6 +24,8 @@ export const useAdminAuthStore = defineStore('adminAuth', {
         isExpired: (state) => !!state.accessToken && isTokenExpired(state.accessToken),
         adminName: (state) => state.admin ? state.admin.name : '',
         adminPosition: (state) => state.admin ? state.admin.position : '',
+        hasRole: (state) => (role) => state.admin && state.admin.position === role,
+        hasAnyRole: (state) => (roles) => state.admin && roles.includes(state.admin.position),
     },
 
     actions: {

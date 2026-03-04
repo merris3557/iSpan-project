@@ -110,6 +110,14 @@ const filterBanned = ref('all');
 
 const admins = ref([]);
 
+// Mapping for roles
+const positionMap = {
+  'SUPER_ADMIN': '總管理員',
+  'HUMAN_RESOURCE': '人事',
+  'CUSTOMER_SERVICE': '客服',
+  'SHOP_MANAGER': '電商'
+};
+
 // Fetch admins on mount
 const fetchAdmins = async () => {
     try {
@@ -121,7 +129,7 @@ const fetchAdmins = async () => {
                 username: admin.account,
                 fullName: admin.name,
                 email: admin.email,
-                position: admin.position,
+                position: positionMap[admin.position] || admin.position,
                 isBanned: !admin.enabled
             }));
         }
@@ -199,7 +207,13 @@ const openAddModal = async () => {
         </div>
         <div class="mb-3">
           <label class="form-label fw-bold">職位</label>
-          <input id="swal-input-position" class="form-control" placeholder="請輸入職位">
+          <select id="swal-input-position" class="form-select">
+            <option value="" disabled selected>請選擇職位</option>
+            <option value="SUPER_ADMIN">總管理員</option>
+            <option value="HUMAN_RESOURCE">人事</option>
+            <option value="CUSTOMER_SERVICE">客服</option>
+            <option value="SHOP_MANAGER">電商</option>
+          </select>
         </div>
       </div>
     `,

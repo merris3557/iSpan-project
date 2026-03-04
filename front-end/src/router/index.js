@@ -234,7 +234,8 @@ const routes = [
       {
         path: 'users/list',
         name: 'AdminUsersList',
-        component: () => import('@/views/UserListView.vue')
+        component: () => import('@/views/UserListView.vue'),
+        meta: { roles: ['SUPER_ADMIN', 'CUSTOMER_SERVICE'] }
       },
       {
         path: 'users/storeRegistration',
@@ -261,6 +262,10 @@ const routes = [
         name: 'AdminsList',
         component: () => import('@/views/AdminListView.vue'),
         meta: { requiresAdminAuth: false }
+        // meta: {
+        //   requiresAdminAuth: true,
+        //   roles: ['SUPER_ADMIN']
+        // }
       }
     ]
   },
@@ -321,6 +326,20 @@ router.beforeEach(async (to, from, next) => {
     if (!adminAuthStore.isLoggedIn) {
       await adminAuthStore.handleLogoutAndNotify('unauthorized');
       return next('/admin/login');
+    }
+
+    // Role-based authorization
+    if (to.meta.roles && to.meta.roles.length > 0) {
+      if (!adminAuthStore.hasAnyRole(to.meta.roles)) {
+        const Swal = (await import('sweetalert2')).default;
+        await Swal.fire({
+          icon: 'error',
+          title: '權限不足',
+          text: '您沒有訪問此頁面的權限',
+          confirmButtonColor: '#1e3c72'
+        });
+        return next('/admin'); // 導向預設的 dashboard
+      }
     }
   }
 
