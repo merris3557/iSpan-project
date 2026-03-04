@@ -25,7 +25,6 @@ api.interceptors.request.use(
         // Common admin-only paths (or if we are logged in as admin explicitly)
         // StoreRegistration API mixed paths: /store-registrations is admin GET, user POST
         const isAdminPath = config.url.startsWith('/admins') ||
-            config.url.startsWith('/feedbackList') ||   // 客服後台 API  
             (config.url.startsWith('/store-registrations') && config.method === 'get' && !config.url.endsWith('/my')) ||
             (config.url.includes('/review'));
 

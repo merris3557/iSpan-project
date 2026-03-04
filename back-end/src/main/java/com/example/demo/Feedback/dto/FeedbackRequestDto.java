@@ -13,6 +13,4 @@ public class FeedbackRequestDto {
     private String contents;
 
     private Long typeId;
-
-    private String caseNumber;
 }

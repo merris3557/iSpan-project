@@ -6,8 +6,6 @@ import lombok.Setter;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.*;
 
 @Getter
@@ -22,10 +20,9 @@ public class FeedbackTypes {
     @Column(name = "id")
     private Long typeId;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String typeName;
 
-    @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "feedbackTypes")
     private List<Feedback> feedbacks;
 

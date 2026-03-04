@@ -1,6 +1,5 @@
 package com.example.demo.storeRegis;
 
-import com.example.demo.MapSearch.service.MapboxService;
 import com.example.demo.admin.Admin;
 import com.example.demo.admin.AdminRepository;
 import com.example.demo.store.entity.StoresInfo;
@@ -15,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -26,7 +24,6 @@ public class StoreRegistrationService {
     private final UserRepository userRepository;
     private final StoreInfoRepository storeInfoRepository;
     private final AdminRepository adminRepository;
-    private final MapboxService mapboxService;
 
     // 1. 建立新申請
     @Transactional
@@ -189,23 +186,6 @@ public class StoreRegistrationService {
                                                                                                                     // name
         storeInfo.setStorePhone(registration.getPhone());
         storeInfo.setAddress(registration.getAddress());
-
-        // --- 重點修改區塊 ---
-        // 取得舊地址與新地址比對（如果是更新申請才需要，若為了保險可以每次審核都重新轉一次）
-        String newAddress = registration.getAddress();
-        storeInfo.setAddress(newAddress);
-
-        // 呼叫 Mapbox API 轉換地址
-        BigDecimal[] coords = mapboxService.getCoordinate(registration.getAddress());
-
-        if (coords != null && coords.length >= 2) {
-            storeInfo.setLatitude(coords[0]); // 緯度
-            storeInfo.setLongitude(coords[1]); // 經度
-
-        } else {
-            System.err.println("警告：地址轉換經緯度失敗，地址為：" + newAddress);
-        }
-        // ------------------
 
         // Default values only for new StoresInfo
         if (storeInfo.getStoreId() == null) {

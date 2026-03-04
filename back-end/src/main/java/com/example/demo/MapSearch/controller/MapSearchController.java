@@ -17,18 +17,18 @@ public class MapSearchController {
 
     /**
      * 搜尋店家 API
-     * GET /api/map/search?keyword=台式&categoryIds=1&categoryIds=3
+     * GET /api/map/search?keyword=台式&categories=親子友善&categories=蔬食
      *
-     * @param keyword     搜尋關鍵字（可選），查詢 stores_info 資料表
-     * @param categoryIds 標籤 ID 列表（可選，支援多值），透過 JOIN store_category_mapping 查詢
+     * @param keyword    搜尋關鍵字（可選）
+     * @param categories 標籤名稱列表（可選，支援多值）
      * @return 符合條件的店家列表（含經緯度，供地圖顯示）
      */
     @GetMapping("/search")
     public ResponseEntity<List<StoreSearchResultDto>> search(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) List<Integer> categoryIds) {
+            @RequestParam(required = false) List<String> categories) {
 
-        List<StoreSearchResultDto> results = mapSearchService.search(keyword, categoryIds);
+        List<StoreSearchResultDto> results = mapSearchService.search(keyword, categories);
         return ResponseEntity.ok(results);
     }
 

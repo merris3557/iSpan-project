@@ -1,7 +1,5 @@
 package com.example.demo.Feedback.service;
 
-import java.util.List;
-
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,7 +10,6 @@ import com.example.demo.Feedback.entity.Feedback;
 import com.example.demo.Feedback.entity.FeedbackTypes;
 import com.example.demo.Feedback.repository.FeedbackRepository;
 import com.example.demo.Feedback.repository.FeedbackStatusRepository;
-import com.example.demo.Feedback.repository.FeedbackTypesRepository;
 import com.example.demo.user.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -24,7 +21,6 @@ public class FeedbackService {
     private final FeedbackRepository feedbackRepo;
     private final FeedbackStatusRepository feedbackStatusRepo;
     private final UserRepository userRepo;
-    private final FeedbackTypesRepository feedbackTypesRepo;
 
     public void createFeedback(FeedbackRequestDto dto) {
 
@@ -39,7 +35,6 @@ public class FeedbackService {
         feedback.setName(dto.getName());
         feedback.setPhone(dto.getPhone());
         feedback.setContents(dto.getContents());
-        feedback.setCaseNumber(dto.getCaseNumber());
 
         // 處理關聯 (關鍵修正)
         // 處理 Type (從 DTO 拿到的 typeId)
@@ -52,9 +47,5 @@ public class FeedbackService {
         // 寫入資料庫
         feedbackRepo.save(feedback);
 
-    }
-
-    public List<FeedbackTypes> getAllTypes() {
-        return feedbackTypesRepo.findAll();
     }
 }

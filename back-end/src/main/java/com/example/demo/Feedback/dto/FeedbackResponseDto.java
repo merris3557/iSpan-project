@@ -5,8 +5,6 @@ import lombok.Data;
 @Data
 public class FeedbackResponseDto {
 
-    private Long id;
-
     private String name;
 
     private String phone;
@@ -25,5 +23,5 @@ public class FeedbackResponseDto {
 
     private String repliedAt;
 
-    private Integer adminId;
+    private Long adminId;
 }

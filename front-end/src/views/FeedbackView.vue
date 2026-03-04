@@ -38,14 +38,10 @@
               v-model="formData.contactName"
               type="text"
               class="form-control"
-              :class="{ 'is-invalid': errors.contactName, 'is-readonly': isLoggedIn }"
-              :placeholder="isLoggedIn ? '' : '請輸入您的姓名'"
-              :readonly="isLoggedIn"
+              :class="{ 'is-invalid': errors.contactName }"
+              placeholder="請輸入您的姓名"
               @input="clearError('contactName')"
             />
-            <small v-if="isLoggedIn" class="form-hint text-success">
-              <i class="bi bi-shield-check"></i> 已自動帶入登入帳號資料
-            </small>
             <div v-if="errors.contactName" class="error-message">
               <i class="bi bi-exclamation-circle"></i>
               {{ errors.contactName }}
@@ -63,9 +59,8 @@
               v-model="formData.email"
               type="email"
               class="form-control"
-              :class="{ 'is-invalid': errors.email, 'is-readonly': isLoggedIn }"
-              :placeholder="isLoggedIn ? '' : 'example@email.com'"
-              :readonly="isLoggedIn"
+              :class="{ 'is-invalid': errors.email }"
+              placeholder="example@email.com"
               @input="clearError('email')"
             />
             <div v-if="errors.email" class="error-message">
@@ -102,30 +97,35 @@
               <i class="bi bi-tag"></i>
               反應問題種類
             </label>
-            <select
-              id="issueType"
-              v-model="formData.issueType"
-              class="form-select"
-              :class="{ 'is-invalid': errors.issueType }"
-              @change="clearError('issueType')"
-            >
-              <option value="" disabled>請選擇問題種類</option>
-              
-              <option 
-               v-for="type in issueTypes" 
-              :key="type.typeId" 
-              :value="type.typeId" 
+            <div class="select-wrapper">
+              <select
+                id="issueType"
+                v-model="formData.issueType"
+                class="form-select"
+                :class="{ 'is-invalid': errors.issueType }"
+                @change="clearError('issueType')"
               >
-                {{ type.typeName }}
-              </option>
-            </select>
+                <option value="" disabled>請選擇問題種類</option>
+                <option value="商店資訊有誤">商店資訊有誤</option>
+                <option value="網站使用回饋">網站使用回饋</option>
+                <option value="服務品質問題">服務品質問題</option>
+                <option value="功能建議">功能建議</option>
+                <option value="技術問題">技術問題</option>
+                <option value="其他">其他</option>
+              </select>
+              <i class="bi bi-chevron-down select-icon"></i>
+            </div>
+            <div v-if="errors.issueType" class="error-message">
+              <i class="bi bi-exclamation-circle"></i>
+              {{ errors.issueType }}
+            </div>
           </div>
 
           <!-- Feedback Content -->
           <div class="form-group">
             <label for="feedbackContent" class="form-label required">
               <i class="bi bi-chat-left-text"></i>
-              反映內容
+              回饋內容
             </label>
             <textarea
               id="feedbackContent"
@@ -203,46 +203,18 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
-import { getTypeList, submitFeedback } from '@/api/feedback';
-import { useAuthStore } from '@/stores/auth';
+import { ref, computed } from 'vue';
+import axios from 'axios';
 
 export default {
   name: 'FeedbackView',
   setup() {
-    const authStore = useAuthStore();
-
-    // 是否為已登入狀態（名稱/email 改為唯讀）
-    const isLoggedIn = computed(() => authStore.isLoggedIn);
-
-    const issueTypes = ref([]);
-
     const formData = ref({
       contactName: '',
       contactPhone: '',
       email: '',
       issueType: '',
       feedbackContent: ''
-    });
-
-    const fetchIssueTypes = async () => {
-      try {
-        const response = await getTypeList();
-        // config.js 的 response interceptor 已回傳 response.data
-        issueTypes.value = response;
-      } catch (error) {
-        console.error('無法取得問題種類清單:', error);
-      }
-    };
-
-    onMounted(() => {
-      fetchIssueTypes();
-
-      // 若已登入，自動帶入會員資料
-      if (authStore.isLoggedIn && authStore.user) {
-        formData.value.contactName = authStore.user.name ?? '';
-        formData.value.email       = authStore.user.email ?? '';
-      }
     });
 
     const errors = ref({});
@@ -256,6 +228,7 @@ export default {
       errors.value = {};
       let isValid = true;
 
+      // Validate contact name
       if (!formData.value.contactName.trim()) {
         errors.value.contactName = '請輸入聯絡人姓名';
         isValid = false;
@@ -264,6 +237,7 @@ export default {
         isValid = false;
       }
 
+      // Validate phone (now optional)
       if (formData.value.contactPhone.trim()) {
         const phoneRegex = /^[0-9-+()]*$/;
         if (!phoneRegex.test(formData.value.contactPhone)) {
@@ -272,6 +246,7 @@ export default {
         }
       }
 
+      // Validate email (now required)
       if (!formData.value.email.trim()) {
         errors.value.email = '請輸入電子郵件';
         isValid = false;
@@ -283,11 +258,13 @@ export default {
         }
       }
 
+      // Validate issue type
       if (!formData.value.issueType) {
         errors.value.issueType = '請選擇問題種類';
         isValid = false;
       }
 
+      // Validate feedback content
       if (!formData.value.feedbackContent.trim()) {
         errors.value.feedbackContent = '請輸入回饋內容';
         isValid = false;
@@ -307,6 +284,7 @@ export default {
 
     const handleSubmit = async () => {
       if (!validateForm()) {
+        // Show first error field
         const firstErrorField = Object.keys(errors.value)[0];
         if (firstErrorField) {
           const element = document.getElementById(firstErrorField);
@@ -321,35 +299,45 @@ export default {
       isSubmitting.value = true;
 
       try {
-        // 產生案件編號
+        // Generate report number
         const timestamp = Date.now();
         const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-        const generatedNumber = `FB${timestamp.toString().slice(-6)}${random}`;
-        reportNumber.value = generatedNumber;
+        reportNumber.value = `FB${timestamp.toString().slice(-6)}${random}`;
 
-        const payload = {
-          caseNumber: generatedNumber,
-          name:       formData.value.contactName,
-          phone:      formData.value.contactPhone,
-          email:      formData.value.email,
-          contents:   formData.value.feedbackContent,
-          typeId:     formData.value.issueType
+        // Map Issue Type
+        const issueTypeMap = {
+          '商店資訊有誤': 1,
+          '網站使用回饋': 2,
+          '服務品質問題': 3,
+          '功能建議': 4,
+          '技術問題': 5,
+          '其他': 6
         };
 
-        // 統一使用 api/feedback.js 的 submitFeedback()
-        await submitFeedback(payload);
+        const payload = {
+          name: formData.value.contactName,
+          phone: formData.value.contactPhone,
+          email: formData.value.email,
+          contents: formData.value.feedbackContent,
+          typeId: issueTypeMap[formData.value.issueType] || 1 // Fallback to 1 just in case
+        };
 
+        // Real API call
+        await axios.post('http://localhost:8080/api/feedback', payload);
+
+        // Show success banner
         showSuccessMessage.value = true;
 
+        // Reset form after showing success
         setTimeout(() => {
           resetForm();
           showSuccessMessage.value = false;
         }, 5000);
 
+        // Scroll to top to show success message
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
       } catch (error) {
-        console.error('送出失敗:', error);
         alert('送出失敗，請稍後再試');
       } finally {
         isSubmitting.value = false;
@@ -357,12 +345,11 @@ export default {
     };
 
     const resetForm = () => {
-      // 重設時，若已登入保留登入者資料
       formData.value = {
-        contactName:     isLoggedIn.value ? (authStore.user?.name ?? '') : '',
-        contactPhone:    '',
-        email:           isLoggedIn.value ? (authStore.user?.email ?? '') : '',
-        issueType:       '',
+        contactName: '',
+        contactPhone: '',
+        email: '',
+        issueType: '',
         feedbackContent: ''
       };
       errors.value = {};
@@ -370,13 +357,11 @@ export default {
 
     return {
       formData,
-      issueTypes,
       errors,
       isSubmitting,
       showSuccessMessage,
       reportNumber,
       characterCount,
-      isLoggedIn,
       handleSubmit,
       clearError,
       resetForm
@@ -593,22 +578,31 @@ export default {
     font-family: inherit;
   }
 
+  .select-wrapper {
+    position: relative;
+
+    .form-select {
+      appearance: none;
+      padding-right: 3rem;
+      cursor: pointer;
+    }
+
+    .select-icon {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: #6b7280;
+      font-size: 1rem;
+    }
+  }
+
   .form-hint {
     display: block;
     margin-top: 0.5rem;
     color: #6b7280;
     font-size: 0.8125rem;
-
-    &.text-success {
-      color: #059669 !important;
-    }
-  }
-
-  .is-readonly {
-    background-color: #f9fafb;
-    cursor: not-allowed;
-    color: #374151;
-    border-color: #d1d5db;
   }
 
   .error-message {

@@ -15,20 +15,20 @@ export const useMapSearchStore = defineStore('mapSearch', {
     actions: {
         /**
          * 呼叫後端搜尋 API
-         * @param {string} keyword - 關鍵字（可空），搜尋 stores_info
-         * @param {number[]} categoryIds - 標籤 ID 陣列（可空），透過 JOIN store_category_mapping 搜尋
+         * @param {string} keyword - 關鍵字（可空）
+         * @param {string[]} categories - 標籤陣列（可空）
          */
-        async searchStores(keyword = '', categoryIds = []) {
+        async searchStores(keyword = '', categories = []) {
             this.loading = true;
             this.error = null;
 
             try {
-                // 組裝 query string（categoryIds 可多值）
+                // 組裝 query string（categories 可多值）
                 const params = new URLSearchParams();
                 if (keyword && keyword.trim()) {
                     params.append('keyword', keyword.trim());
                 }
-                categoryIds.forEach(id => params.append('categoryIds', id));
+                categories.forEach(c => params.append('categories', c));
 
                 const queryString = params.toString();
                 const url = queryString ? `/map/search?${queryString}` : '/map/search';
