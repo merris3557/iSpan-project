@@ -1,22 +1,36 @@
 <script setup>
+// import { computed } from 'vue';
+// import { useRoute } from 'vue-router';
+// import DefaultLayout from '@/layouts/default.vue';
+// import BlankLayout from '@/layouts/blank.vue';
+import Navbar from '@/layouts/navbar.vue';
+import Footer from '@/layouts/footer.vue';
 import { onMounted } from 'vue';
+import { useProductsDepot } from '@/stores/productsDepot';
+import { useCartStore } from '@/stores/cart';
 import { useAuthStore } from '@/stores/auth';
 import { useAdminAuthStore } from '@/stores/adminAuth';
 
-const authStore = useAuthStore();
-const adminAuthStore = useAdminAuthStore();
 
-onMounted(() => {
-    // 每次載入應用程式時，如果在 localStorage 有登入紀錄，就去跟後端拿最新資料
+const depot = useProductsDepot();
+
+onMounted(async () => {
+    const authStore = useAuthStore()
+    const adminAuthStore = useAdminAuthStore();
+    const cartStore = useCartStore()
+    
     if (authStore.isLoggedIn) {
+        await cartStore.fetchCart()
         authStore.syncUserProfile();
     }
-    
     if (adminAuthStore.isLoggedIn) {
         adminAuthStore.syncAdminProfile();
     }
-});
-</script><template>
+})
+// const route = useRoute();
+</script>
+
+<template>
   <RouterView />
 </template>
 

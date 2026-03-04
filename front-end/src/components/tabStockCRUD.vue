@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useProductsDepot } from '@/stores/productsDepot.js';
 import InputNumber from 'primevue/inputnumber';
 import Select from 'primevue/select';
@@ -7,13 +7,23 @@ import Button from 'primevue/button';
 import Message from 'primevue/message';
 import Swal from 'sweetalert2';
 
-// 初始化 Store
+
+const props = defineProps({
+    product: {
+        type: Object,
+        required: true
+    }
+});
+
 const depot = useProductsDepot();
+const emit = defineEmits(['close']);
 
 // 響應式狀態
 const selectedProduct = ref(null);
-const editMode = ref('add'); // 'add', 'reduce', 'set'
+const editMode = ref('set'); // 'add', 'reduce', 'set'
 const editValue = ref(0);
+
+
 
 // 修改模式選項
 const modes = [
@@ -21,59 +31,52 @@ const modes = [
     { label: '調整總數 (=)', value: 'set' }
 ];
 
+onMounted(() => {
+    editValue.value = props.product.stock;
+})
+
+
+
 // 處理更新邏輯
-const handleConfirm = () => {
-    if (!selectedProduct.value) return;
+const handleConfirm =async () => {
 
     // 呼叫 store 的 action 更新庫存
-    depot.updateStock(selectedProduct.value.id, editMode.value, editValue.value);
+    await depot.updateStock(props.product.id,editMode.value, editValue.value);
 
-    // 取得更新後的最新產品資料以顯示在 Swal
-    const currentProduct = depot.products.find(p => p.id === selectedProduct.value.id);
-
-    Swal.fire({
+    await Swal.fire({
         icon: 'success',
         title: '庫存更新成功',
-        text: `產品 ${currentProduct.productName} 的庫存已更新為 ${currentProduct.stock} 件`,
+        text: `產品 ${props.product.productName} 的庫存已更新為 ${props.product.stock} 件`,
         timer: 1500,
         showConfirmButton: false
     });
 
     // 重設輸入框
     editValue.value = 0;
+    emit('close')
 };
 </script>
 
 <template>
-<div class="p-6">
-    <h1 class="text-2xl font-bold mb-4">庫存管理系統</h1>
 
-    <div class="card shadow-sm p-4 bg-white rounded-lg border">
-        
-        
-        <div class="flex flex-col gap-4">
-            <div>
-                <label class="block mb-2 text-gray-600 font-medium">1. 選擇商品項目</label>
-                <Select
-                    v-model="selectedProduct"
-                    :options="depot.products"
-                    optionLabel="productName"
-                    placeholder="請選擇產品..."
-                    class="w-full md:w-80"
-                    filter
-                    >
-                </Select>
-            </div>
+    <div class="edit-inner-container">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-700">
+                編輯商品：<span class="text-blue-600">{{ props.product.productName }}</span>
+            </h3>
+            <span class="text-sm text-gray-500">商品編號: {{ props.product.id }}</span>
+        </div>
 
             <transition name="fade">
-                <div v-if="selectedProduct" class="mt-4 border-t pt-4">
+                <div  class="mt-4 border-t pt-4">
                     <Message severity="secondary" :closable="false" class="mb-4">
-                        目前庫存狀態：<span class="font-bold text-lg text-primary">{{ selectedProduct.stock }}</span> 件
+                        目前庫存狀態：<span class="font-bold text-lg text-primary">{{ props.product.stock }}</span> 件
                     </Message>
 
                     <div class="flex flex-wrap gap-4 items-end">
                         <div class="flex flex-col gap-2">
-                            <span class="text-sm text-gray-500">2. 修改方式</span>
+                            <span class="text-sm text-gray-500" >2. 修改方式 &nbsp;&nbsp; </span>
+                            
                             <Select
                                 v-model="editMode" 
                                 :options="modes" 
@@ -86,7 +89,7 @@ const handleConfirm = () => {
 
                         <br/>
                         <div class="flex flex-col gap-2">
-                            <span class="text-sm text-gray-500">3. 輸入數量</span>
+                            <span class="text-sm text-gray-500">3. 輸入數量 &nbsp;&nbsp;</span>
                             <InputNumber 
                                 v-model="editValue"
                                 :min="0"
@@ -98,22 +101,27 @@ const handleConfirm = () => {
                         </div>
 
                         <br/>
-
+                        <div class="w-full flex gap-2 justify-content:center" >
                         <Button
                             label="確認修改" 
-                            icon="pi pi-check" 
                             @click="handleConfirm" 
                             severity="success"
                             class="mb-1" 
-                            >
-
-                        </Button>
+                        />
+                    
+                        <Button
+                            label="取消"
+                        @click="emit('close')"
+                        severity="secondary"
+                        outlined
+                        variant="text"
+                        class="mb-1 w-[120px]"
+                        />
+                        </div>
                     </div>
                 </div>
             </transition>
-        </div>
     </div> 
-</div>
 </template>
 
 <style scoped>

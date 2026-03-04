@@ -1,8 +1,7 @@
-tabStock.vue
 
 <script setup>
 
-import { ref, computed} from 'vue';
+import { ref, computed, onMounted} from 'vue';
 // import productsData from '@/data/productsData.json'
 import {useProductsDepot} from '@/stores/productsDepot';
 
@@ -15,6 +14,13 @@ import TabStockCRUD from '@/components/tabStockCRUD.vue';
 
 //定義展開狀態
 const expandedId = ref(null);
+const depot = useProductsDepot();
+const products = computed(() => depot.products);
+
+onMounted(() => {
+    depot.fetchProducts();
+})
+
 
 //定義切換函式
 const toggleEdit = (id) =>{
@@ -26,12 +32,22 @@ const toggleEdit = (id) =>{
     }
 }
 
-const depot = useProductsDepot();
-const products = computed(() => depot.products);
 
 
 
+//上架顯示上架時間，如果有更新庫存顯示更新庫存時間
+const displayTime = (item) => {
+    const timeToDisplay = item.lastUpdate || item.added;
+    if (!timeToDisplay) return '---';
 
+    const date = new Date(timeToDisplay);
+    return date.toLocaleString('zh-TW', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour12: false
+    })
+}
 
 
 
@@ -68,7 +84,7 @@ const products = computed(() => depot.products);
                         <td class="amount">NT$ {{ item.price }}</td>
                         <td class="stock">{{ item.stock }}</td>
                         
-                        <td class="date">{{ item.StockingTime }}</td>
+                        <td class="date">{{ displayTime(item) }}</td>
                         <td>
                             <div class ="action-buttons">
                                 <button @click="toggleEdit(item.id)" class="btn-action btn-edit" title="編輯">

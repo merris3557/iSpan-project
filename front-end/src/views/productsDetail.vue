@@ -33,23 +33,32 @@ const updateQuantity = (val) => {
     }
 };
 
-const handleAddToCart = () => {
-    cartStore.addToCart({
+const handleAddToCart = async () => {
+    try{
+        await cartStore.addToCart({
         id: products.value.id,
         name: products.value.productName,
         price: products.value.price,
         image: products.value.image,
         stock: products.value.stock, // 傳遞庫存給購物車
         quantity: buyQuantity.value // 傳遞選購數量
-    });
+        });
 
-    Swal.fire({
-        icon: 'success',
-        title: '成功加入購物車',
-        text: `已加入 ${buyQuantity.value} 件商品`,
-        timer: 1500,
-        showConfirmButton: false
-    });
+        Swal.fire({
+            icon: 'success',
+            title: '成功加入購物車',
+            text: `已加入 ${buyQuantity.value} 件商品`,
+            timer: 1500,
+            showConfirmButton: false
+        });
+
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: '加入失敗',
+            text: '請檢察網路連線或登入狀態'
+        });
+    } 
 };
 </script>
 

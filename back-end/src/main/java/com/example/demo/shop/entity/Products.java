@@ -1,7 +1,9 @@
 package com.example.demo.shop.entity;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -45,18 +47,19 @@ public class Products{
 
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant added;
+    private LocalDateTime added;
 
     
     //資料存數的時候，自動填入當下時間
     @PrePersist 
     protected void onCreate(){
         if (this.added == null){
-            this.added = Instant.now();
+            this.added = LocalDateTime.now();
         }
     }
 
-    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference //加入這個代表"這是父端"
     private Stock stock;
 
 }

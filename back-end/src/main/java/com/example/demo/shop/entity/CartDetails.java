@@ -35,6 +35,9 @@ public class CartDetails {
     @Column (name = "item_amount", precision = 10, scale = 2,nullable=false)
     private BigDecimal itemAmount;
 
+    @Column(name = "image", nullable = false)
+    private String image;
+
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable=false)
     private User user;

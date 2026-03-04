@@ -8,6 +8,8 @@ import { authAPI } from '@/api/auth';
 import { useAuthStore } from '@/stores/auth';
 import { decodeJwtPayload, getRoleFromToken, getSubFromToken, isTokenExpired } from '@/utils/jwt';
 
+import { useCartStore } from '@/stores/cart'
+
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -49,7 +51,14 @@ const doLogin = async (dataToSubmit) => {
     console.log('=================================');
     
     // 使用 Auth Store 儲存登入資訊
-    authStore.login(response.data.user, accessToken, response.data.refreshToken);
+    authStore.login(response.data.user, accessToken, response.data.refreshToken)
+
+    //為了登入後立即更新並顯示購物車icon的數字
+    const cartStore = useCartStore()
+    console.log('準備 fetchCart')  
+    await cartStore.fetchCart()
+    console.log('fetchCart 完成', cartStore.items) 
+
     
     await Swal.fire({
       icon: 'success',

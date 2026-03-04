@@ -16,6 +16,8 @@ import { useAuthStore } from '@/stores/auth';
 import { userAPI } from '@/api/user';
 import { authAPI } from '@/api/auth';
 import Swal from 'sweetalert2';
+import { useCartStore } from '@/stores/cart'
+
 
 const route = useRoute();
 const router = useRouter();
@@ -109,6 +111,12 @@ onMounted(async () => {
       
       // 正式透過 store 把資料狀態設定好
       authStore.login(user, accessToken, refreshToken);
+
+      //為了登入後立即更新並顯示購物車icon的數字
+      const cartStore = useCartStore()
+      console.log('準備 fetchCart')  
+      await cartStore.fetchCart()
+      console.log('fetchCart 完成', cartStore.items) 
       
       await Swal.fire({
         icon: 'success',
