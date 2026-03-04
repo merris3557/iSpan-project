@@ -5,6 +5,7 @@ import com.example.demo.auth.dto.ChangePasswordRequest;
 import com.example.demo.auth.dto.Enable2FAResponse;
 import com.example.demo.auth.dto.Verify2FARequest;
 import com.example.demo.common.dto.ApiResponse;
+import com.example.demo.user.dto.AdminUpdateUserRequest;
 import com.example.demo.user.dto.UpdateProfileRequest;
 import com.example.demo.user.dto.UserResponse;
 
@@ -50,6 +51,15 @@ public class UserController {
             @RequestParam Boolean isStore) {
         UserResponse response = userService.updateStoreStatus(id, isStore);
         return ResponseEntity.ok(ApiResponse.success("User store status updated successfully", response));
+    }
+
+    @PutMapping("/{id}")
+    // @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<UserResponse>> updateUserByAdmin(
+            @PathVariable Long id,
+            @Valid @RequestBody AdminUpdateUserRequest request) {
+        UserResponse response = userService.updateUserByAdmin(id, request);
+        return ResponseEntity.ok(ApiResponse.success("User updated successfully", response));
     }
 
     @DeleteMapping("/{id}")

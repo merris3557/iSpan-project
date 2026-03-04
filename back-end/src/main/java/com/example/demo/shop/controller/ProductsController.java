@@ -1,8 +1,12 @@
 package com.example.demo.shop.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -39,6 +43,12 @@ public class ProductsController {
 
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<Products>> getAllProducts(){
+        List<Products> products = productsService.getAllProducts();
+        return ResponseEntity.ok(products);
+    }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateProduct(@PathVariable Integer id, @RequestBody ProductsDTO productsDTO){
@@ -55,7 +65,18 @@ public class ProductsController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("系統發生錯誤 " );
         }
 
-
     }
-    
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteProduct(@PathVariable Integer id){
+        try {
+            productsService.deleteProductById(id);
+            return ResponseEntity.ok().body("刪除成功");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("刪除失敗 " );
+        }
+    }
+
+
 }

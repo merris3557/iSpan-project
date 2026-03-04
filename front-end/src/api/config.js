@@ -61,31 +61,37 @@ api.interceptors.response.use(
     (error) => {
         // Handle global errors here
         if (error.response && error.response.status === 401) {
-            // Unauthorized or Token Expired
-            console.error('Session expired or unauthorized');
+            // Ignore 401 errors from login endpoints so components can handle them
+            const isLoginEndpoint = error.config && error.config.url &&
+                (error.config.url.includes('/login') || error.config.url.includes('/auth/login'));
 
-            const isAdminPath = error.config && error.config.url && (
-                error.config.url.startsWith('/admins') ||
-                (error.config.url.startsWith('/store-registrations') && error.config.method === 'get' && !error.config.url.endsWith('/my')) ||
-                (error.config.url.includes('/review'))
-            );
+            if (!isLoginEndpoint) {
+                // Unauthorized or Token Expired
+                console.error('Session expired or unauthorized');
 
-            if (isAdminPath) {
-                import('@/stores/adminAuth').then(module => {
-                    const adminAuthStore = module.useAdminAuthStore();
-                    adminAuthStore.handleLogoutAndNotify('timeout').then(() => {
+                const isAdminPath = error.config && error.config.url && (
+                    error.config.url.startsWith('/admins') ||
+                    (error.config.url.startsWith('/store-registrations') && error.config.method === 'get' && !error.config.url.endsWith('/my')) ||
+                    (error.config.url.includes('/review'))
+                );
+
+                if (isAdminPath) {
+                    import('@/stores/adminAuth').then(module => {
+                        const adminAuthStore = module.useAdminAuthStore();
+                        adminAuthStore.handleLogoutAndNotify('timeout').then(() => {
+                            if (typeof window !== 'undefined') {
+                                window.location.href = '/admin/login';
+                            }
+                        });
+                    });
+                } else {
+                    const authStore = useAuthStore();
+                    authStore.handleLogoutAndNotify('timeout').then(() => {
                         if (typeof window !== 'undefined') {
-                            window.location.href = '/admin/login';
+                            window.location.href = '/login';
                         }
                     });
-                });
-            } else {
-                const authStore = useAuthStore();
-                authStore.handleLogoutAndNotify('timeout').then(() => {
-                    if (typeof window !== 'undefined') {
-                        window.location.href = '/login';
-                    }
-                });
+                }
             }
         }
 

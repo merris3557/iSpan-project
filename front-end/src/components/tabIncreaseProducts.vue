@@ -5,6 +5,8 @@ import Swal from 'sweetalert2';
 import axios from 'axios';
 
 const depot = useProductsDepot();
+const fileInputRef = ref(null);
+const isSubmitting = ref(false);
 
 // 初始化表單資料
 const form = ref({
@@ -21,39 +23,52 @@ const handleAddProduct =async () => {
         return;
     }
 
+    isSubmitting.value = true;
+
     try{
         const response = await axios.post(`http://localhost:8080/api/products/add`, {
             productName:form.value.productName,
             price: form.value.price,
             stock: form.value.stock,
             description: form.value.description,
-            image: form.value.image 
+            image: form.value.image,
         });
 
-        Swal.fire({
-            icon: 'sucess',
+        await Swal.fire({
+            icon: 'success',
             title: '新增成功',
             text: '商品已存入資料庫並同步至庫存',
             timer: 1500
         });
 
-        form.vale= { productName: '', price: 0, stock: 0 , description: '', image: ''};
+        //新增成功後呼叫store的方法，重新從資料庫抓資料
+        await depot.fetchProducts();
+
+        form.value= { productName: '', price: 0, stock: 0 , description: '', image: ''};
+
+        if (fileInputRef.value) {
+            fileInputRef.value.value = "";
+        }
+
+
     } catch (error) {
         console.error("存檔失敗", error);
         Swal.fire('錯誤', '後端連線失敗，請檢察API是否啟動', 'error')
+    } finally {
+        isSubmitting.value = false; 
     }
 
-    // 生成新 ID (例如取最後一個 ID + 1)
-    const newId = (depot.products.length + 1).toString().padStart(4, '0');
+    // // 生成新 ID (例如取最後一個 ID + 1)
+    // const newId = (depot.products.length + 1).toString().padStart(4, '0');
     
-    const newProduct = {
-        id: newId,
-        ...form.value,
-        StockingTime: new Date().toISOString().split('T')[0] // 取得今天日期
-    };
+    // const newProduct = {
+    //     id: newId,
+    //     ...form.value,
+    //     StockingTime: new Date().toISOString().split('T')[0] // 取得今天日期
+    // };
 
-    // 推送到 Store
-    depot.products.push(newProduct);
+    // // 推送到 Store
+    // depot.products.push(newProduct);
 
     // Swal.fire({
     //     icon: 'success',
@@ -109,6 +124,7 @@ const handleImageUpload = (event) => {
                             accept="image/*"
                             @change="handleImageUpload"
                             id="file-input"
+                            ref="fileInputRef"
                             />
                 </div>
             </div>
@@ -127,7 +143,7 @@ const handleImageUpload = (event) => {
                 <label>商品描述</label>
                 <textarea v-model="form.description" rows="4" placeholder="請輸入詳細描述..."></textarea>
             </div>
-            <button @click="handleAddProduct" class="btn-submit">確認新增商品</button>
+            <button @click="handleAddProduct" :disabled="isSubmitting" class="btn-submit">{{ isSubmitting ? '處理中...，請勿重複點選按鈕' : '確認新增商品'}}</button>
         </div>
     </div>
 </template>

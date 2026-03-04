@@ -8,6 +8,13 @@ export const userAPI = {
         return api.get('/users/profile');
     },
     /**
+     * 更新使用者資料 (姓名、密碼等)
+     * @param {Object} data - { name: 'New Name', password: 'New Password' }
+     */
+    updateProfile(data) {
+        return api.put('/users/profile', data);
+    },
+    /**
      * 取得當前用戶的 2FA 狀態
      */
     get2FAStatus() {

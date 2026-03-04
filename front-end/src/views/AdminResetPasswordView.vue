@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import BaseCard from '@/components/common/BaseCard.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
-import { authAPI } from '@/api/auth';
+import api from '@/api/config';
 import Swal from 'sweetalert2';
 
 const router = useRouter();
@@ -20,7 +20,7 @@ const handleResetPassword = async () => {
             icon: 'error',
             title: '格式錯誤',
             text: '密碼格式有誤',
-            confirmButtonColor: '#9f9572'
+            confirmButtonColor: '#1e3c72'
         });
         return;
     }
@@ -29,7 +29,8 @@ const handleResetPassword = async () => {
         Swal.fire({
             icon: 'error',
             title: '錯誤',
-            text: '兩次輸入的密碼不一致'
+            text: '兩次輸入的密碼不一致',
+            confirmButtonColor: '#1e3c72'
         });
         return;
     }
@@ -41,42 +42,41 @@ const handleResetPassword = async () => {
         Swal.fire({
             icon: 'error',
             title: '錯誤',
-            text: '無效的重設連結（缺少 Token）'
+            text: '無效或已過期的重設連結（缺少 Token）',
+            confirmButtonColor: '#1e3c72'
         });
         isSubmitting.value = false;
         return;
     }
 
     const data = { 
+        password: newPassword.value,
+        token: token,
         newPassword: newPassword.value,
-        confirmPassword: confirmPassword.value,
-        token: token
+        confirmPassword: confirmPassword.value
     };
 
     try {
-        console.log('Reset password request with:', data);
-        const response = await authAPI.resetPassword(data);
-        console.log('Reset password success:', response);
+        console.log('Admin reset password request with:', data);
+        const response = await api.post('/admins/reset-password', data);
+        console.log('Admin reset password success:', response);
         await Swal.fire({
             icon: 'success',
             title: '成功',
-            text: '密碼重設成功！請使用新密碼登入。'
+            text: '管理員密碼重設成功！請使用新密碼登入。',
+            confirmButtonColor: '#1e3c72',
+            timer: 2000
         });
-        router.push('/login');
+        router.push('/admin/login');
     } catch (error) {
-        console.error('Reset password failed:', error);
+        console.error('Admin reset password failed:', error);
         
-        let errorMessage = '請稍後再試。';
-        if (error.response && error.response.data && error.response.data.message) {
-            errorMessage = error.response.data.message;
-        } else if (error.message) {
-            errorMessage = error.message;
-        }
-
+        // Backend could return various token messages like "already been used", "expired", "invalid"
         Swal.fire({
             icon: 'error',
             title: '重設請求失敗',
-            text: errorMessage
+            text: '無效或已過期的重設連結',
+            confirmButtonColor: '#1e3c72'
         });
     } finally {
         isSubmitting.value = false;
@@ -85,22 +85,22 @@ const handleResetPassword = async () => {
 </script>
 
 <template>
-    <div class="reset-password-page bg-gdg-light min-vh-100 d-flex align-items-center justify-content-center p-3">
-        <BaseCard maxWidth="450px" :shadow="true" :hoverEffect="false">
+    <div class="admin-login-page bg-admin-content min-vh-100 d-flex align-items-center justify-content-center p-3">
+        <BaseCard class="admin-card" maxWidth="450px" :shadow="false" :border="false">
             <template #header>
-                <div class="text-center mb-4">
-                    <h2 class="fw-bold">設定新密碼</h2>
+                <div class="text-center mb-4 mt-2">
+                    <h2 class="text-admin-primary fw-bold h4">設定管理員新密碼</h2>
                 </div>
             </template>
 
             <form @submit.prevent="handleResetPassword">
                 <div class="mb-3">
-                    <label for="newPassword" class="form-label fw-bold small">新密碼</label>
+                    <label for="newPassword" class="form-label text-dark fw-medium small">新密碼</label>
                     <input 
                         type="password" 
                         id="newPassword" 
                         v-model="newPassword" 
-                        class="form-control custom-input" 
+                        class="form-control admin-form-control" 
                         placeholder="請輸入新密碼"
                         required
                     >
@@ -110,12 +110,12 @@ const handleResetPassword = async () => {
                 </div>
 
                 <div class="mb-4">
-                    <label for="confirmPassword" class="form-label fw-bold small">確認新密碼</label>
+                    <label for="confirmPassword" class="form-label text-dark fw-medium small">確認新密碼</label>
                     <input 
                         type="password" 
                         id="confirmPassword" 
                         v-model="confirmPassword" 
-                        class="form-control custom-input" 
+                        class="form-control admin-form-control" 
                         placeholder="請再次輸入新密碼"
                         required
                     >
@@ -123,27 +123,35 @@ const handleResetPassword = async () => {
 
                 <div class="d-grid gap-2">
                     <BaseButton 
-                        color="gdg" 
-                        class="py-2 fw-bold" 
+                        color="primary" 
+                        class="btn-admin-primary w-100 py-2 fw-bold" 
                         :label="isSubmitting ? '重設中...' : '重設密碼'" 
                         :disabled="isSubmitting"
                         @click="handleResetPassword"
                     />
                 </div>
+                
+                <!-- <div class="text-center mt-3 pt-2">
+                    <button type="button" @click="router.push('/admin/login')" class="btn btn-link text-muted small text-decoration-none fw-medium">
+                        <i class="bi bi-arrow-left me-1"></i> 取消並返回登入
+                    </button>
+                </div> -->
             </form>
         </BaseCard>
     </div>
 </template>
 
-<style scoped>
-.custom-input {
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-    padding: 0.6rem 1rem;
+<style lang="scss" scoped>
+@import '@/assets/styles/custom.scss';
+
+.admin-login-page {
+  background-color: #f5f6fa;
 }
 
-.custom-input:focus {
-    border-color: #9f9572;
-    box-shadow: 0 0 0 0.2rem rgba(159, 149, 114, 0.25);
+.admin-form-control {
+  &:focus {
+    border-color: #1e3c72;
+    box-shadow: 0 0 0 0.25rem rgba(30, 60, 114, 0.15);
+  }
 }
 </style>

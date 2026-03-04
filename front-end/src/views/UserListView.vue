@@ -36,7 +36,6 @@
             <option value="id">ID</option>
             <option value="username">使用者名稱</option>
             <option value="email">電子郵件</option>
-            <option value="phone">電話</option>
           </select>
         </div>
         <div class="col">
@@ -69,7 +68,6 @@
               <th>ID</th>
               <th>使用者名稱</th>
               <th>電子郵件</th>
-              <th>電話</th>
               <th>身分</th>
               <th>停權狀態</th>
               <th>操作</th>
@@ -87,7 +85,6 @@
                 </div>
               </td>
               <td>{{ user.email }}</td>
-              <td>{{ user.phone }}</td>
               <td>
                 <span :class="['status-badge', user.isStoreOwner ? 'status-owner' : 'status-user']">
                   {{ user.isStoreOwner ? '店家' : '一般用戶' }}
@@ -113,7 +110,7 @@
               </td>
             </tr>
             <tr v-if="paginatedUsers.length === 0">
-              <td colspan="7" class="text-center py-5 text-muted">
+              <td colspan="6" class="text-center py-5 text-muted">
                 沒有找到匹配的使用者
               </td>
             </tr>
@@ -171,8 +168,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
-import usersData from '@/data/usersData.json';
+import { ref, computed, watch, onMounted } from 'vue';
+import api from '@/api/config';
 import Swal from 'sweetalert2';
 
 // Search state
@@ -194,7 +191,33 @@ const resetFilters = () => {
 // Pagination state
 const currentPage = ref(1);
 const pageSize = 10;
-const users = ref(usersData);
+const users = ref([]);
+
+const fetchUsers = async () => {
+  try {
+    const response = await api.get('/users');
+    if (response.success && response.data) {
+      users.value = response.data.map(user => ({
+        id: user.id,
+        username: user.name,
+        email: user.email,
+        isStoreOwner: user.isStore,
+        isBanned: !user.enabled
+      }));
+    }
+  } catch (error) {
+    console.error('Failed to fetch users:', error);
+    Swal.fire({
+      icon: 'error',
+      title: '錯誤',
+      text: '無法取得使用者列表'
+    });
+  }
+};
+
+onMounted(() => {
+  fetchUsers();
+});
 
 // Computed: Filtered users based on search and status filters
 const filteredUsers = computed(() => {
@@ -221,8 +244,7 @@ const filteredUsers = computed(() => {
       return (
         user.id.toString().includes(query) ||
         user.username.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query) ||
-        user.phone.includes(query)
+        user.email.toLowerCase().includes(query)
       );
     } else if (searchCategory.value === 'id') {
       return user.id.toString().includes(query);
@@ -230,8 +252,6 @@ const filteredUsers = computed(() => {
       return user.username.toLowerCase().includes(query);
     } else if (searchCategory.value === 'email') {
       return user.email.toLowerCase().includes(query);
-    } else if (searchCategory.value === 'phone') {
-      return user.phone.includes(query);
     }
     return true;
   });
@@ -296,10 +316,6 @@ const openEditModal = async (user) => {
           <input id="swal-input-email" class="form-control" value="${user.email}">
         </div>
         <div class="mb-3">
-          <label class="form-label fw-bold">電話</label>
-          <input id="swal-input-phone" class="form-control" value="${user.phone}">
-        </div>
-        <div class="mb-3">
           <label class="form-label fw-bold">身分</label>
           <select id="swal-input-role" class="form-select">
             <option value="false" ${!user.isStoreOwner ? 'selected' : ''}>一般用戶</option>
@@ -324,7 +340,6 @@ const openEditModal = async (user) => {
       return {
         username: document.getElementById('swal-input-username').value,
         email: document.getElementById('swal-input-email').value,
-        phone: document.getElementById('swal-input-phone').value,
         isStoreOwner: document.getElementById('swal-input-role').value === 'true',
         isBanned: document.getElementById('swal-input-status').value === 'true'
       };
@@ -336,7 +351,6 @@ const openEditModal = async (user) => {
     const changes = [];
     if (formValues.username !== user.username) changes.push(`使用者名稱: ${formValues.username}`);
     if (formValues.email !== user.email) changes.push(`電子郵件: ${formValues.email}`);
-    if (formValues.phone !== user.phone) changes.push(`電話: ${formValues.phone}`);
     if (formValues.isStoreOwner !== user.isStoreOwner) changes.push(`身分: ${formValues.isStoreOwner ? '商家' : '一般用戶'}`);
     if (formValues.isBanned !== user.isBanned) changes.push(`狀態: ${formValues.isBanned ? '已停權' : '正常'}`);
 
@@ -359,18 +373,45 @@ const openEditModal = async (user) => {
       });
 
       if (confirmResult.isConfirmed) {
-        // Update local data (Simulation)
-        const index = users.value.findIndex(u => u.id === user.id);
-        if (index !== -1) {
-          users.value[index] = { ...users.value[index], ...formValues };
+        try {
+          const requestData = {
+            name: formValues.username,
+            email: formValues.email,
+            isStore: formValues.isStoreOwner,
+            enabled: !formValues.isBanned
+          };
+
+          const response = await api.put(`/users/${user.id}`, requestData);
           
-          Swal.fire({
-            title: '修改成功',
-            text: '使用者資料已更新',
-            icon: 'success',
-            confirmButtonColor: '#1e3c72',
-            timer: 1500
-          });
+          if (response.success) {
+            Swal.fire({
+              title: '修改成功',
+              text: '使用者資料已成功更新',
+              icon: 'success',
+              confirmButtonColor: '#1e3c72',
+              timer: 1500
+            });
+
+            // Refresh the user list
+            await fetchUsers();
+          } else {
+            throw new Error(response.message || '更新失敗');
+          }
+        } catch (error) {
+           console.error('Update failed:', error);
+           let errorMessage = '無法連線至伺服器或傳送資料錯誤';
+           if (error.response?.data?.message) {
+             errorMessage = error.response.data.message;
+           } else if (error.message) {
+             errorMessage = error.message;
+           }
+           
+           Swal.fire({
+            title: '修改失敗',
+            text: errorMessage,
+            icon: 'error',
+            confirmButtonColor: '#1e3c72'
+           });
         }
       }
     } else {

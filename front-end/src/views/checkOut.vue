@@ -1,9 +1,10 @@
 <script setup>
 import { useCartStore } from '@/stores/cart'
 import { useRouter } from 'vue-router'
-import { ref } from 'vue'
+import { ref, computed, onMounted  } from 'vue'
 import Swal from 'sweetalert2'
 import { useOrderDepot } from '@/stores/orderDepot.js'
+import TwCitySelector from 'tw-city-selector'
 
 const cartStore = useCartStore()
 const router = useRouter()
@@ -15,22 +16,68 @@ const orderDepot = useOrderDepot()
 const orderForm = ref({
     name: '',
     phone: '',
-    address: '',
     email: '',
-    paymentMethod: 'credit_card', // 預設信用卡
+    city: '',      // 縣市
+    district: '',  // 區域
+    zipcode: '',   // 郵遞區號
+    street: '',    // 路段手輸
+    deliveryMethod: 'home',
+    paymentMethod: 'credit_card', 
     note: ''
 })
 
-const handleCheckout = () => {
+onMounted(  () => {
+    
+        new TwCitySelector({
+        el: '#twzipcode',
+        elCounty: '.county',
+        elDistrict: '.district', // 區域 select 的 class
+        elZipcode: '.zipcode', // 郵遞區號 input 的 class
+        onCountyChange: (val) => { orderForm.value.city = val },
+        onDistrictChange: (val) => { orderForm.value.district = val },
+        onZipcodeChange: (val) => { orderForm.value.zipcode = val }
+        });
+
+        
+
+        setTimeout(() => {
+        console.log('twzipcode el:', document.querySelector('#twzipcode'))
+        console.log('county el:', document.querySelector('#twzipcode .county'))
+        console.log('county value:', document.querySelector('#twzipcode .county')?.value)
+        console.log('district value:', document.querySelector('#twzipcode .district')?.value)
+        console.log('zipcode value:', document.querySelector('#twzipcode .zipcode')?.value)
+    }, 500)
+})
+
+
+
+const shippingFee = computed(() => {
+    if (!cartStore.items || cartStore.items.length === 0) return 0;
+    if (cartStore.totalPrice >= 2000) return 0;
+    
+    return orderForm.value.deliveryMethod === 'home' ? 100 : 60;
+});
+
+const finalTotalPrice = computed(() => cartStore.totalPrice + shippingFee.value);
+
+const isValidEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+const handleCheckout = async () => {
+    console.log('表單內容：', orderForm.value) 
     // 簡單表單驗證
-    if (!orderForm.value.name || !orderForm.value.phone || !orderForm.value.address) {
+    if (!orderForm.value.name || !orderForm.value.phone ||  !orderForm.value.street) {
         Swal.fire('錯誤', '請填寫完整的收件人資訊', 'error')
         return
     }
 
-const validateEmail= ()  =>{
-    this.email = this.email.replace(/[^\w@.-]/g, '');
-}
+    if (orderForm.email && !isValidEmail(orderForm.email)) {
+        Swal.fire('錯誤', 'Email 格式有誤', 'error');
+        return;
+    }
+
+    const orderNumber = 'ORD' + Date.now();
 
 
 
@@ -80,12 +127,15 @@ const validateEmail= ()  =>{
 
             console.log('目前的訂單總數：', orderDepot.orders.length); // 這裡應該會顯示 1 以上
 
-            Swal.fire('成功', `訂單已建立！狀態為：${currentStatus}`, 'success')
+            cartStore.clearCart();
 
-            // 清空購物車
-            cartStore.items = []
-            cartStore.saveToStorage ? cartStore.saveToStorage() : null
-            
+            Swal.fire({
+                icon: 'success',
+                title: '成功',
+                text: `訂單已建立！狀態為：${currentStatus}`,
+                footer: `<p style="font-weight: bold; font-size: 16px; color: 198754;">訂單編號為: ${orderNumber}</p>`
+            })
+
             router.push('/shopStore')
             // 測試用：清空購物車並導回首頁
             // cartStore.items = []
@@ -123,26 +173,48 @@ const validateEmail= ()  =>{
 
                         </div>
                         <br>
-                        <div class="form-group">
+                        <div class="form-group mt-3">
                             <label>電子信箱</label>
-                            <input  v-model="orderForm.email" type="validateEmail.email handleCheckout" class="form-control" >
+                            <input v-model="orderForm.email" type="email" class="form-control" >
                             <span style="color: #cdbabab4;">example@mail.com</span>
-                        
+                            <small v-if="orderForm.email && !isValidEmail(orderForm.email)" class="text-danger">格式有誤</small>
                         </div>
                         <br>
-                        <div class="form-group">
+                        <div class="form-group mt-3">
                             <label>收件地址 *</label>
-                            <input v-model="orderForm.address" type="text" class="form-control" >
-                            <span style="color: #cdbabab4;">請輸入詳細地址</span>
-                            
+                            <div id="twzipcode" class="address-select-group">
+                                <select class="county form-control"></select>
+                                <br>
+                                <select class="district form-control"></select>
+                                <br>
+                                <input class="zipcode form-control" readonly placeholder="郵遞區號">
+                            </div>
+                            <br>
+                            <input v-model="orderForm.street" type="text" class="form-control mt-2" placeholder="路段、門牌號碼">
                         </div>
                         <br>
                         <div class="form-group">
                             <label>備註</label>
                             <textarea v-model="orderForm.note" class="form-control" rows="2"></textarea>
                         </div>
-                    </div>
-                </div>
+                        </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="d-block mb-2">配送方式</label>
+                            <div class="payment-options">
+                                <label class="payment-radio">
+                                    <input type="radio" v-model="orderForm.deliveryMethod" value="home">
+                                    <span class="radio-label" >宅配 <span style="color: gray;">(金額未滿2000元運費 NT$ 100)</span></span>
+                                </label>
+                                <label class="payment-radio">
+                                    <input type="radio" v-model="orderForm.deliveryMethod" value="store">
+                                    <span class="radio-label" >超商取貨 <span style="color: gray;">(金額未滿2000元運費 NT$ 60)</span></span>
+                                </label>
+                            </div>
+                        </div>
+                    
+                
 
                 <div class="card mt-4">
                     <div class="card-header">付款方式</div>
@@ -171,7 +243,11 @@ const validateEmail= ()  =>{
                     <div class="card-body p-0">
                         <ul class="order-list">
                             <li v-for="item in cartStore.items" :key="item.id" class="order-item">
-                                <img :src="item.image" class="item-thumb" @error="(e) => e.target.src = 'https://placehold.jp/24/cccccc/ffffff/50x50.png?text=無圖'">
+                                <img 
+                                    :src="item.image || 'https://placehold.jp/50x50.png?text=無圖'" 
+                                    class="item-thumb" 
+                                    @error="(e) => e.target.src = 'https://placehold.jp/24/cccccc/ffffff/50x50.png?text=無圖'"
+                                >
                                 
                                 <div class="item-info">
                                     <p class="item-name">{{ item.name }}</p>
@@ -190,12 +266,22 @@ const validateEmail= ()  =>{
                         </div>
                         <div class="total-row">
                             <span>運費</span>
-                            <span class="text-success">免運</span>
+                            <span :class="{ 'text-success': shippingFee === 0 && cartStore.totalPrice >= 2000 }">
+                                <template v-if="cartStore.items.length === 0">NT$ 0</template>
+                                <template v-else-if="shippingFee === 0">免運</template>
+                                <template v-else>NT$ {{ shippingFee }}</template>
+                            </span>
+                        </div>
+                        
+                        <div v-if="cartStore.totalPrice < 2000" class="free-shipping-tip">
+                            <small class="text-muted">
+                                再買 NT$ {{ 2000 - cartStore.totalPrice }} 即可享免運優惠
+                            </small>
                         </div>
                         <hr>
                         <div class="total-row final-price">
                             <span>總計</span>
-                            <span>NT$ {{ cartStore.totalPrice }}</span>
+                            <span>NT$ {{ finalTotalPrice }}</span>
                         </div>
                         <button @click="handleCheckout" class="btn-submit-order">確認送出訂單</button>
                         <button @click="router.push('/cart')" class="btn-back">返回購物車</button>

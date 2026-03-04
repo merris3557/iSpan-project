@@ -3,10 +3,11 @@ import {useCartStore} from '@/stores/cart'
 import { useProductsDepot } from '@/stores/productsDepot';
 import Swal from 'sweetalert2';
 
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import BaseCard from '@/components/common/BaseCard.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const cartStore = useCartStore()
@@ -18,42 +19,56 @@ const goToDetail = (id) =>{
     router.push({name:'productsDetail', params:{id}});
 };
 
-const addToCart = (item) => {
-    cartStore.addToCart({
-        id: item.id,
-        name: item.productName,
-        price: item.price,
-        image: item.image,
-        description: item.description,
-        stock:item.stock ?? 99,
-        quantity: 1
-    })
-    
-    Swal.fire({
-        icon: 'success',
-        title: '成功加入購物車',
-        text: `已選購  ${item.productName}`,
-        timer: 1500,
-        showConfirmButton: false
-    });
+const addToCart = async (item) => {
 
+    const authStore = useAuthStore();
+
+    //如果沒登入，先存路徑再跳轉
+    if (!authStore.isLoggedIn) {
+        const result = await Swal.fire({
+            title: '請先登入',
+            text: '登入後即可將商品加入購物車',
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: '前往登入',
+            cancelButtonText: '取消'
+        });
+
+        if(result.isConfirmed) {
+            // 存下目前這頁的路徑 (/shopStore)
+            sessionStorage.setItem  ('redirectPath', router.currentRoute.value.fullPath);
+            router.push('/login');
+        }
+        return;
+    }
+
+
+    try{
+        await cartStore.addToCart({
+            id: item.id,
+            name: item.productName,
+            price: item.price,
+            image: item.image,
+            description: item.description,
+            stock:item.stock ?? 99,
+            quantity: 1
+        })
+    
+        Swal.fire({
+            icon: 'success',
+            title: '成功加入購物車',
+            text: `已選購  ${item.productName}`,
+            timer: 1500,
+            showConfirmButton: false
+        });
+    } catch (error) {
+        Swal.fire('錯誤', '加入購物車失敗', 'error')
+    }
 
 }
 
 
-// const productsList = computed(()=>{
-//     const newList =products.value.map(x => {
-//         let newData = {
-//             id: x.id,
-//             productName: x.productName,
-//             price: x.price,
-//             description: x.description,
-//             image: x.image
-//         }
-//         return newData
-//     })
-//     return newList
-// })
+
 
 
 const productsList = computed(() => {
@@ -71,8 +86,10 @@ const productsList = computed(() => {
 
 
 <template>
-<div class="shop-container">
+    <div class="shop-container">
+
     <div class="shop-grid">
+
     <!-- 卡片  -->
     <BaseCard 
         v-for="item in productsList" 

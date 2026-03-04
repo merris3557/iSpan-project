@@ -1,6 +1,7 @@
 package com.example.demo.user;
 
 import com.example.demo.common.exception.ResourceNotFoundException;
+import com.example.demo.user.dto.AdminUpdateUserRequest;
 import com.example.demo.user.dto.UpdateProfileRequest;
 import com.example.demo.user.dto.UserResponse;
 
@@ -60,6 +61,20 @@ public class UserService {
     }
 
     @Transactional
+    public UserResponse updateUserByAdmin(Long userId, AdminUpdateUserRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setIsStore(request.getIsStore());
+        user.setEnabled(request.getEnabled());
+
+        user = userRepository.save(user);
+        return mapToUserResponse(user);
+    }
+
+    @Transactional
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
@@ -106,6 +121,7 @@ public class UserService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .isStore(user.getIsStore())
+                .enabled(user.getEnabled())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import BaseCard from '@/components/common/BaseCard.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
 import { authAPI } from '@/api/auth';
+import Swal from 'sweetalert2';
 
 const router = useRouter();
 const email = ref('');
@@ -19,10 +20,31 @@ const handleSendResetLink = async () => {
         console.log('Forgot password request with:', data);
         const response = await authAPI.forgotPassword(data);
         console.log('Forgot password success:', response);
-        alert(`重設密碼信件已發送至 ${email.value}`);
+        
+        await Swal.fire({
+            icon: 'success',
+            title: '重設信件已發送',
+            text: `重設密碼信件已發送至 ${email.value}`,
+            confirmButtonColor: '#9f9572'
+        });
+        
+        router.push('/login');
     } catch (error) {
         console.error('Forgot password failed:', error);
-        alert(`發送請求失敗 (預計傳送到後端的 JSON):\n${JSON.stringify(data, null, 2)}`);
+        
+        let errorMessage = '請稍後再試。';
+        if (error.response && error.response.data && error.response.data.message) {
+            errorMessage = error.response.data.message;
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+
+        Swal.fire({
+            icon: 'error',
+            title: '發送請求失敗',
+            text: errorMessage,
+            confirmButtonColor: '#9f9572'
+        });
     } finally {
         isSubmitting.value = false;
     }

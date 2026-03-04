@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminRegistrationRequest {
+public class AdminUpdateRequest {
 
     @NotBlank(message = "Account is required")
     private String account;
@@ -24,4 +24,7 @@ public class AdminRegistrationRequest {
     @NotBlank(message = "Email is required")
     @jakarta.validation.constraints.Email(message = "Invalid email format")
     private String email;
+
+    @NotNull(message = "Enabled status is required")
+    private Boolean enabled;
 }

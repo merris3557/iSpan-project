@@ -2,6 +2,7 @@ package com.example.demo.shop.entity;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 import com.example.demo.user.User;
 
@@ -52,7 +53,7 @@ public class Orders {
 
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "payment_date")
     private Instant paymentDate;
@@ -66,7 +67,7 @@ public class Orders {
     @PrePersist
     protected void onCreate(){
         if (this.createdAt == null){
-            this.createdAt = Instant.now();
+            this.createdAt = LocalDateTime.now();
         }
         
         //預設status狀態為pending

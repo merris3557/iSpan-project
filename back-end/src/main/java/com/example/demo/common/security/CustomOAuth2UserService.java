@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +47,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User user = userRepository.findByEmail(email)
                 .map(existingUser -> updateExistingUser(existingUser, name, providerId))
                 .orElseGet(() -> createNewUser(email, name, providerId, registrationId));
+
+        // 檢查帳號是否被鎖定
+        if (Boolean.FALSE.equals(user.getEnabled())) {
+            throw new OAuth2AuthenticationException(
+                    new OAuth2Error("account_disabled"),
+                    "此帳號已被停用，請聯繫管理員。");
+        }
 
         return new CustomOAuth2User(oauth2User, user);
     }
