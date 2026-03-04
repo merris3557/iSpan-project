@@ -241,7 +241,7 @@ const handleEditName = async () => {
 };
 
 const handleModifyPassword = () => {
-  router.push('/forget-password');
+  router.push('/forgot-password');
 };
 
 const handleEnable2FA = async () => {
