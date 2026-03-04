@@ -22,6 +22,15 @@ export const adminAPI = {
      */
     getAll() {
         return api.get('/admins');
+    },
+
+    /**
+     * 更新管理員
+     * @param {Integer} id - 管理員 ID
+     * @param {Object} data - { account, name, position, email, enabled }
+     */
+    update(id, data) {
+        return api.put(`/admins/${id}`, data);
     }
 };
 

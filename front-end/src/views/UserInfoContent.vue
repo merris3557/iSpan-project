@@ -3,9 +3,46 @@
     <h4 class="mb-3 border-bottom pb-2">{{ title }}</h4>
     
     <template v-if="title === '個人資料'">
-      <!-- 個人資料基本資訊可以放這裡 -->
       <div class="mb-4">
-        <p class="text-muted">這裡是您的個人資料設定區塊。</p>
+        <div v-if="loadingProfile" class="text-center py-3">
+          <div class="spinner-border text-gdg" role="status">
+            <span class="visually-hidden">載入中...</span>
+          </div>
+        </div>
+        <div v-else class="card shadow-sm border-0">
+          <div class="card-header bg-white border-bottom-0 pt-4 pb-2">
+            <h5 class="mb-0 text-gdg fw-bold"><i class="bi bi-person-fill me-2"></i>基本資料</h5>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3 align-items-center">
+              <div class="col-sm-3 text-muted fw-bold">帳號 Email</div>
+              <div class="col-sm-9">{{ userInfo.email }}</div>
+            </div>
+            <div class="row mb-3 align-items-center">
+              <div class="col-sm-3 text-muted fw-bold">姓名</div>
+              <div class="col-sm-9 d-flex align-items-center">
+                <span class="me-3">{{ userInfo.name }}</span>
+                <button @click="handleEditName" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                  <i class="bi bi-pencil-square me-1"></i>編輯姓名
+                </button>
+              </div>
+            </div>
+            <div class="row mb-3 align-items-center">
+              <div class="col-sm-3 text-muted fw-bold">身分</div>
+              <div class="col-sm-9">
+                <span v-if="userInfo.isStore" class="badge bg-gdg text-white px-2 py-1 user-select-none">商家</span>
+                <span v-else class="badge bg-secondary text-white px-2 py-1 user-select-none">一般會員</span>
+              </div>
+            </div>
+            <div class="row mt-4 pt-3 border-top">
+              <div class="col-sm-12">
+                <button @click="handleModifyPassword" class="btn btn-gdg text-white px-4">
+                  <i class="bi bi-key-fill me-2"></i>修改密碼
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- 2FA 設定區塊 -->
@@ -96,8 +133,17 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import userAPI from '@/api/user';
 import Swal from 'sweetalert2';
+
+const router = useRouter();
+const userInfo = ref({
+  email: '',
+  name: '',
+  isStore: false
+});
+const loadingProfile = ref(false);
 
 const props = defineProps({
   title: {
@@ -130,9 +176,73 @@ const fetch2FAStatus = async () => {
   }
 };
 
+const fetchUserProfile = async () => {
+  if (props.title !== '個人資料') return;
+  loadingProfile.value = true;
+  try {
+    const response = await userAPI.getProfile();
+    if (response && response.data) {
+      let data = response.data;
+      if (data.data) {
+        data = data.data; // Handle double wrapping if occurs
+      }
+      userInfo.value = {
+        email: data.email,
+        name: data.name,
+        isStore: data.isStore
+      };
+    }
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+  } finally {
+    loadingProfile.value = false;
+  }
+};
+
 onMounted(() => {
+  fetchUserProfile();
   fetch2FAStatus();
 });
+
+const handleEditName = async () => {
+  const { value: newName } = await Swal.fire({
+    title: '修改姓名',
+    input: 'text',
+    inputValue: userInfo.value.name,
+    inputLabel: '請輸入新的姓名',
+    showCancelButton: true,
+    confirmButtonText: '儲存',
+    cancelButtonText: '取消',
+    confirmButtonColor: '#9f9572',
+    inputValidator: (value) => {
+      if (!value) {
+        return '姓名不能為空！';
+      }
+      if (value.length < 2 || value.length > 100) {
+        return '姓名長度必須在 2 到 100 個字元之間！';
+      }
+    }
+  });
+
+  if (newName && newName !== userInfo.value.name) {
+    try {
+      await userAPI.updateProfile({ name: newName });
+      userInfo.value.name = newName;
+      Swal.fire({
+        icon: 'success',
+        title: '成功',
+        text: '姓名已更新',
+        confirmButtonColor: '#9f9572'
+      });
+    } catch (error) {
+      Swal.fire('錯誤', error.response?.data?.message || '更新姓名失敗', 'error');
+    }
+  }
+};
+
+const handleModifyPassword = () => {
+  router.push('/forget-password');
+};
 
 const handleEnable2FA = async () => {
   isSubmitting.value = true;
@@ -223,6 +333,10 @@ const handleDisable2FA = async () => {
 <style scoped>
 .text-gdg {
   color: #9f9572 !important;
+}
+
+.bg-gdg {
+  background-color: #9f9572 !important;
 }
 
 .btn-gdg {

@@ -17,5 +17,6 @@ public class UserResponse {
     private String email;
     private String name;
     private Boolean isStore;
+    private Boolean enabled;
     private LocalDateTime createdAt;
 }

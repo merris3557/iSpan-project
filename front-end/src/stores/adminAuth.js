@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { isTokenExpired } from '@/utils/jwt';
+import api from '@/api/config';
 
 const safeJSONParse = (val) => {
     try {
@@ -24,6 +25,8 @@ export const useAdminAuthStore = defineStore('adminAuth', {
         isExpired: (state) => !!state.accessToken && isTokenExpired(state.accessToken),
         adminName: (state) => state.admin ? state.admin.name : '',
         adminPosition: (state) => state.admin ? state.admin.position : '',
+        hasRole: (state) => (role) => state.admin && state.admin.position === role,
+        hasAnyRole: (state) => (roles) => state.admin && roles.includes(state.admin.position),
     },
 
     actions: {
@@ -66,6 +69,36 @@ export const useAdminAuthStore = defineStore('adminAuth', {
                 text: config.text,
                 confirmButtonText: type === 'timeout' ? '重新登入' : '前往登入'
             });
+        },
+
+        async syncAdminProfile() {
+            if (!this.isLoggedIn) return;
+
+            try {
+                const response = await api.get('/admins/me');
+
+                // axios interceptor 已經回傳 response.data，所以這裡只需要再取 .data (ApiResponse 物件裡的 data)
+                const latestAdminData = response.data;
+
+                this.admin = { ...this.admin, ...latestAdminData };
+                localStorage.setItem('adminUser', JSON.stringify(this.admin));
+
+            } catch (error) {
+                console.error('同步管理員資料失敗:', error);
+
+                if (error.response && [401, 403].includes(error.response.status)) {
+                    this.logout();
+
+                    const Swal = (await import('sweetalert2')).default;
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '登入狀態失效',
+                        text: '您的管理員帳號狀態已變更或驗證過期，請重新登入。'
+                    }).then(() => {
+                        window.location.href = '/admin/login';
+                    });
+                }
+            }
         }
     }
 });

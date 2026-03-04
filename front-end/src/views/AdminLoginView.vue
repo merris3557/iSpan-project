@@ -56,11 +56,10 @@ const handleLogin = async () => {
     
   } catch (error) {
     console.error('Admin login failed:', error);
-    const errorMsg = error.response?.data?.message || '登入失敗，請檢查帳號密碼';
     Swal.fire({
       icon: 'error',
       title: '登入失敗',
-      text: errorMsg,
+      text: '登入失敗，請檢查輸入是否正確',
       confirmButtonColor: '#1e3c72'
     });
   } finally {
@@ -115,7 +114,7 @@ const handleLogin = async () => {
           </BaseButton>
 
           <div class="text-center mt-2">
-            <button type="button" class="btn btn-link text-admin-primary small text-decoration-none fw-medium">
+            <button type="button" @click="router.push('/admin/forgot-password')" class="btn btn-link text-admin-primary small text-decoration-none fw-medium">
               忘記密碼？
             </button>
           </div>

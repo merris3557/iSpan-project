@@ -5,7 +5,7 @@
       <div class="sidebar-header">
         <div class="logo-container">
           <i class="bi bi-speedometer2"></i>
-          <span v-if="!sidebarCollapsed" class="logo-text">速賺家後台系統</span>
+          <span v-if="!sidebarCollapsed" class="logo-text">饗島後台管理系統</span>
         </div>
       </div>
 
@@ -101,7 +101,7 @@
 
           <!-- 客服管理 -->
           <li class="nav-item">
-            <router-link to="/feedbackAP" class="nav-link">
+            <router-link to="/admin/feedbackAP" class="nav-link">
               <i class="bi bi-headset"></i>
               <span v-if="!sidebarCollapsed">客服管理</span>
             </router-link>
@@ -167,10 +167,10 @@
             
             <!-- Dropdown Menu -->
             <div class="user-dropdown">
-              <a href="#" class="dropdown-item">
+              <router-link to="/admin/forgot-password" class="dropdown-item">
                 <i class="bi bi-person-gear"></i>
-                編輯個人資料
-              </a>
+                修改密碼
+              </router-link>
               <div class="dropdown-divider"></div>
               <a href="#" class="dropdown-item text-danger" @click.prevent="handleLogout">
                 <i class="bi bi-box-arrow-right"></i>

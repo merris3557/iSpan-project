@@ -1,25 +1,23 @@
 <script setup>
-// import { computed } from 'vue';
-// import { useRoute } from 'vue-router';
-// import DefaultLayout from '@/layouts/default.vue';
-// import BlankLayout from '@/layouts/blank.vue';
-import Navbar from '@/layouts/navbar.vue';
-import Footer from '@/layouts/footer.vue';
-// const route = useRoute();
+import { onMounted } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+import { useAdminAuthStore } from '@/stores/adminAuth';
 
-// const layout = computed(() => {
-//   if (route.meta.layout === 'blank') return BlankLayout;
-//   return DefaultLayout;
-// });
-</script>
+const authStore = useAuthStore();
+const adminAuthStore = useAdminAuthStore();
 
-<template>
-  <Navbar />
-  <!-- <component :is="layout">
-    <RouterView />
-  </component> -->
+onMounted(() => {
+    // 每次載入應用程式時，如果在 localStorage 有登入紀錄，就去跟後端拿最新資料
+    if (authStore.isLoggedIn) {
+        authStore.syncUserProfile();
+    }
+    
+    if (adminAuthStore.isLoggedIn) {
+        adminAuthStore.syncAdminProfile();
+    }
+});
+</script><template>
   <RouterView />
-  <Footer />
 </template>
 
 <style scoped></style>

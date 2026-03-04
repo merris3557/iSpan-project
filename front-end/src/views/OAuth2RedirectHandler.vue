@@ -22,6 +22,19 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 onMounted(async () => {
+  // 處理帳號封鎖或其他 OAuth2 登入失敗的情況
+  const errorMsg = route.query.error;
+  if (errorMsg) {
+    await Swal.fire({
+      icon: 'error',
+      title: '登入失敗',
+      text: decodeURIComponent(errorMsg),
+      confirmButtonColor: '#9f9572'
+    });
+    router.push('/login');
+    return;
+  }
+
   const accessToken = route.query.accessToken;
   const refreshToken = route.query.refreshToken;
 

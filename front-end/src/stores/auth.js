@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { isTokenExpired } from '@/utils/jwt'
+import api from '@/api/config'
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -58,6 +59,34 @@ export const useAuthStore = defineStore('auth', {
             });
 
             // 由於 store 無法直接存取 router，這部分留給呼叫端處理跳轉，或從外部傳入 router
+        },
+        async syncUserProfile() {
+            if (!this.checkAuth()) return;
+
+            try {
+                const response = await api.get('/auth/me');
+
+                // axios interceptor 已經回傳 response.data，所以這裡只需要再取 .data (ApiResponse 物件裡的 data)
+                const latestUserData = response.data;
+
+                this.updateUser(latestUserData);
+
+            } catch (error) {
+                console.error('同步使用者資料失敗:', error);
+
+                if (error.response && [401, 403].includes(error.response.status)) {
+                    this.logout();
+
+                    const Swal = (await import('sweetalert2')).default;
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '登入狀態失效',
+                        text: '您的帳號狀態已變更或驗證過期，請重新登入。'
+                    }).then(() => {
+                        window.location.href = '/login';
+                    });
+                }
+            }
         }
     }
 })

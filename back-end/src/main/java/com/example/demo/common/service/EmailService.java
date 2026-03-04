@@ -36,7 +36,7 @@ public class EmailService {
             message.setSubject("Password Reset Request - iSpan Project");
 
             // TODO: 實際使用時請修改前端 URL
-            String resetUrl = "http://localhost:3000/reset-password?token=" + resetToken;
+            String resetUrl = "http://localhost:5173/reset-password?token=" + resetToken;
 
             message.setText(String.format(
                     "Hello,\n\n" +
@@ -52,6 +52,40 @@ public class EmailService {
 
         } catch (Exception e) {
             log.error("Failed to send password reset email to: {}", toEmail, e);
+            throw new RuntimeException("Failed to send email", e);
+        }
+    }
+
+    /**
+     * 發送管理員密碼重設郵件
+     * 
+     * @param toEmail    收件人郵箱
+     * @param resetToken 重設 token
+     */
+    public void sendAdminPasswordResetEmail(String toEmail, String resetToken) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("Admin Password Reset Request - iSpan Project");
+
+            // TODO: 實際使用時請修改前端 URL
+            String resetUrl = "http://localhost:5173/admin/reset-password?token=" + resetToken;
+
+            message.setText(String.format(
+                    "Hello Admin,\n\n" +
+                            "You have requested to reset your password.\n\n" +
+                            "Please click the link below to reset your password:\n%s\n\n" +
+                            "This link will expire in 1 hour.\n\n" +
+                            "If you didn't request this, please ignore this email.\n\n" +
+                            "Best regards,\niSpan Project Team",
+                    resetUrl));
+
+            mailSender.send(message);
+            log.info("Admin password reset email sent to: {}", toEmail);
+
+        } catch (Exception e) {
+            log.error("Failed to send admin password reset email to: {}", toEmail, e);
             throw new RuntimeException("Failed to send email", e);
         }
     }
