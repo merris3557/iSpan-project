@@ -39,24 +39,24 @@ public class MapSearchService {
     // ─── Search ──────────────────────────────────────────────────────────────
 
     /**
-     * 搜尋店家。keyword 和 categories 均可為空。
+     * 搜尋店家。keyword 和 categoryIds 均可為空。
      * - 兩者皆空 → 回傳全部
-     * - 僅 keyword → 依關鍵字搜尋
-     * - 僅 categories → 依標籤搜尋
-     * - 兩者皆有 → 同時符合
+     * - 僅 keyword → 依關鍵字搜尋（stores_info 資料表）
+     * - 僅 categoryIds → 依標籤 ID 搜尋（JOIN store_category_mapping → categories）
+     * - 兩者皆有 → 資料庫層級 JOIN + 關鍵字同時符合
      */
-    public List<StoreSearchResultDto> search(String keyword, List<String> categories) {
+    public List<StoreSearchResultDto> search(String keyword, List<Integer> categoryIds) {
         boolean hasKeyword = keyword != null && !keyword.isBlank();
-        boolean hasCategory = categories != null && !categories.isEmpty();
+        boolean hasCategory = categoryIds != null && !categoryIds.isEmpty();
 
         List<StoresInfo> raw;
 
         if (hasKeyword && hasCategory) {
-            raw = mapSearchRepository.findByKeywordAndCategoryNames(keyword, categories);
+            raw = mapSearchRepository.findByKeywordAndCategoryIds(keyword, categoryIds, categoryIds.size());
         } else if (hasKeyword) {
             raw = mapSearchRepository.findByKeyword(keyword);
         } else if (hasCategory) {
-            raw = mapSearchRepository.findByCategoryNames(categories);
+            raw = mapSearchRepository.findByCategoryIds(categoryIds, categoryIds.size());
         } else {
             raw = mapSearchRepository.findAll();
         }

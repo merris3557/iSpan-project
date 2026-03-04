@@ -82,6 +82,14 @@ public class SecurityConfig {
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         // 地圖搜尋端點：允許匿名存取（搜尋不需要登入）
                         .requestMatchers("/api/map/**").permitAll()
+                        // 標籤列表：允許匿名存取（SearchBar 動態載入標籤不需要登入）
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/categories").permitAll()
+                        // --- 新增：放行客服表單 API ---
+                        .requestMatchers("/api/feedback/**").permitAll()
+                        // --- 新增：放行客服後台清單 GET（回覆 PUT 仍需認證）---
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/feedbackList").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/feedbackList/status-list")
+                        .permitAll()
                         // 商家資訊端點：允許公開查看特定商家資訊
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/owner/store/{id}").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/bookings/config/**").permitAll()

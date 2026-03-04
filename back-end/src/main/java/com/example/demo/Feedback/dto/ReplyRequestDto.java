@@ -4,12 +4,12 @@ import lombok.Data;
 
 @Data
 public class ReplyRequestDto {
-    private Long id;
+    private Long feedbackId;
 
     private String reply;
 
-    private Long statusId;
+    private Integer adminId;
 
-    private Long adminId;
+    private Long statusId;
 
 }

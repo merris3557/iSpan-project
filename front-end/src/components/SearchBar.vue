@@ -3,36 +3,37 @@
     <div class="search-bar">
       <div class="dropdown-area" v-click-outside="closeDropdown">
         <div class="dropdown-trigger" @click.stop="toggleDropdown">
-          <span :class="{ 'has-value': selectedOptions.length > 0 }">
+          <span :class="{ 'has-value': selectedIds.length > 0 }">
             {{ displayLabel }}
           </span>
           <span class="arrow" :class="{ 'is-open': isOpen }"></span>
         </div>
 
         <div v-if="isOpen" class="dropdown-panel">
-          <ul class="options-list">
-            <li 
-              v-for="item in options" 
-              :key="item" 
+          <!-- 載入中 -->
+          <div v-if="loadingCategories" class="loading-hint">載入中...</div>
+          <!-- 標籤選項 -->
+          <ul v-else class="options-list">
+            <li
+              v-for="item in categories"
+              :key="item.categoryId"
               @click.stop="toggleOption(item)"
-              :class="{ 'active': selectedOptions.includes(item) }"
+              :class="{ 'active': selectedIds.includes(item.categoryId) }"
             >
               <span class="radio-dot"></span>
-              {{ item }}
+              {{ item.categoryName }}
             </li>
           </ul>
-          <div class="submit-action" @click.stop="confirmSearch">
-            顯示篩選結果
-          </div>
+          <!-- 「顯示篩選結果」按鈕已移除，統一由右側放大鏡觸發搜尋 -->
         </div>
       </div>
 
       <div class="vertical-divider"></div>
 
       <div class="input-group">
-        <input 
-          type="text" 
-          v-model="searchQuery" 
+        <input
+          type="text"
+          v-model="searchQuery"
           placeholder="尋找美味"
           @keyup.enter="confirmSearch"
         />
@@ -48,20 +49,46 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useMapSearchStore } from '@/stores/mapSearchStore';
+import storeAPI from '@/api/store';
 
 const mapSearchStore = useMapSearchStore();
 
-const options = ['親子友善','寵物友善', '蔬食', '插座提供'];
+// ─── 標籤資料（從資料庫動態載入）─────────────────────────────────────────────
+const categories = ref([]);          // [{ categoryId, categoryName }, ...]
+const loadingCategories = ref(false);
+
+const fetchCategories = async () => {
+  loadingCategories.value = true;
+  try {
+    const response = await storeAPI.getAllCategories();
+    if (response && response.success) {
+      categories.value = response.data;
+    }
+  } catch (error) {
+    console.error('載入標籤失敗:', error);
+  } finally {
+    loadingCategories.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchCategories();
+});
+
+// ─── 選取狀態（存 categoryId 整數）──────────────────────────────────────────
 const isOpen = ref(false);
-const selectedOptions = ref([]); // 變更為陣列以支援複選
+const selectedIds = ref([]);    // 已選的 categoryId 陣列
 const searchQuery = ref('');
 
-// 計算顯示文字：若沒選顯示"選擇條件"，選了顯示項目並用逗號隔開
+// 計算顯示文字：未選顯示「選擇條件」，選了顯示名稱用逗號隔開
 const displayLabel = computed(() => {
-  if (selectedOptions.value.length === 0) return '選擇條件';
-  return selectedOptions.value.join(', ');
+  if (selectedIds.value.length === 0) return '選擇條件';
+  return categories.value
+    .filter(c => selectedIds.value.includes(c.categoryId))
+    .map(c => c.categoryName)
+    .join(', ');
 });
 
 const toggleDropdown = () => {
@@ -72,20 +99,20 @@ const closeDropdown = () => {
   isOpen.value = false;
 };
 
-// 複選邏輯：存在就移除，不存在就加入
+// 複選邏輯：存在就移除，不存在就加入（操作 categoryId）
 const toggleOption = (item) => {
-  const index = selectedOptions.value.indexOf(item);
+  const index = selectedIds.value.indexOf(item.categoryId);
   if (index > -1) {
-    selectedOptions.value.splice(index, 1);
+    selectedIds.value.splice(index, 1);
   } else {
-    selectedOptions.value.push(item);
+    selectedIds.value.push(item.categoryId);
   }
 };
 
-// 呼叫後端搜尋 API
+// 呼叫後端搜尋 API（傳 keyword + categoryIds）
 const confirmSearch = async () => {
   isOpen.value = false;
-  await mapSearchStore.searchStores(searchQuery.value, selectedOptions.value);
+  await mapSearchStore.searchStores(searchQuery.value, selectedIds.value);
 };
 
 // 點擊外部關閉指令
@@ -126,7 +153,7 @@ $gdg-gold-dark: #776f54;
   position: relative;
   padding: 0 15px;
   cursor: pointer;
-  min-width: 140px; // 稍微加寬以容納複選文字
+  min-width: 140px;
   user-select: none;
 
   .dropdown-trigger {
@@ -168,6 +195,13 @@ $gdg-gold-dark: #776f54;
   border-radius: 4px;
 }
 
+.loading-hint {
+  padding: 12px 20px;
+  color: #aaa;
+  font-size: 14px;
+  text-align: center;
+}
+
 .options-list {
   list-style: none;
   padding: 0;
@@ -179,6 +213,7 @@ $gdg-gold-dark: #776f54;
     align-items: center;
     color: #666;
     transition: background 0.2s;
+    cursor: pointer;
 
     &:hover { background: rgba(160, 150, 115, 0.05); }
 
@@ -211,16 +246,6 @@ $gdg-gold-dark: #776f54;
       }
     }
   }
-}
-
-.submit-action {
-  background: $gdg-gold;
-  color: #fff;
-  text-align: center;
-  padding: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  &:hover { background: $gdg-gold-dark; }
 }
 
 .vertical-divider {

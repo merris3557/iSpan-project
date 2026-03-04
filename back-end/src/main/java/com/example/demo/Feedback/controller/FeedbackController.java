@@ -1,12 +1,17 @@
 package com.example.demo.Feedback.controller;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.Feedback.dto.FeedbackRequestDto;
+import com.example.demo.Feedback.entity.FeedbackStatus;
+import com.example.demo.Feedback.entity.FeedbackTypes;
 import com.example.demo.Feedback.service.FeedbackService;
 import com.example.demo.Feedback.service.MailService;
 
@@ -32,6 +37,11 @@ public class FeedbackController {
             System.err.println("郵件寄送失敗，但資料已存入資料庫: " + e.getMessage());
         }
 
+    }
+
+    @GetMapping("/typeList")
+    public List<FeedbackTypes> getTypeList() {
+        return feedbackService.getAllTypes();
     }
 
 }
