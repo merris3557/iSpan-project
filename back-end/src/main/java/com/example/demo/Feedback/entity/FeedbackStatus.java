@@ -1,5 +1,6 @@
 package com.example.demo.Feedback.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,6 +24,7 @@ public class FeedbackStatus {
     @Column(name = "name", nullable = false)
     private String statusName;
 
+    @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "feedbackStatus")
     private List<Feedback> feedbacks;
 }
