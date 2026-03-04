@@ -36,6 +36,9 @@ public class Products{
     @Column(name = "product_name", nullable = false, length = 100)    
     private String  productName;
 
+    @Column(name = "product_code", unique = true, length = 20)
+    private String productCode;
+
     @Column(name = "image", columnDefinition = "NVARCHAR(MAX)")
     private String image;
 
@@ -57,6 +60,8 @@ public class Products{
             this.added = LocalDateTime.now();
         }
     }
+
+    
 
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference //加入這個代表"這是父端"
