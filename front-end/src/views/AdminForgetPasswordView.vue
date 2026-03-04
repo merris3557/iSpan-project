@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import BaseCard from '@/components/common/BaseCard.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
@@ -8,7 +8,29 @@ import Swal from 'sweetalert2';
 
 const router = useRouter();
 const email = ref('');
+const users = ref([]);
+const isLoadingUsers = ref(false);
 const isSubmitting = ref(false);
+
+const fetchUsers = async () => {
+    isLoadingUsers.value = true;
+    try {
+        const response = await api.get('/users');
+        if (response.success && response.data) {
+            users.value = response.data;
+        } else {
+            console.error('Failed to fetch users:', response.message || 'Unknown error');
+        }
+    } catch (error) {
+        console.error('Error fetching users:', error);
+    } finally {
+        isLoadingUsers.value = false;
+    }
+};
+
+onMounted(() => {
+    fetchUsers();
+});
 
 const handleSendResetLink = async () => {
     if (isSubmitting.value) return;
@@ -28,7 +50,7 @@ const handleSendResetLink = async () => {
             confirmButtonColor: '#1e3c72'
         });
         
-        router.push('/admin/login');
+        //router.push('/admin/login');
     } catch (error) {
         console.error('Admin forgot password failed:', error);
         
@@ -63,21 +85,25 @@ const handleSendResetLink = async () => {
 
             <div class="text-center px-4 mb-4">
                 <p class="text-muted small fw-medium">
-                    輸入您管理員帳戶的電子郵件地址，<br>我們將發送密碼重設連結給您。
+                    選擇使用者的電子郵件地址，<br>我們將發送密碼重設連結。
                 </p>
             </div>
 
             <form @submit.prevent="handleSendResetLink">
                 <div class="mb-4">
-                    <label for="email" class="form-label text-dark fw-medium small">電子郵件</label>
-                    <input 
-                        type="email" 
+                    <label for="email" class="form-label text-dark fw-medium small">選擇使用者</label>
+                    <select 
                         id="email" 
                         v-model="email" 
-                        class="form-control admin-form-control" 
-                        placeholder="請輸入您的電子郵件地址"
+                        class="form-select admin-form-control" 
                         required
+                        :disabled="isLoadingUsers"
                     >
+                        <option value="" disabled>{{ isLoadingUsers ? '載入使用者中...' : '請選擇使用者電子郵件' }}</option>
+                        <option v-for="user in users" :key="user.id" :value="user.email">
+                            {{ user.email }} ({{ user.name }})
+                        </option>
+                    </select>
                 </div>
 
                 <div class="d-grid gap-2">
@@ -85,16 +111,16 @@ const handleSendResetLink = async () => {
                         color="primary" 
                         class="btn-admin-primary w-100 py-2 fw-bold" 
                         :label="isSubmitting ? '發送中...' : '發送密碼重設信件'" 
-                        :disabled="isSubmitting"
+                        :disabled="isSubmitting || !email"
                         @click="handleSendResetLink"
                     />
                 </div>
                 
-                <div class="text-center mt-3 pt-2">
+                <!-- <div class="text-center mt-3 pt-2">
                     <button type="button" @click="router.push('/admin/login')" class="btn btn-link text-muted small text-decoration-none fw-medium">
                         <i class="bi bi-arrow-left me-1"></i> 取消並返回登入
                     </button>
-                </div>
+                </div> -->
             </form>
         </BaseCard>
     </div>

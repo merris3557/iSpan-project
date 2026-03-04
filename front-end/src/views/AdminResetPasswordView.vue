@@ -13,6 +13,18 @@ const confirmPassword = ref('');
 const isSubmitting = ref(false);
 
 const handleResetPassword = async () => {
+    // 1. 檢查密碼格式 (至少8碼，包含大小寫、數字、特殊符號)
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(newPassword.value)) {
+        Swal.fire({
+            icon: 'error',
+            title: '格式錯誤',
+            text: '密碼格式有誤',
+            confirmButtonColor: '#1e3c72'
+        });
+        return;
+    }
+
     if (newPassword.value !== confirmPassword.value) {
         Swal.fire({
             icon: 'error',
@@ -92,6 +104,9 @@ const handleResetPassword = async () => {
                         placeholder="請輸入新密碼"
                         required
                     >
+                    <div class="form-text text-muted mt-1" style="font-size: 0.8rem;">
+                        *密碼需至少 8 個字元，並包含大小寫英文字母、數字及特殊符號
+                    </div>
                 </div>
 
                 <div class="mb-4">
@@ -116,11 +131,11 @@ const handleResetPassword = async () => {
                     />
                 </div>
                 
-                <div class="text-center mt-3 pt-2">
+                <!-- <div class="text-center mt-3 pt-2">
                     <button type="button" @click="router.push('/admin/login')" class="btn btn-link text-muted small text-decoration-none fw-medium">
                         <i class="bi bi-arrow-left me-1"></i> 取消並返回登入
                     </button>
-                </div>
+                </div> -->
             </form>
         </BaseCard>
     </div>

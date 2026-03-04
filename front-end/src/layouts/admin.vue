@@ -167,10 +167,10 @@
             
             <!-- Dropdown Menu -->
             <div class="user-dropdown">
-              <a href="#" class="dropdown-item">
+              <router-link to="/admin/forgot-password" class="dropdown-item">
                 <i class="bi bi-person-gear"></i>
-                編輯個人資料
-              </a>
+                修改密碼
+              </router-link>
               <div class="dropdown-divider"></div>
               <a href="#" class="dropdown-item text-danger" @click.prevent="handleLogout">
                 <i class="bi bi-box-arrow-right"></i>
