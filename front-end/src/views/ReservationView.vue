@@ -96,10 +96,28 @@ const handleBooking = async () => {
         Swal.fire('請填寫姓名與電話', '', 'warning');
         return;
     }
-    // 調用寫好的 POST API
-    await bookingAPI.createBooking(bookingForm.value);
-    await Swal.fire('訂位成功！', '', 'success');
-    router.push({ name: 'UserBookingsTab' });
+    try {
+        // 調用寫好的 POST API
+        await bookingAPI.createBooking(bookingForm.value);
+
+        // 成功後的處理
+        await Swal.fire('訂位成功！', '', 'success');
+        router.push({ name: 'UserBookingsTab' });
+    } catch (error) {
+        // 失敗時的處理（包含座位被搶走）
+        // bookingAPI 底層是用 axios，所以可以從 error.response 抓後端傳來的訊息
+        const errorMsg = error.response?.data?.message || '訂位失敗，請稍後再試。';
+
+        await Swal.fire({
+            title: '訂位失敗',
+            text: errorMsg,
+            icon: 'error',
+            confirmButtonText: '確定',
+            confirmButtonColor: '#d33' // 使用紅色按鈕警告
+        });
+        // 失敗後重新整理網頁
+        window.location.reload();
+    }
 };
 
 onMounted(fetchStoreConfig);
@@ -193,7 +211,7 @@ watch([() => bookingForm.value.bookingDate, () => bookingForm.value.reservedSeat
                         <div v-if="bookingForm.reservedSeatType" class="form-text small mt-1">
                             註：{{ bookingForm.reservedSeatType }}人座僅限預約 {{ Math.max(1, bookingForm.reservedSeatType - 1)
                             }} ~ {{
-                            bookingForm.reservedSeatType }} 人
+                                bookingForm.reservedSeatType }} 人
                         </div>
                     </div>
                 </div>
