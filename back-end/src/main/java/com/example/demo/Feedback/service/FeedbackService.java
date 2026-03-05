@@ -49,6 +49,11 @@ public class FeedbackService {
             feedback.setFeedbackTypes(type);
         }
 
+        // 處理已登入會員 (userId 存在時才關聯)
+        if (dto.getUserId() != null) {
+            userRepo.findById(dto.getUserId()).ifPresent(feedback::setUser);
+        }
+
         // 寫入資料庫
         feedbackRepo.save(feedback);
 

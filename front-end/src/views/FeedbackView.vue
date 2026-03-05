@@ -333,7 +333,8 @@ export default {
           phone:      formData.value.contactPhone,
           email:      formData.value.email,
           contents:   formData.value.feedbackContent,
-          typeId:     formData.value.issueType
+          typeId:     formData.value.issueType,
+          userId:     authStore.isLoggedIn ? (authStore.user?.id ?? null) : null
         };
 
         // 統一使用 api/feedback.js 的 submitFeedback()

@@ -15,4 +15,7 @@ public class FeedbackRequestDto {
     private Long typeId;
 
     private String caseNumber;
+
+    /** 已登入會員的 ID，未登入時為 null */
+    private Long userId;
 }
