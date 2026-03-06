@@ -87,9 +87,23 @@ const handleUpdate = async (updatedItem) => {
             showConfirmButton: false
         });
     } catch (error) {
-        console.error('更新訂位失敗:', error);
+    console.error('更新訂位失敗:', error);
+    // 檢查是否有後端回傳的 Validation failed data
+    if (error.response && error.response.status === 400 && error.response.data.data) {
+        const errorData = error.response.data.data;
+        // 把錯誤物件轉換成顯示字串 (例如："手機格式不正確，需為 09 開頭的 10 位數字<br>姓名不能為空")
+        const errorMessages = Object.values(errorData).join('<br>');
+        
+        Swal.fire({
+            icon: 'error',
+            title: '資料格式錯誤',
+            html: errorMessages // 使用 html 確保換行正常顯示
+        });
+    } else {
+        // 其他未知錯誤
         Swal.fire('錯誤', '更新失敗，請稍後再試', 'error');
     }
+}
 };
 
 // 刪除/取消邏輯

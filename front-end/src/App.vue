@@ -13,7 +13,7 @@ const depot = useProductsDepot();
 // ===== 閒置逾時設定 =====
 // 建議與 application.properties 的 jwt.access-token-expiration-ms 保持一致
 // 測試期：60 秒；生產環境：900 秒（15 分鐘）
-const IDLE_TIMEOUT_MS = 60 * 1000;
+const IDLE_TIMEOUT_MS = 15 * 60 * 1000;
 
 // Store 必須在 setup 頂層取得，才能讓 watch 正確監聽
 const authStore = useAuthStore();

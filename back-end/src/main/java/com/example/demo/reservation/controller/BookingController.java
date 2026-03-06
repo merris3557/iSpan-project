@@ -22,6 +22,7 @@ import com.example.demo.reservation.dto.SlotAvailDto;
 import com.example.demo.reservation.service.BookingService;
 import com.example.demo.store.dto.ReservationSettingsDto;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -51,7 +52,7 @@ public class BookingController {
 
     // 建立訂位
     @PostMapping
-    public ResponseEntity<BookingResponseDto> createBooking(@RequestBody BookingRequestDto dto) {
+    public ResponseEntity<BookingResponseDto> createBooking(@Valid @RequestBody BookingRequestDto dto) {
         BookingResponseDto response = bookingService.createBooking(dto);
         return ResponseEntity.ok(response);
     }
@@ -68,7 +69,7 @@ public class BookingController {
     @PutMapping("/{bookingId}")
     public ResponseEntity<ApiResponse<BookingResponseDto>> updateBooking(
             @PathVariable Integer bookingId,
-            @RequestBody BookingUpdateDto dto) {
+            @Valid @RequestBody BookingUpdateDto dto) {
         BookingResponseDto response = bookingService.updateBooking(bookingId, dto);
         return ResponseEntity.ok(ApiResponse.success("更新成功", response));
     }
@@ -92,7 +93,7 @@ public class BookingController {
     @PutMapping("/store/{bookingId}")
     public ResponseEntity<ApiResponse<BookingResponseDto>> updateBookingByShop(
             @PathVariable Integer bookingId,
-            @RequestBody BookingUpdateDto dto) {
+            @Valid @RequestBody BookingUpdateDto dto) {
         BookingResponseDto response = bookingService.updateBookingByShop(bookingId, dto);
         return ResponseEntity.ok(ApiResponse.success("店家更新成功", response));
     }
