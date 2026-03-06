@@ -330,28 +330,29 @@ router.beforeEach(async (to, from, next) => {
 
 
   if (to.meta.requiresAdminAuth) {
-    // [直接檢查 Local Storage 的方式]
-    // 說明：若希望連「手動刪除 Local Storage」時，也能在切換頁面瞬間立刻攔截，可取消以下註解
-    // const localAdminToken = localStorage.getItem('adminAccessToken');
-    // if (!localAdminToken) {
-    //   await adminAuthStore.handleLogoutAndNotify('unauthorized');
-    //   return next('/admin/login');
-    // }
+    let wasAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
 
-    // Check if token is expired, useAdminAuthStore.isExpired will be implemented next
-    if (adminAuthStore.isExpired) {
-      await adminAuthStore.handleLogoutAndNotify('timeout');
-      return next('/admin/login');
+    console.log(`[Router Admin] 導航到: ${to.path}`);
+    console.log(`[Router Admin] wasAdminLoggedIn: ${wasAdminLoggedIn} | isLoggedIn: ${adminAuthStore.isLoggedIn} | admin.position: ${adminAuthStore.admin?.position ?? 'null'}`);
+
+    if (!adminAuthStore.isLoggedIn && wasAdminLoggedIn) {
+      console.log('[Router Admin] admin=null 且有登入旗標 → 呼叫 syncAdminProfile()');
+      await adminAuthStore.syncAdminProfile();
+      console.log(`[Router Admin] syncAdminProfile 完成 → isLoggedIn: ${adminAuthStore.isLoggedIn} | position: ${adminAuthStore.admin?.position ?? 'null'}`);
     }
 
     if (!adminAuthStore.isLoggedIn) {
-      await adminAuthStore.handleLogoutAndNotify('unauthorized');
+      console.warn('[Router Admin] 仍未登入 → 跳至 /admin/login');
+      // [2026/03/06 修正] 交由 config.js 負責提示「登入逾期」與強制跳轉
+      // 這裡如果彈窗會干擾背後的 silent refresh 流程，所以只需擋下路由即可。
       return next('/admin/login');
     }
 
     // Role-based authorization
     if (to.meta.roles && to.meta.roles.length > 0) {
+      console.log(`[Router Admin] Role check: 需要 ${JSON.stringify(to.meta.roles)} | 目前 position: ${adminAuthStore.admin?.position ?? 'null'}`);
       if (!adminAuthStore.hasAnyRole(to.meta.roles)) {
+        console.warn(`[Router Admin] Role check 失敗！position=${adminAuthStore.admin?.position} 不符合 ${JSON.stringify(to.meta.roles)}`);
         const Swal = (await import('sweetalert2')).default;
         await Swal.fire({
           icon: 'error',
@@ -361,8 +362,10 @@ router.beforeEach(async (to, from, next) => {
         });
         return next('/admin'); // 導向預設的 dashboard
       }
+      console.log('[Router Admin] Role check 通過 ✅');
     }
   }
+
 
 
 
@@ -391,13 +394,14 @@ router.beforeEach(async (to, from, next) => {
 
 
   if (to.meta.requiresAuth) {
-    if (authStore.isExpired) {
-      await authStore.handleLogoutAndNotify('timeout');
-      return next('/login');
+    // 同理，等待一般使用者狀態同步
+    let wasUserLoggedIn = localStorage.getItem('isUserLoggedIn') === 'true';
+    if (!authStore.isLoggedIn && wasUserLoggedIn) {
+      await authStore.syncUserProfile();
     }
 
     if (!authStore.isLoggedIn) {
-      await authStore.handleLogoutAndNotify('unauthorized');
+      // 交由 config.js 負責提示與強制登出跳轉，這裡只管擋下未登入路由
       return next('/login');
     }
   }

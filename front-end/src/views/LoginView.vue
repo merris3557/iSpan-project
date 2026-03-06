@@ -6,7 +6,6 @@ import BaseCard from '@/components/common/BaseCard.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
 import { authAPI } from '@/api/auth';
 import { useAuthStore } from '@/stores/auth';
-import { decodeJwtPayload, getRoleFromToken, getSubFromToken, isTokenExpired } from '@/utils/jwt';
 
 import { useCartStore } from '@/stores/cart'
 
@@ -31,27 +30,12 @@ const doLogin = async (dataToSubmit) => {
     const response = await authAPI.login(dataToSubmit);
     console.log('Login success:', response);
     
-    // ========== 解析 JWT Token ==========
-    // 注意: axios interceptor 已經回傳 response.data，所以這裡的 response 就是 {success, message, data}
-    const accessToken = response.data.accessToken;
-    
-    // 方法 1: 取得完整 payload
-    const payload = decodeJwtPayload(accessToken);
-    console.log('========== JWT Payload ==========');
-    console.log('Full Payload:', payload);
-    
-    // 方法 2: 使用便捷函數取得特定欄位
-    const role = getRoleFromToken(accessToken);
-    const sub = getSubFromToken(accessToken);
-    const expired = isTokenExpired(accessToken);
-    
-    console.log('Role:', role);
-    console.log('Sub (Email):', sub);
-    console.log('Is Expired:', expired);
-    console.log('=================================');
-    
+    // response.data 現在直接是 UserResponse（Token 已由後端設為 HttpOnly Cookie）
+    const userData = response.data;
+    const role = userData.isStore ? 'STORE' : 'USER';
+
     // 使用 Auth Store 儲存登入資訊
-    authStore.login(response.data.user, accessToken, response.data.refreshToken)
+    authStore.login(userData);
 
     //為了登入後立即更新並顯示購物車icon的數字
     const cartStore = useCartStore()

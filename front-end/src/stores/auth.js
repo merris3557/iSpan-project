@@ -1,43 +1,43 @@
 import { defineStore } from 'pinia'
-import { isTokenExpired } from '@/utils/jwt'
 import api from '@/api/config'
+
+let moduleSyncUserPromise = null;
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
-        user: JSON.parse(localStorage.getItem('user')) || null,
-        token: localStorage.getItem('accessToken') || null,
+        // 不再從 localStorage 讀取 user 的詳細資料與 token
+        user: null,
     }),
 
     getters: {
-        isLoggedIn: (state) => !!state.token && !isTokenExpired(state.token),
-        isExpired: (state) => !!state.token && isTokenExpired(state.token),
+        // 判斷是否登入：依據記憶體中是否有 user 物件
+        isLoggedIn: (state) => !!state.user,
         userName: (state) => state.user ? state.user.name : '',
     },
 
     actions: {
-        login(userData, token, refreshToken) {
+        login(userData) {
             this.user = userData;
-            this.token = token;
-            localStorage.setItem('user', JSON.stringify(userData));
-            localStorage.setItem('accessToken', token);
-            localStorage.setItem('refreshToken', refreshToken);
+            // 設立一個安全的不帶敏感資訊的 flag 讓重新整理時知道要抓資料
+            localStorage.setItem('isUserLoggedIn', 'true');
         },
-        logout() {
+        async logout() {
+            try {
+                await api.post('/auth/logout');
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+            this.logoutLocally();
+        },
+        // 僅清除前端狀態
+        logoutLocally() {
             this.user = null;
-            this.token = null;
-            localStorage.removeItem('user');
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('isUserLoggedIn');
         },
         updateUser(userData) {
             this.user = { ...this.user, ...userData };
-            localStorage.setItem('user', JSON.stringify(this.user));
         },
         checkAuth() {
-            if (this.isExpired) {
-                this.logout();
-                return false;
-            }
             return this.isLoggedIn;
         },
         /**
@@ -45,48 +45,51 @@ export const useAuthStore = defineStore('auth', {
          * @param {string} type - 'timeout' (逾時) 或 'unauthorized' (未登入)
          */
         async handleLogoutAndNotify(type = 'timeout') {
-            this.logout();
-            const config = type === 'timeout'
-                ? { title: '登入已逾時', text: '您的登入工作階段已到期，請重新登入' }
-                : { title: '請先登入', text: '此頁面需要登入後才能訪問' };
+            console.warn(`[UserStore] 準備執行 handleLogoutAndNotify，類型: ${type}`);
+            this.logoutLocally();
+            let config;
+            if (type === 'idle') {
+                config = { title: '閒置逾久，已自動登出', text: '閒置過久，已自動登出', confirmButtonText: '重新登入' };
+            } else if (type === 'timeout') {
+                config = { title: '登入逾期', text: '您的登入工作階段已到期，請重新登入', confirmButtonText: '重新登入' };
+            } else {
+                config = { title: '請先登入', text: '此頁面需要登入後才能訪問', confirmButtonText: '前往登入' };
+            }
 
             const Swal = (await import('sweetalert2')).default;
+            console.warn(`[UserStore] 準備彈出 Swal.fire，標題: ${config.title}`);
             await Swal.fire({
                 icon: 'warning',
                 title: config.title,
                 text: config.text,
-                confirmButtonText: type === 'timeout' ? '重新登入' : '前往登入'
+                confirmButtonText: config.confirmButtonText
             });
-
-            // 由於 store 無法直接存取 router，這部分留給呼叫端處理跳轉，或從外部傳入 router
+            console.warn(`[UserStore] Swal.fire 彈出結束 (使用者已點擊)`);
         },
+
         async syncUserProfile() {
-            if (!this.checkAuth()) return;
-
-            try {
-                const response = await api.get('/auth/me');
-
-                // axios interceptor 已經回傳 response.data，所以這裡只需要再取 .data (ApiResponse 物件裡的 data)
-                const latestUserData = response.data;
-
-                this.updateUser(latestUserData);
-
-            } catch (error) {
-                console.error('同步使用者資料失敗:', error);
-
-                if (error.response && [401, 403].includes(error.response.status)) {
-                    this.logout();
-
-                    const Swal = (await import('sweetalert2')).default;
-                    Swal.fire({
-                        icon: 'warning',
-                        title: '登入狀態失效',
-                        text: '您的帳號狀態已變更或驗證過期，請重新登入。'
-                    }).then(() => {
-                        window.location.href = '/login';
-                    });
-                }
+            console.warn('[syncUserProfile] 開始執行');
+            if (moduleSyncUserPromise) {
+                console.warn('[syncUserProfile] 偵測到已有進行中的 Promise，等待中...');
+                return moduleSyncUserPromise;
             }
+
+            console.warn('[syncUserProfile] 建立新的 Promise');
+            moduleSyncUserPromise = (async () => {
+                try {
+                    const response = await api.get('/auth/me');
+                    const responseData = response?.data || response;
+                    const latestUserData = responseData?.data || responseData;
+
+                    this.updateUser(latestUserData);
+                } catch (error) {
+                    console.error('[syncUserProfile] API 請求發生錯誤:', error);
+                } finally {
+                    moduleSyncUserPromise = null;
+                }
+            })();
+
+            return moduleSyncUserPromise;
         }
     }
 })

@@ -64,14 +64,11 @@ onMounted(async () => {
       });
 
       if (code) {
-        // 發送 OAuth2 2FA 驗證請求
         const verifyRes = await authAPI.oauth2Verify2FA({ preAuthToken, code });
-        const { accessToken: newAccess, refreshToken: newRefresh, user } = verifyRes.data;
+        const { user } = verifyRes.data;
 
-        // 登入成功，儲存 Token 並設定 Pinia store
-        localStorage.setItem('accessToken', newAccess);
-        localStorage.setItem('refreshToken', newRefresh);
-        authStore.login(user, newAccess, newRefresh);
+        // 登入成功，設定 Pinia store 與本機常規標記
+        authStore.login(user);
 
         await Swal.fire({
           icon: 'success',
@@ -99,18 +96,16 @@ onMounted(async () => {
     return;
   }
 
-  if (accessToken && refreshToken) {
+  const success = route.query.success;
+
+  if (success === 'true') {
     try {
-      // 暫存 Token 讓 Axios Interceptor 可以發送請求
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-      
-      // 取得使用者詳細資料
+      // HttpOnly Cookies 已經由後端種下，可直接取得使用者詳細資料
       const response = await userAPI.getProfile();
       const user = response.data;
       
       // 正式透過 store 把資料狀態設定好
-      authStore.login(user, accessToken, refreshToken);
+      authStore.login(user);
 
       //為了登入後立即更新並顯示購物車icon的數字
       const cartStore = useCartStore()

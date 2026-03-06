@@ -163,6 +163,44 @@ public class AdminService {
                 .build();
     }
 
+    /**
+     * 供 AdminController 公開呼叫（/me 端點使用）
+     */
+    public AdminResponse mapToPublicAdminResponse(Admin admin) {
+        return mapToAdminResponse(admin);
+    }
+
+    /**
+     * Refresh Token：驗證 refreshToken 後重新簽發 Access + Refresh Token
+     */
+    public AdminLoginResponse refreshToken(String refreshToken) {
+        if (!tokenProvider.validateToken(refreshToken)) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+
+        String account = tokenProvider.getEmailFromToken(refreshToken); // subject 為 account
+        Admin admin = adminRepository.findByAccount(account)
+                .orElseThrow(() -> new RuntimeException("Admin not found with account: " + account));
+
+        if (!Boolean.TRUE.equals(admin.getEnabled())) {
+            throw new RuntimeException("Account is disabled");
+        }
+
+        String newAccessToken = tokenProvider.generateAccessToken(
+                admin.getAccount(),
+                "ADMIN",
+                admin.getPosition() != null ? admin.getPosition().name() : null);
+        String newRefreshToken = tokenProvider.generateRefreshToken(admin.getAccount());
+
+        return AdminLoginResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .tokenType("Bearer")
+                .expiresIn(accessTokenExpirationMs / 1000)
+                .admin(mapToAdminResponse(admin))
+                .build();
+    }
+
     public Admin getCurrentAdmin() {
         org.springframework.security.core.Authentication authentication = org.springframework.security.core.context.SecurityContextHolder
                 .getContext().getAuthentication();

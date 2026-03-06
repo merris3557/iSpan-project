@@ -13,6 +13,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.example.demo.user.User;
 
 import java.io.IOException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 
 /**
  * OAuth2 登入成功處理器
@@ -57,10 +59,25 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                     Boolean.TRUE.equals(user.getIsStore()) ? "STORE" : "USER");
             String refreshToken = tokenProvider.generateRefreshToken(user.getEmail());
 
+            // 寫入 HttpOnly Cookie
+            ResponseCookie jwtCookie = ResponseCookie.from("accessToken", accessToken)
+                    .httpOnly(true)
+                    .secure(false) // in production use true
+                    .path("/")
+                    .maxAge(24 * 60 * 60)
+                    .build();
+            response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
+
+            ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/")
+                    .maxAge(7 * 24 * 60 * 60)
+                    .build();
+            response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
             targetUrl = UriComponentsBuilder.fromUriString(frontendRedirectUri)
-                    .queryParam("accessToken", accessToken)
-                    .queryParam("refreshToken", refreshToken)
-                    .queryParam("tokenType", "Bearer")
+                    .queryParam("success", "true")
                     .build().toUriString();
         }
 

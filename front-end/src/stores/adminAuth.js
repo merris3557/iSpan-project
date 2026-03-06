@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import { isTokenExpired } from '@/utils/jwt';
 import api from '@/api/config';
 
 const safeJSONParse = (val) => {
@@ -12,17 +11,16 @@ const safeJSONParse = (val) => {
     }
 };
 
+let moduleSyncAdminPromise = null;
+
 export const useAdminAuthStore = defineStore('adminAuth', {
     state: () => ({
         // initialize state from local storage to enable user to stay logged in
-        admin: safeJSONParse(localStorage.getItem('adminUser')),
-        accessToken: localStorage.getItem('adminAccessToken') || null,
-        refreshToken: localStorage.getItem('adminRefreshToken') || null,
+        admin: null,
     }),
 
     getters: {
-        isLoggedIn: (state) => !!state.accessToken && !isTokenExpired(state.accessToken),
-        isExpired: (state) => !!state.accessToken && isTokenExpired(state.accessToken),
+        isLoggedIn: (state) => !!state.admin,
         adminName: (state) => state.admin ? state.admin.name : '',
         adminPosition: (state) => state.admin ? state.admin.position : '',
         hasRole: (state) => (role) => state.admin && state.admin.position === role,
@@ -30,75 +28,79 @@ export const useAdminAuthStore = defineStore('adminAuth', {
     },
 
     actions: {
-        login(adminData, accessToken, refreshToken) {
+        login(adminData) {
             this.admin = adminData;
-            this.accessToken = accessToken;
-            this.refreshToken = refreshToken;
-
-            // store user details and jwt in local storage to keep user logged in between page refreshes
-            localStorage.setItem('adminUser', JSON.stringify(adminData));
-            localStorage.setItem('adminAccessToken', accessToken);
-            localStorage.setItem('adminRefreshToken', refreshToken);
+            localStorage.setItem('isAdminLoggedIn', 'true');
         },
 
-        logout() {
-            this.admin = null;
-            this.accessToken = null;
-            this.refreshToken = null;
+        async logout() {
+            try {
+                await api.post('/admins/logout');
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+            this.logoutLocally();
+        },
 
+        logoutLocally() {
+            this.admin = null;
+            localStorage.removeItem('isAdminLoggedIn');
             localStorage.removeItem('adminUser');
             localStorage.removeItem('adminAccessToken');
             localStorage.removeItem('adminRefreshToken');
-
-            // cleanup old legacy keys if necessary
             localStorage.removeItem('adminAccount');
             localStorage.removeItem('adminName');
             localStorage.removeItem('adminPosition');
         },
 
         async handleLogoutAndNotify(type = 'timeout') {
-            this.logout();
-            const config = type === 'timeout'
-                ? { title: '登入已逾時', text: '管理員登入工作階段已到期，請重新登入' }
-                : { title: '請先登入', text: '此頁面需要管理員權限才能訪問' };
+            console.warn(`[Store] 準備執行 handleLogoutAndNotify，類型: ${type}`);
+            this.logoutLocally();
+            let config;
+            if (type === 'idle') {
+                config = { title: '閒置逾久，已自動登出', text: '閒置過久，已自動登出', confirmButtonText: '重新登入' };
+            } else if (type === 'timeout') {
+                config = { title: '登入逾期', text: '管理員登入工作階段已到期，請重新登入', confirmButtonText: '重新登入' };
+            } else {
+                config = { title: '請先登入', text: '此頁面需要管理員權限才能訪問', confirmButtonText: '前往登入' };
+            }
 
             const Swal = (await import('sweetalert2')).default;
+            console.warn(`[Store] 準備彈出 Swal.fire，標題: ${config.title}`);
             await Swal.fire({
                 icon: 'warning',
                 title: config.title,
                 text: config.text,
-                confirmButtonText: type === 'timeout' ? '重新登入' : '前往登入'
+                confirmButtonText: config.confirmButtonText
             });
+            console.warn(`[Store] Swal.fire 彈出結束 (使用者已點擊)`);
         },
 
         async syncAdminProfile() {
-            if (!this.isLoggedIn) return;
-
-            try {
-                const response = await api.get('/admins/me');
-
-                // axios interceptor 已經回傳 response.data，所以這裡只需要再取 .data (ApiResponse 物件裡的 data)
-                const latestAdminData = response.data;
-
-                this.admin = { ...this.admin, ...latestAdminData };
-                localStorage.setItem('adminUser', JSON.stringify(this.admin));
-
-            } catch (error) {
-                console.error('同步管理員資料失敗:', error);
-
-                if (error.response && [401, 403].includes(error.response.status)) {
-                    this.logout();
-
-                    const Swal = (await import('sweetalert2')).default;
-                    Swal.fire({
-                        icon: 'warning',
-                        title: '登入狀態失效',
-                        text: '您的管理員帳號狀態已變更或驗證過期，請重新登入。'
-                    }).then(() => {
-                        window.location.href = '/admin/login';
-                    });
-                }
+            console.warn('[syncAdminProfile] 開始執行');
+            if (moduleSyncAdminPromise) {
+                console.warn('[syncAdminProfile] 偵測到已有進行中的 Promise，等待中...');
+                return moduleSyncAdminPromise;
             }
-        }
+
+            console.warn('[syncAdminProfile] 建立新的 Promise');
+            moduleSyncAdminPromise = (async () => {
+                try {
+                    const response = await api.get('/admins/me');
+
+                    const responseData = response?.data || response;
+                    const latestAdminData = responseData?.data || responseData;
+
+                    this.admin = { ...this.admin, ...latestAdminData };
+                } catch (error) {
+                    console.error('[syncAdminProfile] API 請求發生錯誤:', error);
+                } finally {
+                    moduleSyncAdminPromise = null;
+                    console.warn('[syncAdminProfile] Promise 執行完畢，鎖已解除');
+                }
+            })();
+
+            return moduleSyncAdminPromise;
+        },
     }
 });

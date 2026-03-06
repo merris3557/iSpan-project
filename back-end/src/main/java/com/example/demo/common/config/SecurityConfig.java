@@ -64,9 +64,15 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // 允許訪問認證相關端點
+                        // 注意：/api/auth/me 必須在 /api/auth/** 之前，否則 permitAll 會覆蓋它
+                        // Token 過期時若 /me 被 permitAll，後端用 anonymousUser 查找會回 404 而非 401，
+                        // 導致前端 Refresh 攔截器無法觸發
+                        .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/auth/**").permitAll()
                         // 放行管理員登入與相關基礎功能
                         .requestMatchers("/api/admins/login").permitAll()
+                        .requestMatchers("/api/admins/logout").permitAll()
+                        .requestMatchers("/api/admins/refresh").permitAll() // Refresh 不需帶有效 Token
                         .requestMatchers("/api/admins/forgot-password").permitAll()
                         .requestMatchers("/api/admins/reset-password").permitAll()
                         // TODO: 測試完成後，移除此行恢復強制登入檢查
@@ -104,6 +110,8 @@ public class SecurityConfig {
                         // .requestMatchers(HttpMethod.PUT,
                         // "/api/users/*/store-status").hasRole("ADMIN")
                         // .requestMatchers(HttpMethod.DELETE, "/api/users/*").hasRole("ADMIN")
+                        // 放行 Spring Boot 預設錯誤處理器路由，防止 API Exception（如403/404）轉送至此時觸發 OAuth 登入重導
+                        .requestMatchers("/error").permitAll()
                         // 其他請求需要認證
                         .anyRequest().authenticated()
                         

@@ -29,10 +29,8 @@ const handleLogin = async () => {
     const response = await adminAPI.login(loginData);
     console.log('Admin login success:', response);
     
-    // 取得 admin 資訊及其 token
-    const adminData = response.data.admin;
-    const accessToken = response.data.accessToken;
-    const refreshToken = response.data.refreshToken;
+    // response.data 現在直接是 AdminResponse（Token 已由後端設為 HttpOnly Cookie）
+    const adminData = response.data;
     
     console.log('========== Admin Info ==========');
     console.log('Account:', adminData.account);
@@ -41,7 +39,7 @@ const handleLogin = async () => {
     console.log('===============================');
     
     // 使用 Pinia store 進行登入狀態管理
-    adminAuthStore.login(adminData, accessToken, refreshToken);
+    adminAuthStore.login(adminData);
     
     await Swal.fire({
       icon: 'success',
