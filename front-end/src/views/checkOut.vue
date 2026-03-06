@@ -23,30 +23,29 @@ const orderForm = ref({
     zipcode: '',   // 郵遞區號
     street: '',    // 路段手輸
     deliveryMethod: 'home',
-    paymentMethod: 'credit_card', 
+    paymentMethod: 'ECpay', 
     note: ''
 })
 
-onMounted(  () => {
-    
-        new TwCitySelector({
+onMounted(() => {
+    new TwCitySelector({
         el: '#twzipcode',
         elCounty: '.county',
-        elDistrict: '.district', // 區域 select 的 class
-        elZipcode: '.zipcode', // 郵遞區號 input 的 class
+        elDistrict: '.district',
+        elZipcode: '.zipcode',
         onCountyChange: (val) => { orderForm.value.city = val },
         onDistrictChange: (val) => { orderForm.value.district = val },
         onZipcodeChange: (val) => { orderForm.value.zipcode = val }
-        });
+    });
 
+    setTimeout(() => {
+        const countyEl = document.querySelector('#twzipcode .county')
+        const districtEl = document.querySelector('#twzipcode .district')
+        const zipcodeEl = document.querySelector('#twzipcode .zipcode')
         
-
-        setTimeout(() => {
-        console.log('twzipcode el:', document.querySelector('#twzipcode'))
-        console.log('county el:', document.querySelector('#twzipcode .county'))
-        console.log('county value:', document.querySelector('#twzipcode .county')?.value)
-        console.log('district value:', document.querySelector('#twzipcode .district')?.value)
-        console.log('zipcode value:', document.querySelector('#twzipcode .zipcode')?.value)
+        if (countyEl?.value) orderForm.value.city = countyEl.value
+        if (districtEl?.value) orderForm.value.district = districtEl.value
+        if (zipcodeEl?.value) orderForm.value.zipcode = zipcodeEl.value
     }, 500)
 })
 
@@ -68,10 +67,14 @@ const isValidEmail = (email) => {
 const handleCheckout = async () => {
     console.log('表單內容：', orderForm.value) 
     // 簡單表單驗證
+    
+
     if (!orderForm.value.name || !orderForm.value.phone ||  !orderForm.value.street) {
         Swal.fire('錯誤', '請填寫完整的收件人資訊', 'error')
         return
     }
+
+    
 
     if (orderForm.value.email && !isValidEmail(orderForm.value.email)) {
         Swal.fire('錯誤', 'Email 格式有誤', 'error');
@@ -89,7 +92,7 @@ const handleCheckout = async () => {
 
     //建立訂單狀態為待付款、已付款、出貨中、已完成
     const getOrderStatus = () =>{
-        if(orderForm.value.paymentMethod === 'credit_card') {
+        if(orderForm.value.paymentMethod === 'ECpay') {
             return '待付款'
         } else if (orderForm.value.paymentMethod === 'cod') {
             return '待出貨'
@@ -143,7 +146,7 @@ const handleCheckout = async () => {
             await cartStore.fetchCart()
 
             // 判斷付款方式
-            if (orderForm.value.paymentMethod === 'credit_card') {
+            if (orderForm.value.paymentMethod === 'ECpay') {
                 // 信用卡 → 詢問是否前往綠界付款
                 const payResult = await Swal.fire({
                     icon: 'success',
@@ -185,6 +188,7 @@ const handleCheckout = async () => {
             Swal.fire('錯誤', error.response?.data?.error || '結帳失敗', 'error')
         }
     }
+console.log('city:', orderForm.value.city, 'district:', orderForm.value.district)
 
 }
 </script>
@@ -259,9 +263,9 @@ const handleCheckout = async () => {
                     <div class="card-body">
                         <div class="payment-options">
                             <label class="payment-radio">
-                                <input type="radio" v-model="orderForm.paymentMethod" value="credit_card">
+                                <input type="radio" v-model="orderForm.paymentMethod" value="ECpay">
                                 <span class="radio-label">
-                                    <i class="bi bi-credit-card"></i> 信用卡 (支援綠界支付)
+                                    <i class="bi bi-ECpay"></i> 線上付款
                                 </span>
                             </label>
                             <label class="payment-radio">

@@ -36,55 +36,87 @@ public class EcpayController {
         String itemName = "Order" + orderId;
         int totalAmount = order.getTotalPrice().intValue();
 
-        String form = ecpayService.generatePaymentForm(orderId, totalAmount, itemName);
-        
+        String merchantTradeNo = "ORD" + System.currentTimeMillis();
+        order.setMerchantTradeNo(merchantTradeNo);
+        ordersRepository.save(order);
+
+        String form = ecpayService.generatePaymentForm(orderId, totalAmount, itemName, merchantTradeNo);
+
         return ResponseEntity.ok()
                 .header("Content-Type", "text/html; charset=UTF-8")
                 .body(form);
     }
 
-
-    // 綠界付款完成後回傳（ReturnURL）
+    // 綠界付款完成後回傳（ReturnURL）- 後端通知
     @PostMapping("/return")
     public ResponseEntity<String> returnUrl(@RequestParam Map<String, String> params) {
         String rtnCode = params.get("RtnCode");
         String merchantTradeNo = params.get("MerchantTradeNo");
+        String paymentType = params.getOrDefault("PaymentType", "");
 
         if ("1".equals(rtnCode)) {
-            // 付款成功，更新訂單狀態
-            // 從 merchantTradeNo 取出 orderId（ORD{orderId}xxxx）
-            // 這裡先簡單 log，後續可以更新資料庫
-            System.out.println("付款成功：" + merchantTradeNo);
+            ordersRepository.findByMerchantTradeNo(merchantTradeNo).ifPresent(order -> {
+                String newStatus = getStatusByPaymentType(paymentType);
+                order.setStatus(newStatus);
+                order.setPayMethod("線上付款-" + paymentType);  
+                order.setPaymentDate(java.time.Instant.now());
+                ordersRepository.save(order);
+                System.out.println("付款成功，訂單：" + merchantTradeNo + "，狀態更新為：" + newStatus);
+            });
         }
 
-        return ResponseEntity.ok("1|OK"); // 綠界要求回傳 1|OK
+        return ResponseEntity.ok("1|OK");
     }
 
+    // 綠界付款完成後導回前端（OrderResultURL）
     @CrossOrigin(origins = "*")
-    @PostMapping("/result")  // ← 改這行
+    @PostMapping("/result")
     public ResponseEntity<String> result(@RequestParam Map<String, String> params) {
-        System.out.println("綠界回傳參數：" + params);  // ← 加這行
+        System.out.println("綠界回傳參數：" + params);
 
         String rtnCode = params.get("RtnCode");
-
         String merchantTradeNo = params.getOrDefault("MerchantTradeNo", "");
-        
+        String paymentType = params.getOrDefault("PaymentType", "");
+
+        // 用戶未選擇付款方式就離開
+        if (!"1".equals(rtnCode) && paymentType.isEmpty()) {
+            ordersRepository.findByMerchantTradeNo(merchantTradeNo).ifPresent(order -> {
+                order.setStatus("線上付款-未選擇");
+                ordersRepository.save(order);
+            });
+        }
+
         String redirectUrl;
         if ("1".equals(rtnCode)) {
-        redirectUrl = "http://localhost:5173/payment-result?status=success" +
-                "&tradeNo=" + merchantTradeNo +
-                "&amount=" + params.getOrDefault("TradeAmt", "") +
-                "&paymentDate=" + params.getOrDefault("PaymentDate", "").replace(" ", "+");
+            redirectUrl = "http://localhost:5173/payment-result?status=success" +
+                    "&tradeNo=" + merchantTradeNo +
+                    "&amount=" + params.getOrDefault("TradeAmt", "") +
+                    "&paymentDate=" + params.getOrDefault("PaymentDate", "").replace(" ", "+");
         } else {
             redirectUrl = "http://localhost:5173/payment-result?status=fail";
         }
-        
+
         String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'>" +
-                    "<meta http-equiv='refresh' content='0;url=" + redirectUrl + "'>" +
-                    "</head><body></body></html>";
-        
+                "<meta http-equiv='refresh' content='0;url=" + redirectUrl + "'>" +
+                "</head><body></body></html>";
+
         return ResponseEntity.ok()
                 .header("Content-Type", "text/html; charset=UTF-8")
                 .body(html);
+    }
+
+    private String getStatusByPaymentType(String paymentType) {
+        if (paymentType == null) return "待付款";
+        if (paymentType.startsWith("Credit") ||
+                paymentType.equals("ApplePay") ||
+                paymentType.startsWith("TWQR") ||
+                paymentType.equals("WeiXinPay") ||
+                paymentType.equals("BNPL") ||
+                paymentType.startsWith("GreenPay") ||
+                paymentType.startsWith("DigitalPayment") ||
+                paymentType.startsWith("WebATM")) {
+            return "待出貨";
+        }
+        return "待付款";
     }
 }

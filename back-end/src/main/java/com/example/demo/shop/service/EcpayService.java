@@ -18,10 +18,10 @@ public class EcpayService {
     private static final String ECPAY_URL = "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5";
     private static final String NGROK_URL = "https://shily-untusked-yuri.ngrok-free.dev";
 
-    public String generatePaymentForm(Integer orderId, int finalTotalPrice, String itemName) {
-        String merchantTradeNo = "ORD" +  + System.currentTimeMillis() ;
+    public String generatePaymentForm(Integer orderId, int finalTotalPrice, String itemName, String merchantTradeNo) {
         String merchantTradeDate = LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
+            .format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")); 
+        
 
         TreeMap<String, String> params = new TreeMap<>();
         params.put("MerchantID", MERCHANT_ID);

@@ -51,9 +51,15 @@ public class OrderService {
         order.setUser(user);
         order.setReceiverName(dto.getName());
         order.setReceiverPhone(dto.getPhone());
-        order.setReceiverAddress(dto.getCity() + dto.getDistrict() + dto.getStreet());
+
+        String city = dto.getCity();
+        String district = dto.getDistrict();
+        String street = dto.getStreet() != null ? dto.getStreet() : "";
+        order.setReceiverAddress(city + district + street);
+
+
         order.setPayMethod(dto.getPaymentMethod());
-        order.setStatus(dto.getPaymentMethod().equals("credit_card") ? "待付款" : "待出貨");
+        order.setStatus(dto.getPaymentMethod().equals("ECpay") ? "待付款" : "待出貨");
 
         // 3. 計算總金額
         BigDecimal totalPrice = cartItems.stream()

@@ -1,45 +1,90 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useOrderDepot } from '@/stores/orderDepot.js'
+import { ref, computed, onMounted } from 'vue'
 import Swal from 'sweetalert2'
+import axios from 'axios'
 
-const orderDepot = useOrderDepot()
-const filterStatus = ref('全部') // 篩選狀態
-const editingOrder = ref(null) // 當前正在編輯的訂單
+const orders = ref([])
+const filterStatus = ref('全部')
+const sortOrder = ref('desc') // 新增排序
+const editingOrder = ref(null)
+const selectedOrder = ref(null)
 
-// 1. 篩選邏輯
 const filteredOrders = computed(() => {
-    if (filterStatus.value === '全部') return orderDepot.orders
-    return orderDepot.orders.filter(o => o.status === filterStatus.value)
+    let result = filterStatus.value === '全部' 
+        ? orders.value 
+        : orders.value.filter(o => o.status === filterStatus.value)
+    
+    // 排序
+    return [...result].sort((a, b) => {
+        if (sortOrder.value === 'desc') return b.id - a.id
+        return a.id - b.id
+    })
 })
 
-// 2. 開啟編輯
+// 付款方式顯示
+const formatPayMethod = (payMethod) => {
+    if (!payMethod) return '尚未付款'
+    if (payMethod === 'cod') return '貨到付款'
+    if (payMethod.startsWith('線上付款-')) return payMethod
+    return payMethod
+}
+
+// 付款時間格式化
+const formatDate = (dateStr) => {
+    if (!dateStr) return '--'
+    return new Date(dateStr).toLocaleString('zh-TW')
+}
+
+onMounted(async () => {
+    await fetchOrders()
+})
+
+const fetchOrders = async () => {
+    try {
+        const res = await axios.get('http://localhost:8080/api/orders/all')
+        orders.value = res.data
+    } catch (err) {
+        console.error('無法取得訂單資料', err)
+    }
+}
+
 const startEdit = (order) => {
-    editingOrder.value = JSON.parse(JSON.stringify(order)) // 深拷貝，避免直接改到原始資料
+    editingOrder.value = JSON.parse(JSON.stringify(order))
 }
 
-// 3. 儲存編輯
-const saveEdit = () => {
-    orderDepot.updateOrder(editingOrder.value)
-    editingOrder.value = null
-    Swal.fire('更新成功', '訂單資訊已更新', 'success')
+const saveEdit = async () => {
+    try {
+        await axios.put(`http://localhost:8080/api/orders/${editingOrder.value.id}`, editingOrder.value)
+        await fetchOrders()
+        editingOrder.value = null
+        Swal.fire('更新成功', '訂單資訊已更新', 'success')
+    } catch (error) {
+        Swal.fire('錯誤', '更新失敗', 'error')
+    }
 }
 
-// 4. 刪除訂單
 const deleteOrder = (id) => {
     Swal.fire({
         title: '確定刪除？',
         icon: 'warning',
         showCancelButton: true
-    }).then(res => {
-        if (res.isConfirmed) orderDepot.deleteOrder(id)
+    }).then(async res => {
+        if (res.isConfirmed) {
+            await axios.delete(`http://localhost:8080/api/orders/${id}`)
+            await fetchOrders()
+        }
     })
 }
 
-//5.顯示訂單
+const viewDetail = (order) => {
+    selectedOrder.value = order
+}
+
+
 </script>
 
 <template>
+    
     <div class="order-management">
         <div class="header-row">
             <h2>訂單管理系統</h2>
@@ -51,6 +96,11 @@ const deleteOrder = (id) => {
                     <option>待出貨</option>
                     <option>處理中</option>
                     <option>已完成</option>
+                </select>
+                <label style="margin-left:15px">排序：</label>
+                <select v-model="sortOrder" class="select-filter">
+                    <option value="desc">最新一筆</option>
+                    <option value="asc">最舊一筆</option>
                 </select>
             </div>
         </div>
@@ -70,14 +120,15 @@ const deleteOrder = (id) => {
             <tbody>
                 <tr v-for="order in filteredOrders" :key="order.id">
                     <td>{{ order.id }}</td>
-                    <td>{{ order.customer.name }}</td>
+                    <td>{{ order.receiverName }}</td>
                     <td>NT$ {{ order.totalPrice }}</td>
-                    <td >{{ order.customer.paymentMethod === 'credit_card' ? '信用卡' : '貨到付款' }}</td>
+                    <td>{{ formatPayMethod(order.payMethod) }}</td>
                     <td>
                         <span :class="['status-badge', order.status]">{{ order.status }}</span>
                     </td>
-                    <td>{{ order.orderDate }}</td>
+                    <td>{{ formatDate(order.createdAt) }}</td>
                     <td>
+                        <button @click="viewDetail(order)" class="btn-view">明細</button>
                         <button @click="startEdit(order)" class="btn-edit">編輯</button>
                         <button @click="deleteOrder(order.id)" class="btn-del">刪除</button>
                     </td>
@@ -85,26 +136,67 @@ const deleteOrder = (id) => {
             </tbody>
         </table>
 
+        <!-- 訂單明細視窗 -->
+        <div v-if="selectedOrder" class="edit-modal-overlay">
+            <div class="edit-modal" style="max-height: 80vh; overflow-y: auto;">
+                <h3>訂單明細：#{{ selectedOrder.id }}</h3>
+                <div class="detail-info">
+                    <p><strong>收件人：</strong>{{ selectedOrder.receiverName }}</p>
+                    <p><strong>電話：</strong>{{ selectedOrder.receiverPhone }}</p>
+                    <p><strong>地址：</strong>{{ selectedOrder.receiverAddress }}</p>
+                    <p><strong>付款方式：</strong>{{ formatPayMethod(selectedOrder.payMethod) }}</p>
+                    <p><strong>付款時間：</strong>{{ formatDate(selectedOrder.paymentDate) }}</p>
+                    <p><strong>狀態：</strong>{{ selectedOrder.status }}</p>
+                    <p><strong>總金額：</strong>NT$ {{ selectedOrder.totalPrice }}</p>
+                    <p><strong>建立時間：</strong>{{ formatDate(selectedOrder.createdAt) }}</p>
+                </div>
+                <hr>
+                <h4>商品明細</h4>
+                <table class="order-table">
+                    <thead>
+                        <tr>
+                            <th>商品名稱</th>
+                            <th>數量</th>
+                            <th>單價</th>
+                            <th>小計</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="detail in selectedOrder.orderDetails" :key="detail.id">
+                            <td>{{ detail.productNameSnapshot }}</td>
+                            <td>{{ detail.orderQuantity }}</td>
+                            <td>NT$ {{ detail.priceSnapshot }}</td>
+                            <td>NT$ {{ detail.subtotal }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="modal-btns">
+                    <button @click="selectedOrder = null" class="btn-cancel">關閉</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 編輯視窗 -->
         <div v-if="editingOrder" class="edit-modal-overlay">
             <div class="edit-modal">
-                <h3>編輯訂單：{{ editingOrder.id }}</h3>
+                <h3>編輯訂單：#{{ editingOrder.id }}</h3>
                 <div class="form-grid">
                     <div class="form-item">
                         <label>姓名</label>
-                        <input v-model="editingOrder.customer.name" type="text">
+                        <input v-model="editingOrder.receiverName" type="text">
                     </div>
                     <div class="form-item">
                         <label>電話</label>
-                        <input v-model="editingOrder.customer.phone" type="text">
+                        <input v-model="editingOrder.receiverPhone" type="text">
                     </div>
                     <div class="form-item full-width">
                         <label>地址</label>
-                        <input v-model="editingOrder.customer.address" type="text">
+                        <input v-model="editingOrder.receiverAddress" type="text">
                     </div>
                     <div class="form-item">
                         <label>付款方式</label>
-                        <select v-model="editingOrder.customer.paymentMethod">
-                            <option value="credit_card">信用卡</option>
+                        <select v-model="editingOrder.payMethod">
+                            <option value="線上付款">線上付款</option>
                             <option value="cod">貨到付款</option>
                         </select>
                     </div>
@@ -119,8 +211,7 @@ const deleteOrder = (id) => {
                     </div>
                 </div>
                 <div class="modal-info">
-                    <p>訂單日期：{{ editingOrder.orderDate }}</p>
-                    <p class="highlight">最新編輯時間：{{ editingOrder.lastUpdate }}</p>
+                    <p>建立時間：{{ formatDate(editingOrder.createdAt) }}</p>
                 </div>
                 <div class="modal-btns">
                     <button @click="saveEdit" class="btn-save">儲存變更</button>
@@ -288,6 +379,21 @@ const deleteOrder = (id) => {
     padding: 10px; 
     border-radius: 6px; 
     cursor: pointer; 
+}
+
+.btn-view {
+    background: #0d6efd;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.detail-info p {
+    margin: 8px 0;
+    font-size: 0.95rem;
 }
 
 </style>
