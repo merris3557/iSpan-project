@@ -181,5 +181,14 @@ public class AdminController {
                 .sameSite("Lax")
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, clearRefresh.toString());
+
+        ResponseCookie clearJsessionId = ResponseCookie.from("JSESSIONID", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, clearJsessionId.toString());
     }
 }

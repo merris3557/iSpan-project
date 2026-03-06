@@ -30,6 +30,12 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     @Value("${app.oauth2.redirect-uri:http://localhost:3000/oauth2/redirect}")
     private String frontendRedirectUri;
 
+    @Value("${jwt.access-token-expiration-ms}")
+    private long accessTokenExpirationMs;
+
+    @Value("${jwt.refresh-token-expiration-ms}")
+    private long refreshTokenExpirationMs;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
             HttpServletResponse response,
@@ -64,15 +70,17 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                     .httpOnly(true)
                     .secure(false) // in production use true
                     .path("/")
-                    .maxAge(24 * 60 * 60)
+                    .maxAge(accessTokenExpirationMs / 1000)
+                    .sameSite("Lax")
                     .build();
             response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
 
             ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                     .httpOnly(true)
-                    .secure(false)
-                    .path("/")
-                    .maxAge(7 * 24 * 60 * 60)
+                    .secure(false) // in production use true
+                    .path("/api/auth/refresh") // 僅 refresh 端點可讀取
+                    .maxAge(refreshTokenExpirationMs / 1000)
+                    .sameSite("Lax")
                     .build();
             response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
