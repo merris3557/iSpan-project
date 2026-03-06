@@ -21,9 +21,14 @@ const rawApi = axios.create({
 });
 
 // ===== Refresh 狀態管理 =====
-let refreshState = {
-    promise: null,      // 進行中的 refresh Promise
-    timestamp: 0,       // 上次成功 refresh 的時間戳
+// 前後台分開維護！避免 admin refresh 的 cooldown 影響前台 user refresh，反之亦然也成立。
+let userRefreshState = {
+    promise: null,
+    timestamp: 0,
+};
+let adminRefreshState = {
+    promise: null,
+    timestamp: 0,
 };
 
 // 5 秒內重複觸發的 401 共用同一個 refresh（防止 F5 瞬間多個請求同時觸發多次 refresh）
@@ -32,34 +37,35 @@ const REFRESH_COOLDOWN_MS = 5000;
 function doRefresh(isAdminContext) {
     const now = Date.now();
     const endpoint = isAdminContext ? '/admins/refresh' : '/auth/refresh';
+    const state = isAdminContext ? adminRefreshState : userRefreshState;
 
-    // 如果已有進行中的 refresh，或剛完成不久的 refresh，共用同一個 Promise
-    if (refreshState.promise) {
+    // 如果已有進行中的 refresh，共用同一個 Promise
+    if (state.promise) {
         console.log('[REFRESH] 共用已有的 refresh');
-        return refreshState.promise;
+        return state.promise;
     }
 
     // 如果剛成功 refresh 過（cooldown 期間），直接 resolve（Cookie 已更新）
-    if (now - refreshState.timestamp < REFRESH_COOLDOWN_MS) {
+    if (now - state.timestamp < REFRESH_COOLDOWN_MS) {
         console.log('[REFRESH] 在冷卻期內，跳過重複 refresh');
         return Promise.resolve();
     }
 
     console.log(`[REFRESH] 啟動新 refresh → ${endpoint}`);
-    refreshState.promise = rawApi.post(`${BASE_URL}${endpoint}`)
+    state.promise = rawApi.post(`${BASE_URL}${endpoint}`)
         .then(() => {
             console.log('[REFRESH] 成功，Cookie 已更新');
-            refreshState.timestamp = Date.now();
+            state.timestamp = Date.now();
         })
         .catch(err => {
             console.error('[REFRESH] 失敗', err.response?.status);
             throw err;
         })
         .finally(() => {
-            refreshState.promise = null;
+            state.promise = null;
         });
 
-    return refreshState.promise;
+    return state.promise;
 }
 
 // ===== Request Interceptor =====
