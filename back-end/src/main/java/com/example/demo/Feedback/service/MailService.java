@@ -14,7 +14,7 @@ public class MailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    public void sendHtmlConfirmation(String toEmail, String ticketNumber) {
+    public void sendHtmlConfirmation(String toEmail, String ticketNumber, boolean isMember) {
         MimeMessage message = mailSender.createMimeMessage();
 
         try {
@@ -55,20 +55,23 @@ public class MailService {
                     "              <p style='color: #555555; font-size: 14px;'>" +
                     "                饗島客服團隊已收到您的來信，正全力處理您的訴求，我們將盡速回覆至此信箱與您聯繫。。" +
                     "              </p>" +
-                    "              " +
-                    "              <table border='0' cellpadding='0' cellspacing='0' width='100%' style='margin-top: 30px;'>"
+                    "              </p>" +
+                    (isMember
+                            ? "              <table border='0' cellpadding='0' cellspacing='0' width='100%' style='margin-top: 30px;'>"
+                                    +
+                                    "                <tr>" +
+                                    "                  <td align='center'>" +
+                                    "                    <a href='http://localhost:5173/userInfo/feedback' " +
+                                    "                       style='background-color: " + "#9f9572"
+                                    + "; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;'>"
+                                    +
+                                    "                       查看處理進度" +
+                                    "                    </a>" +
+                                    "                  </td>" +
+                                    "                </tr>" +
+                                    "              </table>"
+                            : "")
                     +
-                    "                <tr>" +
-                    "                  <td align='center'>" +
-                    "                    <a href='http://localhost:5173/userInfo/feedback' " +
-                    "                       style='background-color: " + "#9f9572"
-                    + "; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;'>"
-                    +
-                    "                       查看處理進度" +
-                    "                    </a>" +
-                    "                  </td>" +
-                    "                </tr>" +
-                    "              </table>" +
                     "            </td>" +
                     "          </tr>" +
                     "          " +
@@ -96,7 +99,7 @@ public class MailService {
         }
     }
 
-    public void replyNotification(String toEmail, String caseNumber, String replyContent) {
+    public void replyNotification(String toEmail, String caseNumber, String replyContent, boolean isMember) {
         MimeMessage message = mailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -125,6 +128,21 @@ public class MailService {
                     "            " + replyContent + // 這裡放入管理員寫的回覆內容
                     "          </div>" +
                     "          <p style='font-size: 14px; color: #777;'>若您對回覆內容有任何疑問，歡迎再次聯繫我們。</p>" +
+                    (isMember
+                            ? "              <table border='0' cellpadding='0' cellspacing='0' width='100%' style='margin-top: 30px;'>"
+                                    +
+                                    "                <tr>" +
+                                    "                  <td align='center'>" +
+                                    "                    <a href='http://localhost:5173/userInfo/feedback' " +
+                                    "                       style='background-color: #9f9572; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;'>"
+                                    +
+                                    "                       查看處理進度" +
+                                    "                    </a>" +
+                                    "                  </td>" +
+                                    "                </tr>" +
+                                    "              </table>"
+                            : "")
+                    +
                     "        </td></tr>" +
                     "        " +
                     "        <tr><td style='padding: 20px; text-align: center; font-size: 12px; color: #999;'>" +

@@ -122,7 +122,8 @@ public class FeedbackAPService {
         mailService.replyNotification(
                 feedback.getEmail(),
                 feedback.getCaseNumber(), // 使用你 Entity 裡的 caseNumber
-                dto.getReply());
+                dto.getReply(),
+                feedback.getUser() != null);
     }
 
 }
