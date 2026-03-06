@@ -104,19 +104,33 @@ const handleBooking = async () => {
         await Swal.fire('訂位成功！', '', 'success');
         router.push({ name: 'UserBookingsTab' });
     } catch (error) {
-        // 失敗時的處理（包含座位被搶走）
-        // bookingAPI 底層是用 axios，所以可以從 error.response 抓後端傳來的訊息
-        const errorMsg = error.response?.data?.message || '訂位失敗，請稍後再試。';
+        console.error('訂位失敗:', error);
 
-        await Swal.fire({
-            title: '訂位失敗',
-            text: errorMsg,
-            icon: 'error',
-            confirmButtonText: '確定',
-            confirmButtonColor: '#d33' // 使用紅色按鈕警告
-        });
-        // 失敗後重新整理網頁
-        window.location.reload();
+        // 檢查是否有後端回傳的 Validation failed data
+        if (error.response && error.response.status === 400 && error.response.data.data) {
+            const errorData = error.response.data.data;
+            // 把錯誤物件轉換成顯示字串 (例如："手機格式不正確，需為 09 開頭的 10 位數字<br>姓名不能為空")
+            const errorMessages = Object.values(errorData).join('<br>');
+            
+            await Swal.fire({
+                icon: 'error',
+                title: '資料格式錯誤',
+                html: errorMessages // 使用 html 確保換行正常顯示
+            });
+        } else {
+            // 失敗時的處理（包含座位被搶走）
+            const errorMsg = error.response?.data?.message || '訂位失敗，請稍後再試。';
+
+            await Swal.fire({
+                title: '訂位失敗',
+                text: errorMsg,
+                icon: 'error',
+                confirmButtonText: '確定',
+                confirmButtonColor: '#d33' // 使用紅色按鈕警告
+            });
+            // 失敗後重新整理網頁
+            window.location.reload();
+        }
     }
 };
 
