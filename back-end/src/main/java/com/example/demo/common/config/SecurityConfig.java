@@ -106,6 +106,8 @@ public class SecurityConfig {
                         // .requestMatchers(HttpMethod.PUT,
                         // "/api/users/*/store-status").hasRole("ADMIN")
                         // .requestMatchers(HttpMethod.DELETE, "/api/users/*").hasRole("ADMIN")
+                        // 放行 Spring Boot 預設錯誤處理器路由，防止 API Exception（如403/404）轉送至此時觸發 OAuth 登入重導
+                        .requestMatchers("/error").permitAll()
                         // 其他請求需要認證
                         .anyRequest().authenticated())
                 // 處理 /api/** 的未授權請求直接回傳 401 而非重新導向 OAuth2 登入頁

@@ -11,6 +11,8 @@ const safeJSONParse = (val) => {
     }
 };
 
+let moduleSyncAdminPromise = null;
+
 export const useAdminAuthStore = defineStore('adminAuth', {
     state: () => ({
         // initialize state from local storage to enable user to stay logged in
@@ -28,8 +30,6 @@ export const useAdminAuthStore = defineStore('adminAuth', {
     actions: {
         login(adminData) {
             this.admin = adminData;
-
-            // store user details and jwt in local storage to keep user logged in between page refreshes
             localStorage.setItem('isAdminLoggedIn', 'true');
         },
 
@@ -45,8 +45,6 @@ export const useAdminAuthStore = defineStore('adminAuth', {
         logoutLocally() {
             this.admin = null;
             localStorage.removeItem('isAdminLoggedIn');
-
-            // cleanup old legacy keys if necessary
             localStorage.removeItem('adminUser');
             localStorage.removeItem('adminAccessToken');
             localStorage.removeItem('adminRefreshToken');
@@ -56,6 +54,7 @@ export const useAdminAuthStore = defineStore('adminAuth', {
         },
 
         async handleLogoutAndNotify(type = 'timeout') {
+            console.warn(`[Store] 準備執行 handleLogoutAndNotify，類型: ${type}`);
             this.logoutLocally();
             let config;
             if (type === 'idle') {
@@ -67,33 +66,41 @@ export const useAdminAuthStore = defineStore('adminAuth', {
             }
 
             const Swal = (await import('sweetalert2')).default;
+            console.warn(`[Store] 準備彈出 Swal.fire，標題: ${config.title}`);
             await Swal.fire({
                 icon: 'warning',
                 title: config.title,
                 text: config.text,
                 confirmButtonText: config.confirmButtonText
             });
+            console.warn(`[Store] Swal.fire 彈出結束 (使用者已點擊)`);
         },
 
         async syncAdminProfile() {
-
-            try {
-                const response = await api.get('/admins/me');
-
-                // axios interceptor 已經回傳 response.data，所以這裡只需要再取 .data (ApiResponse 物件裡的 data)
-                const latestAdminData = response.data;
-
-                this.admin = { ...this.admin, ...latestAdminData };
-
-            } catch (error) {
-                console.error('同步管理員資料失敗:', error);
-
-                if (error.response && [401, 403].includes(error.response.status)) {
-                    // 如果 token 不合法或已過期，單純把前端狀態清掉即可，不要彈出 SweetAlert
-                    // 讓 Vue Router 或當前畫面的 API 來決定是否需要踢回登入頁，避免干擾前台畫面
-                    this.logoutLocally();
-                }
+            console.warn('[syncAdminProfile] 開始執行');
+            if (moduleSyncAdminPromise) {
+                console.warn('[syncAdminProfile] 偵測到已有進行中的 Promise，等待中...');
+                return moduleSyncAdminPromise;
             }
-        }
+
+            console.warn('[syncAdminProfile] 建立新的 Promise');
+            moduleSyncAdminPromise = (async () => {
+                try {
+                    const response = await api.get('/admins/me');
+
+                    const responseData = response?.data || response;
+                    const latestAdminData = responseData?.data || responseData;
+
+                    this.admin = { ...this.admin, ...latestAdminData };
+                } catch (error) {
+                    console.error('[syncAdminProfile] API 請求發生錯誤:', error);
+                } finally {
+                    moduleSyncAdminPromise = null;
+                    console.warn('[syncAdminProfile] Promise 執行完畢，鎖已解除');
+                }
+            })();
+
+            return moduleSyncAdminPromise;
+        },
     }
 });

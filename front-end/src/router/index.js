@@ -326,21 +326,29 @@ router.beforeEach(async (to, from, next) => {
 
 
   if (to.meta.requiresAdminAuth) {
-    // 由於現在改用 HttpOnly Cookie，F5 重新整理時 store 是空的。
-    // 如果 localstorage 標記為已登入，我們必須在路由跳轉前先等待同步完成。
     let wasAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
+
+    console.log(`[Router Admin] 導航到: ${to.path}`);
+    console.log(`[Router Admin] wasAdminLoggedIn: ${wasAdminLoggedIn} | isLoggedIn: ${adminAuthStore.isLoggedIn} | admin.position: ${adminAuthStore.admin?.position ?? 'null'}`);
+
     if (!adminAuthStore.isLoggedIn && wasAdminLoggedIn) {
+      console.log('[Router Admin] admin=null 且有登入旗標 → 呼叫 syncAdminProfile()');
       await adminAuthStore.syncAdminProfile();
+      console.log(`[Router Admin] syncAdminProfile 完成 → isLoggedIn: ${adminAuthStore.isLoggedIn} | position: ${adminAuthStore.admin?.position ?? 'null'}`);
     }
 
     if (!adminAuthStore.isLoggedIn) {
-      await adminAuthStore.handleLogoutAndNotify(wasAdminLoggedIn ? 'timeout' : 'unauthorized');
+      console.warn('[Router Admin] 仍未登入 → 跳至 /admin/login');
+      // [2026/03/06 修正] 交由 config.js 負責提示「登入逾期」與強制跳轉
+      // 這裡如果彈窗會干擾背後的 silent refresh 流程，所以只需擋下路由即可。
       return next('/admin/login');
     }
 
     // Role-based authorization
     if (to.meta.roles && to.meta.roles.length > 0) {
+      console.log(`[Router Admin] Role check: 需要 ${JSON.stringify(to.meta.roles)} | 目前 position: ${adminAuthStore.admin?.position ?? 'null'}`);
       if (!adminAuthStore.hasAnyRole(to.meta.roles)) {
+        console.warn(`[Router Admin] Role check 失敗！position=${adminAuthStore.admin?.position} 不符合 ${JSON.stringify(to.meta.roles)}`);
         const Swal = (await import('sweetalert2')).default;
         await Swal.fire({
           icon: 'error',
@@ -350,8 +358,10 @@ router.beforeEach(async (to, from, next) => {
         });
         return next('/admin'); // 導向預設的 dashboard
       }
+      console.log('[Router Admin] Role check 通過 ✅');
     }
   }
+
 
 
 
@@ -387,7 +397,7 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (!authStore.isLoggedIn) {
-      await authStore.handleLogoutAndNotify(wasUserLoggedIn ? 'timeout' : 'unauthorized');
+      // 交由 config.js 負責提示與強制登出跳轉，這裡只管擋下未登入路由
       return next('/login');
     }
   }

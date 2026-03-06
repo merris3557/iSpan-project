@@ -75,30 +75,18 @@ watch(() => adminAuthStore.isLoggedIn, (isLoggedIn) => {
 
 // ===== 頁面初始載入（F5 刷新）時同步登入狀態 =====
 onMounted(async () => {
-    const isFrontend = !window.location.pathname.startsWith('/admin');
-    const isAdminArea = window.location.pathname.startsWith('/admin');
-
     // 前台使用者
     if (localStorage.getItem('isUserLoggedIn') === 'true') {
         await authStore.syncUserProfile();
         if (authStore.isLoggedIn) {
             await cartStore.fetchCart();
             // watch 監聽到 isLoggedIn 變成 true 時會自動呼叫 startUserIdle()
-        } else if (isFrontend && !window.location.hash) {
-            authStore.handleLogoutAndNotify('timeout').then(() => {
-                window.location.href = '/login';
-            });
         }
     }
 
     // 後台管理員
     if (localStorage.getItem('isAdminLoggedIn') === 'true') {
         await adminAuthStore.syncAdminProfile();
-        if (!adminAuthStore.isLoggedIn && isAdminArea && !window.location.hash) {
-            adminAuthStore.handleLogoutAndNotify('timeout').then(() => {
-                window.location.href = '/admin/login';
-            });
-        }
         // watch 監聽到 isLoggedIn 變成 true 時會自動呼叫 startAdminIdle()
     }
 });

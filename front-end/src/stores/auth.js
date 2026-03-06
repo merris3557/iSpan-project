@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import api from '@/api/config'
 
+let moduleSyncUserPromise = null;
+
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         // 不再從 localStorage 讀取 user 的詳細資料與 token
@@ -43,6 +45,7 @@ export const useAuthStore = defineStore('auth', {
          * @param {string} type - 'timeout' (逾時) 或 'unauthorized' (未登入)
          */
         async handleLogoutAndNotify(type = 'timeout') {
+            console.warn(`[UserStore] 準備執行 handleLogoutAndNotify，類型: ${type}`);
             this.logoutLocally();
             let config;
             if (type === 'idle') {
@@ -54,32 +57,39 @@ export const useAuthStore = defineStore('auth', {
             }
 
             const Swal = (await import('sweetalert2')).default;
+            console.warn(`[UserStore] 準備彈出 Swal.fire，標題: ${config.title}`);
             await Swal.fire({
                 icon: 'warning',
                 title: config.title,
                 text: config.text,
                 confirmButtonText: config.confirmButtonText
             });
+            console.warn(`[UserStore] Swal.fire 彈出結束 (使用者已點擊)`);
         },
+
         async syncUserProfile() {
-
-            try {
-                const response = await api.get('/auth/me');
-
-                // axios interceptor 已經回傳 response.data，所以這裡只需要再取 .data (ApiResponse 物件裡的 data)
-                const latestUserData = response.data;
-
-                this.updateUser(latestUserData);
-
-            } catch (error) {
-                console.error('同步使用者資料失敗:', error);
-
-                if (error.response && [401, 403].includes(error.response.status)) {
-                    // 如果 token 不合法或已過期，單純把前端狀態清掉即可，不要彈出 SweetAlert
-                    // 讓 Vue Router 或當前畫面的 API 來決定是否需要踢回登入頁，避免干擾 Admin 畫面
-                    this.logoutLocally();
-                }
+            console.warn('[syncUserProfile] 開始執行');
+            if (moduleSyncUserPromise) {
+                console.warn('[syncUserProfile] 偵測到已有進行中的 Promise，等待中...');
+                return moduleSyncUserPromise;
             }
+
+            console.warn('[syncUserProfile] 建立新的 Promise');
+            moduleSyncUserPromise = (async () => {
+                try {
+                    const response = await api.get('/auth/me');
+                    const responseData = response?.data || response;
+                    const latestUserData = responseData?.data || responseData;
+
+                    this.updateUser(latestUserData);
+                } catch (error) {
+                    console.error('[syncUserProfile] API 請求發生錯誤:', error);
+                } finally {
+                    moduleSyncUserPromise = null;
+                }
+            })();
+
+            return moduleSyncUserPromise;
         }
     }
 })
