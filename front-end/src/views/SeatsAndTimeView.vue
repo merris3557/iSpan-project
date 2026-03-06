@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import SeatManager from '@/components/EditSeat.vue';
 import TimeSlotManager from '@/components/EditTime.vue';
+import EditOffDay from '@/components/EditOffDay.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
 import Swal from 'sweetalert2';
 import AvailTime from '@/components/EditAvailTime.vue';
@@ -19,6 +20,8 @@ const bookingConfig = ref({
     interval: 30,
     duration: 90
 });
+
+const offDaysData = ref([]);
 
 const businessHours = ref([
     { day: 'Monday', open: '11:00', close: '21:00', active: false },
@@ -73,6 +76,20 @@ const fetchSettings = async () => {
                     }
                 });
             }
+
+            // 4. 店休設定
+            if (data.offDays) {
+                data.offDays.forEach(od => {
+                    if (od.offDate === null && od.dayOfWeek === null) {
+                        od.type = 'daily';
+                    } else {
+                        od.type = od.offDate ? 'date' : 'day';
+                    }
+                    if (od.startTime) od.startTime = od.startTime.slice(0, 5);
+                    if (od.endTime) od.endTime = od.endTime.slice(0, 5);
+                });
+                offDaysData.value = data.offDays;
+            }
         }
     } catch (error) {
         console.error('獲取設定失敗:', error);
@@ -99,6 +116,41 @@ const saveSettings = async () => {
             return;
         }
 
+        // 2. 店休時間驗證：防止跨日或無效時段
+        const invalidOffDays = offDaysData.value.filter(od => {
+            if (od.startTime && od.endTime) {
+                return od.endTime <= od.startTime;
+            }
+            return false;
+        });
+
+        if (invalidOffDays.length > 0) {
+            await Swal.fire({
+                icon: 'error',
+                title: '店休時間設定錯誤',
+                text: '店休的結束時間必須晚於開始時間（不支援跨日設定）',
+                confirmButtonColor: '#9f9572'
+            });
+            return;
+        }
+
+        // 3. 店休必填欄位驗證：特定日期與常規星期必須填寫對應欄位
+        const missingRequiredOffDays = offDaysData.value.filter(od => {
+            if (od.type === 'date' && !od.offDate) return true;
+            if (od.type === 'day' && (od.dayOfWeek === null || od.dayOfWeek === '')) return true;
+            return false;
+        });
+
+        if (missingRequiredOffDays.length > 0) {
+            await Swal.fire({
+                icon: 'error',
+                title: '店休設定不完整',
+                text: '選擇「特定日期」時必須指定日期，選擇「常規星期」時必須選擇星期幾。',
+                confirmButtonColor: '#9f9572'
+            });
+            return;
+        }
+
         const payload = {
             timeSlot: bookingConfig.value.interval,
             timeLimit: bookingConfig.value.duration,
@@ -113,7 +165,13 @@ const saveSettings = async () => {
                     openTime: bh.open,
                     closeTime: bh.close,
                     isClosed: false
-                }))
+                })),
+            offDays: offDaysData.value.map(od => ({
+                offDate: od.type === 'date' ? od.offDate : null,
+                dayOfWeek: od.type === 'day' ? od.dayOfWeek : null,
+                startTime: od.startTime || null,
+                endTime: od.endTime || null
+            }))
         };
 
         const res = await storeAPI.updateReservationSettings(payload);
@@ -145,6 +203,10 @@ const saveSettings = async () => {
         <hr class="my-5" />
         <section class="mb-5 p-4 border bg-white">
             <AvailTime v-model="businessHours" />
+        </section>
+
+        <section class="mb-5 p-4 border bg-white">
+            <EditOffDay v-model="offDaysData" />
         </section>
 
         <section class="mb-5 p-4 border bg-white">

@@ -15,10 +15,12 @@ import com.example.demo.reservation.dto.SlotAvailDto;
 import com.example.demo.reservation.entity.Booking;
 import com.example.demo.reservation.repository.BookingRepository;
 import com.example.demo.store.dto.ReservationSettingsDto;
+import com.example.demo.store.entity.OffDay;
 import com.example.demo.store.entity.OpenHour;
 import com.example.demo.store.entity.Seat;
 import com.example.demo.store.entity.SeatId;
 import com.example.demo.store.entity.StoresInfo;
+import com.example.demo.store.repository.OffDayRepository;
 import com.example.demo.store.repository.OpenHourRepository;
 import com.example.demo.store.repository.SeatRepository;
 import com.example.demo.store.repository.StoreInfoRepository;
@@ -36,6 +38,7 @@ public class BookingService {
     private final SeatRepository seatRepository;
     private final UserRepository userRepository;
     private final OpenHourRepository openHourRepository;
+    private final OffDayRepository offDayRepository;
 
     // 取得店家訂位設定
     // 與StoreOperationService.java中的getStoreBookingConfig()方法幾乎相同，但不限定商家本人登入
@@ -106,18 +109,25 @@ public class BookingService {
             // 1. 計算當前時段的末端
             LocalTime slotEnd = currentTime.plusMinutes(timeLimit);
 
-            // 2. 調用下方createBooking()方法裡面的 countOverlappingBookings() repository 方法
+            // 2. 檢查是否為店休
+            if (isOffDay(storeId, date, currentTime, slotEnd)) {
+                slots.add(new SlotAvailDto(currentTime.toString(), false));
+                currentTime = currentTime.plusMinutes(timeSlot);
+                continue;
+            }
+
+            // 3. 調用下方createBooking()方法裡面的 countOverlappingBookings() repository 方法
             long occupied = bookingRepository.countConflicts(
                     storeId, date, seatType, currentTime, slotEnd);
 
-            // 3. 判斷是否為過去時間
+            // 4. 判斷是否為過去時間
             boolean isPast = date.equals(LocalDate.now()) && currentTime.isBefore(LocalTime.now());
 
-            // 4. 判定並加入清單 (occupied < totalTables)
+            // 5. 判定並加入清單 (occupied < totalTables)
             boolean isAvailable = (occupied < totalTables) && !isPast;
             slots.add(new SlotAvailDto(currentTime.toString(), isAvailable));
 
-            // 5. 往後跳過一個時段間隔
+            // 6. 往後跳過一個時段間隔
             currentTime = currentTime.plusMinutes(timeSlot);
 
         }
@@ -146,10 +156,15 @@ public class BookingService {
             endTime = startTime.plusMinutes(store.getTimeLimit());
         }
 
-        // 4.悲觀鎖
+        // 4. 檢查是否為店休
+        if (isOffDay(dto.getStoreId(), dto.getBookingDate(), startTime, endTime)) {
+            throw new RuntimeException("所選時段適逢店休，無法預約");
+        }
+
+        // 5.悲觀鎖
         // 獲取該店該桌型的設定，並在此處「鎖定」該資源
         SeatId seatId = new SeatId(dto.getStoreId(), dto.getReservedSeatType());
-        Seat seatConfig = seatRepository.findByIdForUpdate(seatId) // 改用悲觀鎖
+        Seat seatConfig = seatRepository.findByIdForUpdate(seatId) // 這裡會鎖定該筆 Seat 記錄，直到本事務結束
                 .orElseThrow(() -> new RuntimeException("該店家未設定此類別的座位"));
 
         // 在有鎖的情況下進行人數檢查與重疊查詢
@@ -174,7 +189,7 @@ public class BookingService {
                     seatType, minGuests, maxGuests));
         }
 
-        // 5. 建立訂位實體並儲存
+        // 6. 建立訂位實體並儲存
         Booking booking = new Booking();
         booking.setUser(user);
         booking.setStore(store);
@@ -189,7 +204,7 @@ public class BookingService {
 
         Booking savedBooking = bookingRepository.save(booking);
 
-        // 6. 轉換回 Response Dto
+        // 7. 轉換回 Response Dto
         return convertToResponse(savedBooking);
     }
 
@@ -261,13 +276,13 @@ public class BookingService {
 
         // 如果日期或時間有變動，必須進行營業時間與重疊檢核
         if (dto.getBookingDate() != null || dto.getStartTime() != null) {
-            // 0. 日期檢核：不得修改為當天
+            // 1. 日期檢核：不得修改為當天
             if (!newDate.isAfter(LocalDate.now())) {
                 throw new RuntimeException("不得將預約修改為今日或過去的日期");
             }
             StoresInfo store = booking.getStore();
 
-            // 1. 營業時間檢核
+            // 2. 營業時間檢核
             int dayOfWeek = newDate.getDayOfWeek().getValue();
             int dbDayValue = (dayOfWeek == 7) ? 0 : dayOfWeek;
             OpenHour openHour = openHourRepository.findByStore_StoreIdAndDayOfWeek(store.getStoreId(), dbDayValue)
@@ -277,7 +292,7 @@ public class BookingService {
                 throw new RuntimeException("所選時段非營業時間或已超過最後預約時間");
             }
 
-            // 2. 容量與重疊檢核
+            // 3. 容量與重疊檢核
             // 鎖定該座位類型資源 (悲觀鎖)
             SeatId seatId = new SeatId(store.getStoreId(), booking.getReservedSeatType());
             Seat seatConfig = seatRepository.findByIdForUpdate(seatId)
@@ -286,7 +301,12 @@ public class BookingService {
             int totalTables = seatConfig.getTotalCount();
             LocalTime newEnd = newStart.plusMinutes(store.getTimeLimit());
 
-            // 查詢重疊訂單 (排除自身，避免跟原本的自己衝突)
+            // 4. 檢查是否為店休
+            if (isOffDay(store.getStoreId(), newDate, newStart, newEnd)) {
+                throw new RuntimeException("所選時段適逢店休");
+            }
+
+            // 5. 查詢重疊訂單 (排除自身，避免跟原本的自己衝突)
             long occupied = bookingRepository.countConflictsExcept(
                     store.getStoreId(), newDate, booking.getReservedSeatType(),
                     newStart, newEnd, bookingId);
@@ -295,7 +315,7 @@ public class BookingService {
                 throw new RuntimeException("該時段此類別座位已滿");
             }
 
-            // 通過檢核，執行更新
+            // 6. 通過檢核，執行更新
             booking.setBookingDate(newDate);
             booking.setStartTime(newStart);
             booking.setEndTime(newEnd);
@@ -308,5 +328,40 @@ public class BookingService {
             booking.setGuestPhone(dto.getGuestPhone());
 
         return convertToResponse(bookingRepository.save(booking));
+    }
+
+    private boolean isOffDay(Integer storeId, LocalDate date, LocalTime startTime, LocalTime endTime) {
+        // 1. 取得店家所有的店休設定
+        List<OffDay> offDays = offDayRepository.findByStore_StoreId(storeId);
+
+        // 2. 計算這天是星期幾 (Java 是 1-7，我們資料庫存 0-6)
+        int dayOfWeek = date.getDayOfWeek().getValue();
+        int dbDayValue = (dayOfWeek == 7) ? 0 : dayOfWeek;
+
+        // 3. 逐一比對店休規則
+        for (OffDay off : offDays) {
+            // 條件 A：特定日期剛好是今天
+            boolean matchDate = (off.getOffDate() != null && off.getOffDate().equals(date));
+            // 條件 B：常規店休剛好是星期幾
+            boolean matchDayOfWeek = (off.getDayOfWeek() != null && off.getDayOfWeek().equals(dbDayValue));
+            // 條件 C：每天常規休假 (日期與星期皆未設定)
+            boolean matchDaily = (off.getOffDate() == null && off.getDayOfWeek() == null);
+
+            // 如果都不是，看下一條規則
+            if (!matchDate && !matchDayOfWeek && !matchDaily) {
+                continue;
+            }
+
+            // 日期對上了，現在檢查「時間」是否有交集 (重疊)
+            if (off.getStartTime() == null && off.getEndTime() == null) {
+                return true; // 沒寫時間代表全天店休
+            } else {
+                // 重疊邏輯：預約開始時間 < 店休結束時間 且 預約結束時間 > 店休開始時間
+                if (startTime.isBefore(off.getEndTime()) && endTime.isAfter(off.getStartTime())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

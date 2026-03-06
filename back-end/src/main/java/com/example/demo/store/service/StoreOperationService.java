@@ -1,5 +1,6 @@
 package com.example.demo.store.service;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -73,10 +74,10 @@ public class StoreOperationService extends StoreBaseService {
         List<ReservationSettingsDto.OffDayDto> odDtos = offDayRepository.findByStore_StoreId(storeId).stream()
                 .map(od -> {
                     ReservationSettingsDto.OffDayDto odDto = new ReservationSettingsDto.OffDayDto();
-                    odDto.setOffDate(od.getOffDate().toString());
+                    odDto.setOffDate(od.getOffDate() != null ? od.getOffDate().toString() : null);
                     odDto.setDayOfWeek(od.getDayOfWeek());
-                    odDto.setStartTime(od.getStartTime().toString());
-                    odDto.setEndTime(od.getEndTime().toString());
+                    odDto.setStartTime(od.getStartTime() != null ? od.getStartTime().toString() : null);
+                    odDto.setEndTime(od.getEndTime() != null ? od.getEndTime().toString() : null);
                     return odDto;
                 }).toList();
         dto.setOffDays(odDtos);
@@ -144,18 +145,32 @@ public class StoreOperationService extends StoreBaseService {
 
         if (dto.getOffDays() != null) {
             List<OffDay> newOffDays = dto.getOffDays().stream().map(odDto -> {
-                LocalTime start = LocalTime.parse(odDto.getStartTime());
-                LocalTime end = LocalTime.parse(odDto.getEndTime());
-                // 阻擋跨日休假
-                if (!end.isAfter(start)) {
-                    throw new IllegalArgumentException("休假時間設定錯誤：結束時間必須晚於開始時間（日期 " + odDto.getOffDate() + "）");
-                }
-
                 OffDay od = new OffDay();
                 od.setStore(store);
+
+                // 處理特定店休(特定日期)
+                if (odDto.getOffDate() != null && !odDto.getOffDate().isEmpty()) {
+                    od.setOffDate(LocalDate.parse(odDto.getOffDate()));
+                }
+
+                // 處理固定店休(星期幾)
                 od.setDayOfWeek(odDto.getDayOfWeek());
-                od.setStartTime(start);
-                od.setEndTime(end);
+
+                // 處理特定時段店休(例如：12:00-13:00)
+                if (odDto.getStartTime() != null && !odDto.getStartTime().isEmpty()) {
+                    od.setStartTime(LocalTime.parse(odDto.getStartTime()));
+                }
+                if (odDto.getEndTime() != null && !odDto.getEndTime().isEmpty()) {
+                    od.setEndTime(LocalTime.parse(odDto.getEndTime()));
+                }
+
+                // 阻擋跨日或無效的店休時間
+                if (od.getStartTime() != null && od.getEndTime() != null) {
+                    if (!od.getEndTime().isAfter(od.getStartTime())) {
+                        throw new IllegalArgumentException("店休時間設定錯誤：結束時間必須晚於開始時間");
+                    }
+                }
+
                 return od;
             }).toList();
             offDayRepository.saveAll(newOffDays);
