@@ -164,7 +164,7 @@ const formatDate = (dateStr) => {
                             <th scope="col" style="width:130px">日期時間</th>
                             <th scope="col" style="width:80px">姓名</th>
                             <th scope="col" style="width:200px">聯絡方式</th>
-                            <th scope="col">內容（前20字）</th>
+                            <th scope="col">內容</th>
                             <th scope="col" style="width:80px">狀態</th>
                             <th scope="col" style="width:80px">操作</th>
                         </tr>

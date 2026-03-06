@@ -38,7 +38,7 @@ public class MailService {
                     "          <tr>" +
                     "            <td align='center' style='padding: 40px 0 20px 0; background-color: " + "#9f9572"
                     + ";'>" +
-                    "              <img src='https://github.com/merris3557/iSpan-project/blob/47c4ceb5de5d816e6f0e62f2f791da15e52de7b7/front-end/src/pictures/TL_Logo_forMail.png' alt='饗島 Logo' width='120' style='display: block; '>"
+                    "              <img src='https://raw.githubusercontent.com/merris3557/Project_TL_picture/refs/heads/main/%E9%A5%97%E5%B3%B6.png' alt='饗島 Logo' width='120' style='display: block; '>"
                     + // filter: brightness(0) invert(1); 假設 Logo 是深色，這裡濾鏡轉白色
                     "            </td>" +
                     "          </tr>" +
@@ -53,14 +53,14 @@ public class MailService {
                     + "</strong>" +
                     "              </p>" +
                     "              <p style='color: #555555; font-size: 14px;'>" +
-                    "                我們的客服團隊將於 48 小時內進行核實並回覆至此信箱。感謝您的耐心等待。" +
+                    "                饗島客服團隊已收到您的來信，正全力處理您的訴求，我們將盡速回覆至此信箱與您聯繫。。" +
                     "              </p>" +
                     "              " +
                     "              <table border='0' cellpadding='0' cellspacing='0' width='100%' style='margin-top: 30px;'>"
                     +
                     "                <tr>" +
                     "                  <td align='center'>" +
-                    "                    <a href='http://localhost:8081/complaint-status/" + ticketNumber + "' " +
+                    "                    <a href='http://localhost:5173/userInfo/feedback' " +
                     "                       style='background-color: " + "#9f9572"
                     + "; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;'>"
                     +
@@ -75,7 +75,7 @@ public class MailService {
                     "          <tr>" +
                     "            <td style='padding: 20px 30px; background-color: #ffffff; text-align: center;'>" +
                     "              <p style='margin: 0; font-size: 12px; color: #999999;'>" +
-                    "                &copy; 2024 饗島 Taste Land Project. All rights reserved.<br>" +
+                    "                &copy; 2026 饗島 Taste Land Project. All rights reserved.<br>" +
                     "                此為系統自動發送，請勿直接回覆。" +
                     "              </p>" +
                     "            </td>" +
@@ -112,7 +112,8 @@ public class MailService {
                     +
                     "        " +
                     "        <tr><td align='center' style='padding: 30px; background-color: #9f9572;'>" +
-                    "          <img src='你的Logo網址' width='100' style='filter: brightness(0) invert(1);'>" +
+                    "          <img src='https://raw.githubusercontent.com/merris3557/Project_TL_picture/refs/heads/main/%E9%A5%97%E5%B3%B6.png' width='100' style='filter: brightness(0) invert(1);'>"
+                    +
                     "        </td></tr>" +
                     "        " +
                     "        <tr><td style='padding: 40px 30px; background-color: rgba(160, 150, 115, 0.05);'>" +
@@ -127,7 +128,8 @@ public class MailService {
                     "        </td></tr>" +
                     "        " +
                     "        <tr><td style='padding: 20px; text-align: center; font-size: 12px; color: #999;'>" +
-                    "          &copy; 2026 饗島 Taste Land. 此為系統自動發送。" +
+                    "          &copy; 2026 饗島 Taste Land Project. All rights reserved.<br>" +
+                    "                此為系統自動發送，請勿直接回覆。" +
                     "        </td></tr>" +
                     "      </table>" +
                     "    </td></tr>" +
