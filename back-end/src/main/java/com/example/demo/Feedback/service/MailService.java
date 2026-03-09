@@ -1,8 +1,10 @@
 package com.example.demo.Feedback.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
@@ -161,4 +163,64 @@ public class MailService {
             e.printStackTrace();
         }
     }
+
+    @Async
+public void sendBookingNotification(String toEmail, String guestName, String storeName, 
+                                    String date, String time, int guestCount, String type) {
+    jakarta.mail.internet.MimeMessage mimeMessage = mailSender.createMimeMessage();
+    
+    // 強制轉型成字串（雖然 String.format 支援 %d，但轉型後比較保險）
+    String countStr = String.valueOf(guestCount);
+
+    try {
+        org.springframework.mail.javamail.MimeMessageHelper helper = 
+            new org.springframework.mail.javamail.MimeMessageHelper(mimeMessage, "UTF-8");
+
+        helper.setFrom("afterrr5pm@gmail.com");
+        helper.setTo(toEmail);
+        
+        // 根據 type 決定主旨與標題
+        String subjectTag;
+        String headMessage;
+        String color; // 增加顏色區分，取消用紅色，更新用藍色
+
+        switch (type) {
+            case "UPDATE":
+                subjectTag = "【訂位變更通知】";
+                headMessage = "您的訂位資訊已成功更新";
+                color = "#2196F3";
+                break;
+            case "CANCEL":
+                subjectTag = "【訂位取消確認】";
+                headMessage = "您的訂位已成功取消";
+                color = "#F44336";
+                break;
+            default:
+                subjectTag = "【訂位成功確認】";
+                headMessage = "您的訂位已完成";
+                color = "#4CAF50";
+        }
+
+        helper.setSubject(subjectTag + storeName);
+        
+        String htmlContent = String.format(
+            "<h3 style='color:%s;'>親愛的 %s 您好：</h3>" +
+            "<p>%s！以下是您的預約明細：</p>" +
+            "<ul>" +
+            "  <li>餐廳名稱：<b>%s</b></li>" +
+            "  <li>訂位日期：%s</li>" +
+            "  <li>訂位時間：%s</li>" +
+            "  <li>用餐人數：%s 人</li>" + // 這裡傳入轉型後的字串
+            "</ul>" +
+            "<p>如有任何問題，請洽餐廳專線。期待再次為您服務！</p>",
+            color, guestName, headMessage, storeName, date, time, countStr
+        );
+
+        helper.setText(htmlContent, true);
+        mailSender.send(mimeMessage);
+        System.out.println(">>>> [" + type + "] 郵件已發送至 " + toEmail);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
 }

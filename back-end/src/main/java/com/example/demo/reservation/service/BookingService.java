@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.demo.Feedback.service.MailService;
 import com.example.demo.reservation.dto.BookingRequestDto;
 import com.example.demo.reservation.dto.BookingResponseDto;
 import com.example.demo.reservation.dto.BookingUpdateDto;
@@ -39,6 +40,7 @@ public class BookingService {
     private final UserRepository userRepository;
     private final OpenHourRepository openHourRepository;
     private final OffDayRepository offDayRepository;
+    private final MailService mailService;
 
     // 取得店家訂位設定
     // 與StoreOperationService.java中的getStoreBookingConfig()方法幾乎相同，但不限定商家本人登入
@@ -202,9 +204,20 @@ public class BookingService {
         booking.setEndTime(endTime);
         booking.setStatus(true);
 
+        // 7. 轉換回 Response Dto
         Booking savedBooking = bookingRepository.save(booking);
 
-        // 7. 轉換回 Response Dto
+        // 8. 寄送郵件通知 (在回傳 response 之前呼叫)
+        // 建議從 user 物件中拿 email，或者從 dto 拿
+        mailService.sendBookingNotification(
+                user.getEmail(), // 假設你的 User Entity 有 email 欄位
+                savedBooking.getGuestName(),
+                savedBooking.getStore().getStoreName(),
+                savedBooking.getBookingDate().toString(),
+                savedBooking.getStartTime().toString(),
+                savedBooking.getGuestCount(),
+                "NEW");
+
         return convertToResponse(savedBooking);
     }
 
@@ -242,17 +255,44 @@ public class BookingService {
         booking.setGuestName(dto.getGuestName());
         booking.setGuestPhone(dto.getGuestPhone());
 
-        return convertToResponse(bookingRepository.save(booking));
+        Booking savedBooking = bookingRepository.save(booking);
+
+        // 發送更新通知
+        mailService.sendBookingNotification(
+                savedBooking.getUser().getEmail(),
+                savedBooking.getGuestName(),
+                savedBooking.getStore().getStoreName(),
+                savedBooking.getBookingDate().toString(),
+                savedBooking.getStartTime().toString(),
+                savedBooking.getGuestCount(),
+                "UPDATE");
+
+        return convertToResponse(savedBooking);
     }
 
     // 3. 取消訂位（軟刪除，將狀態改為 false）
     @Transactional
     public void cancelBooking(Integer bookingId) {
+        // 1. 查找訂位紀錄
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("找不到該訂位紀錄"));
 
+        // 2. 執行軟刪除狀態變更
         booking.setStatus(false);
-        bookingRepository.save(booking);
+        
+        // 3. 儲存並取得更新後的實體 (為了確保能拿到關聯的 User 和 Store 資訊)
+        Booking savedBooking = bookingRepository.save(booking);
+
+        // 4. 發送取消通知信
+        // 傳入 "CANCEL" 觸發你在 MailService 中設定的紅色主題/文字
+        mailService.sendBookingNotification(
+                savedBooking.getUser().getEmail(),
+                savedBooking.getGuestName(),
+                savedBooking.getStore().getStoreName(),
+                savedBooking.getBookingDate().toString(),
+                savedBooking.getStartTime().toString(),
+                savedBooking.getGuestCount(),
+                "CANCEL");
     }
 
     // ----------店家訂位管理----------
@@ -327,7 +367,19 @@ public class BookingService {
         if (dto.getGuestPhone() != null)
             booking.setGuestPhone(dto.getGuestPhone());
 
-        return convertToResponse(bookingRepository.save(booking));
+                Booking savedBooking = bookingRepository.save(booking);
+
+        // 發送更新通知
+        mailService.sendBookingNotification(
+                savedBooking.getUser().getEmail(),
+                savedBooking.getGuestName(),
+                savedBooking.getStore().getStoreName(),
+                savedBooking.getBookingDate().toString(),
+                savedBooking.getStartTime().toString(),
+                savedBooking.getGuestCount(),
+                "UPDATE");
+
+        return convertToResponse(savedBooking);
     }
 
     private boolean isOffDay(Integer storeId, LocalDate date, LocalTime startTime, LocalTime endTime) {

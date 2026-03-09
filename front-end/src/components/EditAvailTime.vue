@@ -1,4 +1,5 @@
 <script setup>
+import Swal from 'sweetalert2';
 const modelValue = defineModel({ type: Array });
 
 const daysMap = {
@@ -7,14 +8,42 @@ const daysMap = {
 };
 
 // 一鍵同步功能：將第一天的設定套用到所有開啟的日期
+// const syncAllDays = () => {
+//     if (!confirm('是否將第一天的時間設定套用到其他所有天數？')) return;
+//     const firstDay = modelValue.value[0];
+//     modelValue.value.forEach((item, index) => {
+//         if (index !== 0) {
+//             item.open = firstDay.open;
+//             item.close = firstDay.close;
+//             item.active = firstDay.active;
+//         }
+//     });
+// };
+
+
+
+
 const syncAllDays = () => {
-    if (!confirm('是否將第一天的時間設定套用到其他所有天數？')) return;
-    const firstDay = modelValue.value[0];
-    modelValue.value.forEach((item, index) => {
-        if (index !== 0) {
-            item.open = firstDay.open;
-            item.close = firstDay.close;
-            item.active = firstDay.active;
+    Swal.fire({
+        title: '確定同步至全週嗎？',
+        text: '這會使星期一的時間設定套用到其他所有天，請確認是否要繼續。',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#9f9572',
+        confirmButtonText: '預定同步',
+        cancelButtonColor: '#d33',
+        cancelButtonText: '取消'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const firstDay = modelValue.value[0];
+            modelValue.value.forEach((item, index) => {
+                if (index !== 0) {
+                    item.open = firstDay.open;
+                    item.close = firstDay.close;
+                    item.active = firstDay.active;
+                }
+            });
+            Swal.fire('已同步', '星期一的時間設定已套用到其他所有天數。', 'success');
         }
     });
 };

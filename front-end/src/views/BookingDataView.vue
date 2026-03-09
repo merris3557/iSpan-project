@@ -93,6 +93,8 @@ const handleDelete = async (booking) => {
 const handleUpdate = async (updatedItem) => {
     try {
         const updateDto = {
+            guestName: updatedItem.name,
+            guestPhone: updatedItem.phone,
             bookingDate: updatedItem.date,
             startTime: updatedItem.time // 格式如 "18:30"
         };
