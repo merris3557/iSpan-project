@@ -151,9 +151,10 @@ const createMethodWrapper = (methodName) => {
                 await doRefresh(isAdminContext);
 
                 const retryConfig = { ...error.config };
+                
+                // 註解：不要隨便刪除 transformRequest，否則 FormData 和 JSON 資料格式會跑掉而導致 400 錯誤
+                // 但為了某些相容性問題，只刪除 adapter
                 delete retryConfig.adapter;
-                delete retryConfig.transformRequest;
-                delete retryConfig.transformResponse;
 
                 console.log(`[REFRESH-WRAPPER] 重送 ${methodName.toUpperCase()} ${url}`);
                 const finalResult = await api.request(retryConfig);
