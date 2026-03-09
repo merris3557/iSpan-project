@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import Swal from 'sweetalert2'
-import axios from 'axios'
+import apiWrapper from '@/api/config'
 
 const orders = ref([])
 const filterStatus = ref('全部')
@@ -41,8 +41,9 @@ onMounted(async () => {
 
 const fetchOrders = async () => {
     try {
-        const res = await axios.get('http://localhost:8080/api/orders/all')
-        orders.value = res.data
+        const res = await apiWrapper.get('/orders/all')
+        // res 可能已經被 apiWrapper 解包成陣列，若是，則直接使用
+        orders.value = Array.isArray(res) ? res : (res.data || [])
     } catch (err) {
         console.error('無法取得訂單資料', err)
     }
@@ -54,7 +55,7 @@ const startEdit = (order) => {
 
 const saveEdit = async () => {
     try {
-        await axios.put(`http://localhost:8080/api/orders/${editingOrder.value.id}`, editingOrder.value)
+        await apiWrapper.put(`/orders/${editingOrder.value.id}`, editingOrder.value)
         await fetchOrders()
         editingOrder.value = null
         Swal.fire('更新成功', '訂單資訊已更新', 'success')
@@ -70,7 +71,7 @@ const deleteOrder = (id) => {
         showCancelButton: true
     }).then(async res => {
         if (res.isConfirmed) {
-            await axios.delete(`http://localhost:8080/api/orders/${id}`)
+            await apiWrapper.delete(`/orders/${id}`)
             await fetchOrders()
         }
     })

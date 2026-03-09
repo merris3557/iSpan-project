@@ -80,13 +80,14 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/admins").permitAll() // 暫時放行新增管理員
                         // 鎖定其他管理員 API，必須具備 ADMIN 權限才能訪問
                         .requestMatchers("/api/admins/**").hasRole("ADMIN")
-                        // 允許訪問店鋪註冊端點
-                        .requestMatchers("/api/store-registrations/**").permitAll()
+                        // 允許訪問店鋪註冊端點 (註：原先測試時已發現 permitAll 會導致 Token 過期時無法觸發 refresh 且拋出 400 anonymousUser 錯誤)
+                        .requestMatchers("/api/store-registrations/**").authenticated()
                         // 放行綠界相關 API（付款、回傳等）
                         .requestMatchers("/api/ecpay/**").permitAll()
+                        // 產品相關 API: GET 允許匿名瀏覽，POST/PUT/DELETE 需要驗證或店家/管理員權限
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/products/**").permitAll()
+                        .requestMatchers("/api/products/**").authenticated() // 新增、修改、刪除需登入 (若有特定 Role 請自行調整)
                         // OAuth2 登入端點
-                        .requestMatchers("/api/products/**").permitAll()
-                        // 放行電商商品相關API
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         // 地圖搜尋端點：允許匿名存取（搜尋不需要登入）
                         .requestMatchers("/api/map/**").permitAll()
@@ -96,17 +97,16 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/feedback").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/feedback/typeList").permitAll()
                         // /api/feedback/userInfoList 需要登入（使用 @AuthenticationPrincipal）
-                        // --- 新增：放行客服後台清單 GET（回覆 PUT 仍需認證）---
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/feedbackList").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/feedbackList/status-list")
-                        .permitAll()
+                        // 客服後台清單與回覆：僅限管理員
+                        .requestMatchers("/api/feedbackList/**").hasRole("ADMIN")
                         // 商家資訊端點：允許公開查看特定商家資訊
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/owner/store/{id}").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/bookings/config/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/bookings/available-slots").permitAll()
-                        .requestMatchers("/api/orders/**").permitAll()
-                        // 前端商店顯示最新購買資料
+                        // 前端商店顯示最新購買資料 (允許匿名查詢最新訂單)
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/orders/latest").permitAll()
+                        // 其他訂單 API：必須登入才能結帳或查詢個人的訂單
+                        .requestMatchers("/api/orders/**").authenticated()
                         // 管理員權限端點
                         // .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
                         // .requestMatchers(HttpMethod.PUT,

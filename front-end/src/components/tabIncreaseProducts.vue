@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { useProductsDepot } from '@/stores/productsDepot';
 import Swal from 'sweetalert2';
-import axios from 'axios';
+import apiWrapper from '@/api/config';
 
 const depot = useProductsDepot();
 const fileInputRef = ref(null);
@@ -26,7 +26,7 @@ const handleAddProduct =async () => {
     isSubmitting.value = true;
 
     try{
-        const response = await axios.post(`http://localhost:8080/api/products/add`, {
+        const response = await apiWrapper.post('/products/add', {
             productName:form.value.productName,
             price: form.value.price,
             stock: form.value.stock,

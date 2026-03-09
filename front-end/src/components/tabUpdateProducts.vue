@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue';
 import { useProductsDepot } from '@/stores/productsDepot';
 import Swal from 'sweetalert2';
-import axios from 'axios';
+import apiWrapper from '@/api/config';
 
 const depot = useProductsDepot();
 const selectedId = ref('');
@@ -20,7 +20,7 @@ watch(selectedId, (newId) => {
 
 const handleUpdate = async () => {
     try{
-        const response = await axios.put(`http://localhost:8080/api/products/${editForm.value.id}`, {
+        const response = await apiWrapper.put(`/products/${editForm.value.id}`, {
                 productName: editForm.value.productName,
                 price: editForm.value.price,
                 image: editForm.value.image,

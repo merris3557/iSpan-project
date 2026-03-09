@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import axios from 'axios';
+import apiWrapper from '@/api/config';
 
 export const useProductsDepot = defineStore('productDepot', {
     state: () => ({
@@ -18,9 +18,12 @@ export const useProductsDepot = defineStore('productDepot', {
             }
 
             try {
-                const response = await axios.get(`http://localhost:8080/api/products/all`)  // ← 這行不見了
+                const response = await apiWrapper.get('/products/all')  // ← 這行不見了
 
-                this.products = response.data.map(p => ({
+                // apiWrapper 已經把 response.data 取出來了，所以 response 本身就是陣列
+                const data = Array.isArray(response) ? response : (response.data || [])
+                
+                this.products = data.map(p => ({
                     id: p.productId,
                     productName: p.productName,
                     price: p.price,
@@ -39,7 +42,7 @@ export const useProductsDepot = defineStore('productDepot', {
 
         async updateStock(id, type, amount) {
             try {
-                await axios.put(`http://localhost:8080/api/products/updateStock`, {
+                await apiWrapper.put(`/products/updateStock`, {
                     productId: id,
                     type: type,
                     amount: amount
@@ -54,7 +57,7 @@ export const useProductsDepot = defineStore('productDepot', {
         async deleteProduct(id) {
 
             try {
-                await axios.delete(`http://localhost:8080/api/products/${id}`);
+                await apiWrapper.delete(`/products/${id}`);
 
                 const index = this.products.findIndex(p => String(p.id) === String(id));
                 if (index !== -1) {
