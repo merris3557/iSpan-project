@@ -75,19 +75,23 @@ watch(() => adminAuthStore.isLoggedIn, (isLoggedIn) => {
 
 // ===== 頁面初始載入（F5 刷新）時同步登入狀態 =====
 onMounted(async () => {
-    // 前台使用者
-    if (localStorage.getItem('isUserLoggedIn') === 'true') {
-        await authStore.syncUserProfile();
-        if (authStore.isLoggedIn) {
-            await cartStore.fetchCart();
-            // watch 監聽到 isLoggedIn 變成 true 時會自動呼叫 startUserIdle()
-        }
-    }
+    const isAdminPage = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
 
-    // 後台管理員
-    if (localStorage.getItem('isAdminLoggedIn') === 'true') {
-        await adminAuthStore.syncAdminProfile();
-        // watch 監聽到 isLoggedIn 變成 true 時會自動呼叫 startAdminIdle()
+    if (isAdminPage) {
+        // 後台管理員：只在後台頁面同步管理員狀態
+        if (localStorage.getItem('isAdminLoggedIn') === 'true') {
+            await adminAuthStore.syncAdminProfile();
+            // watch 監聽到 isLoggedIn 變成 true 時會自動呼叫 startAdminIdle()
+        }
+    } else {
+        // 前台使用者：只在前台頁面同步使用者狀態與購物車
+        if (localStorage.getItem('isUserLoggedIn') === 'true') {
+            await authStore.syncUserProfile();
+            if (authStore.isLoggedIn) {
+                await cartStore.fetchCart();
+                // watch 監聽到 isLoggedIn 變成 true 時會自動呼叫 startUserIdle()
+            }
+        }
     }
 });
 
