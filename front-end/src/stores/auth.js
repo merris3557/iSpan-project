@@ -13,6 +13,7 @@ export const useAuthStore = defineStore('auth', {
         // 判斷是否登入：依據記憶體中是否有 user 物件
         isLoggedIn: (state) => !!state.user,
         userName: (state) => state.user ? state.user.name : '',
+        isStoreUser: (state) => state.user ? state.user.isStore === true : false,
     },
 
     actions: {

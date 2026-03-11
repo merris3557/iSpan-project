@@ -58,7 +58,7 @@ const routes = [
         path: '/storeRegistration',
         name: 'StoreRegistration',
         component: () => import('@/views/StoreRegistrationView.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, hideFromStore: true }
       },
       {
         path: '/shopStore',
@@ -84,19 +84,19 @@ const routes = [
         path: '/owner/storeInfo',
         name: 'OwnerStoreInfo',
         component: () => import('@/views/OwnerProfileView.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, requiresStore: true }
       },
       {
         path: '/owner/bookings/seats',
         name: 'Seats',
         component: () => import('@/views/SeatsAndTimeView.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, requiresStore: true }
       },
       {
         path: '/owner/bookings/data',
         name: 'Data',
         component: () => import('@/views/BookingDataView.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, requiresStore: true }
       },
       // {
       //   path: '/home',
@@ -179,66 +179,66 @@ const routes = [
     component: () => import('@/layouts/admin.vue'),
     meta: { requiresAdminAuth: true },
     children: [
-      {
-        path: '',
-        name: 'AdminDashboard',
-        component: () => import('@/views/ERPTransferView.vue')
-      },
-      {
-        path: 'frontend/banners',
-        name: 'AdminFrontendBanners',
-        component: () => import('@/views/AdminDashboard.vue')
-      },
-      {
-        path: 'frontend/content',
-        name: 'AdminFrontendContent',
-        component: () => import('@/views/AdminDashboard.vue')
-      },
-      {
-        path: 'news/list',
-        name: 'AdminNewsList',
-        component: () => import('@/views/AdminDashboard.vue')
-      },
-      {
-        path: 'news/create',
-        name: 'AdminNewsCreate',
-        component: () => import('@/views/AdminDashboard.vue')
-      },
-      {
-        path: 'knowledge/list',
-        name: 'AdminKnowledgeList',
-        component: () => import('@/views/AdminDashboard.vue')
-      },
-      {
-        path: 'knowledge/categories',
-        name: 'AdminKnowledgeCategories',
-        component: () => import('@/views/AdminDashboard.vue')
-      },
-      {
-        path: 'products/list',
-        name: 'AdminProductsList',
-        component: () => import('@/views/AdminDashboard.vue')
-      },
-      {
-        path: 'products/create',
-        name: 'AdminProductsCreate',
-        component: () => import('@/views/AdminDashboard.vue')
-      },
-      {
-        path: 'products/categories',
-        name: 'AdminProductsCategories',
-        component: () => import('@/views/AdminDashboard.vue')
-      },
-      {
-        path: 'sales/orders',
-        name: 'AdminSalesOrders',
-        component: () => import('@/views/AdminDashboard.vue')
-      },
-      {
-        path: 'sales/reports',
-        name: 'AdminSalesReports',
-        component: () => import('@/views/AdminDashboard.vue')
-      },
+      // {
+      //   path: '',
+      //   name: 'AdminDashboard',
+      //   component: () => import('@/views/ERPTransferView.vue')
+      // },
+      // {
+      //   path: 'frontend/banners',
+      //   name: 'AdminFrontendBanners',
+      //   component: () => import('@/views/AdminDashboard.vue')
+      // },
+      // {
+      //   path: 'frontend/content',
+      //   name: 'AdminFrontendContent',
+      //   component: () => import('@/views/AdminDashboard.vue')
+      // },
+      // {
+      //   path: 'news/list',
+      //   name: 'AdminNewsList',
+      //   component: () => import('@/views/AdminDashboard.vue')
+      // },
+      // {
+      //   path: 'news/create',
+      //   name: 'AdminNewsCreate',
+      //   component: () => import('@/views/AdminDashboard.vue')
+      // },
+      // {
+      //   path: 'knowledge/list',
+      //   name: 'AdminKnowledgeList',
+      //   component: () => import('@/views/AdminDashboard.vue')
+      // },
+      // {
+      //   path: 'knowledge/categories',
+      //   name: 'AdminKnowledgeCategories',
+      //   component: () => import('@/views/AdminDashboard.vue')
+      // },
+      // {
+      //   path: 'products/list',
+      //   name: 'AdminProductsList',
+      //   component: () => import('@/views/AdminDashboard.vue')
+      // },
+      // {
+      //   path: 'products/create',
+      //   name: 'AdminProductsCreate',
+      //   component: () => import('@/views/AdminDashboard.vue')
+      // },
+      // {
+      //   path: 'products/categories',
+      //   name: 'AdminProductsCategories',
+      //   component: () => import('@/views/AdminDashboard.vue')
+      // },
+      // {
+      //   path: 'sales/orders',
+      //   name: 'AdminSalesOrders',
+      //   component: () => import('@/views/AdminDashboard.vue')
+      // },
+      // {
+      //   path: 'sales/reports',
+      //   name: 'AdminSalesReports',
+      //   component: () => import('@/views/AdminDashboard.vue')
+      // },
       {
         path: 'users/list',
         name: 'AdminUsersList',
@@ -248,32 +248,35 @@ const routes = [
       {
         path: 'users/storeRegistration',
         name: 'StoreRegistrationCheck',
-        component: () => import('@/views/StoreRegistrationCheckView.vue')
+        component: () => import('@/views/StoreRegistrationCheckView.vue'),
+        meta: { roles: ['SUPER_ADMIN', 'CUSTOMER_SERVICE'] }
       },
       {
         path: 'backEnd/productsList',
         name: 'BackEndProductsList',
-        component: () => import('@/views/BackEndProductsList.vue')
+        component: () => import('@/views/BackEndProductsList.vue'),
+        meta: { roles: ['SUPER_ADMIN', 'SHOP_MANAGER'] }
       },
       {
         path: 'backEnd/productsOrders',
         name: 'BackEndproductsOrders',
-        component: () => import('@/views/BackEndproductsOrders.vue')
+        component: () => import('@/views/BackEndproductsOrders.vue'),
+        meta: { roles: ['SUPER_ADMIN', 'SHOP_MANAGER'] }
       },
       {
         path: 'feedbackAP',
         name: 'FeedbackAP',
-        component: () => import('@/views/FeedbackAPView.vue')
+        component: () => import('@/views/FeedbackAPView.vue'),
+        meta: { roles: ['SUPER_ADMIN', 'CUSTOMER_SERVICE'] }
       },
       {
         path: 'admins/list',
         name: 'AdminsList',
         component: () => import('@/views/AdminListView.vue'),
-        meta: { requiresAdminAuth: false }
-        // meta: {
-        //   requiresAdminAuth: true,
-        //   roles: ['SUPER_ADMIN']
-        // }
+        meta: {
+          requiresAdminAuth: true,
+          roles: ['SUPER_ADMIN', 'HUMAN_RESOURCE']
+        }
       }
     ]
   },
@@ -417,6 +420,27 @@ router.beforeEach(async (to, from, next) => {
         });
       }
       return next('/login');
+    }
+
+    // Role-based restrictions for general users
+    if (to.meta.hideFromStore && authStore.isStoreUser) {
+      Swal.fire({
+        icon: 'info',
+        title: '您已是商家',
+        text: '您已經具備商家身分，無需重複申請。',
+        confirmButtonColor: '#9f9572'
+      });
+      return next('/owner/storeInfo');
+    }
+
+    if (to.meta.requiresStore && !authStore.isStoreUser) {
+      Swal.fire({
+        icon: 'error',
+        title: '權限不足',
+        text: '您不是商家，沒有權限訪問此頁面。',
+        confirmButtonColor: '#9f9572'
+      });
+      return next('/');
     }
   }
   next();
