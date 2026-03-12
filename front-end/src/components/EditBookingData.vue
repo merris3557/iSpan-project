@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import BaseButton from '@/components/common/BaseButton.vue';
 
 // 接收父層傳來的資料(dataList)
@@ -32,6 +32,39 @@ const cancelEdit = () => {
     editingId.value = null;
 };
 
+// 分頁邏輯
+const currentPage = ref(1);
+const itemsPerPage = 10;
+
+const totalPages = computed(() => {
+    return Math.max(1, Math.ceil(props.bookings.length / itemsPerPage));
+});
+
+const paginatedBookings = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage;
+    return props.bookings.slice(start, start + itemsPerPage);
+});
+
+const changePage = (page) => {
+    if (page >= 1 && page <= totalPages.value) {
+        currentPage.value = page;
+    }
+};
+
+watch(() => props.bookings.length, (newLen) => {
+    if (currentPage.value > totalPages.value) {
+        currentPage.value = Math.max(1, Math.ceil(newLen / itemsPerPage) || 1);
+    }
+});
+
+// 判斷是否為過往紀錄
+const isPastBooking = (dateStr, timeStr) => {
+    if (!dateStr || !timeStr) return false;
+    const now = new Date();
+    const bDateTime = new Date(`${dateStr}T${timeStr}:00`);
+    return bDateTime < now;
+};
+
 
 // 日期選擇限制
 const tomorrow = new Date();
@@ -62,7 +95,7 @@ const minDate = `${year}-${month}-${day}`;
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="item in bookings" :key="item.id">
+                <tr v-for="item in paginatedBookings" :key="item.id" :class="{ 'past-booking': isPastBooking(item.date, item.time) }">
                     <template v-if="editingId === item.id">
                         <td>{{ item.id }}</td>
 
@@ -111,18 +144,34 @@ const minDate = `${year}-${month}-${day}`;
                         <td>{{ item.time }}</td>
                         <td>{{ item.people }}</td>
                         <td>
-                            <div class="d-flex gap-2">
+                            <div class="d-flex gap-2" v-if="!isPastBooking(item.date, item.time)">
                                 <BaseButton color="gdg" size="sm" @click="startEdit(item)">修改</BaseButton>
                                 <BaseButton color="danger" size="sm" @click="$emit('delete', item)">
                                     刪除
                                 </BaseButton>
                             </div>
+                            <span v-else class="text-muted small">已結束</span>
                         </td>
                     </template>
                 </tr>
             </tbody>
             </table>
         </div>
+
+        <!-- 分頁控制 -->
+        <nav v-if="totalPages > 1" class="mt-4" aria-label="Page navigation">
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                    <a class="page-link text-gdg" href="#" @click.prevent="changePage(currentPage - 1)">上一頁</a>
+                </li>
+                <li class="page-item" v-for="p in totalPages" :key="p" :class="{ active: p === currentPage }">
+                    <a class="page-link" :class="p === currentPage ? 'bg-gdg text-white border-gdg' : 'text-gdg'" href="#" @click.prevent="changePage(p)">{{ p }}</a>
+                </li>
+                <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                    <a class="page-link text-gdg" href="#" @click.prevent="changePage(currentPage + 1)">下一頁</a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </template>
 
@@ -149,6 +198,14 @@ const minDate = `${year}-${month}-${day}`;
     white-space: nowrap;
 }
 
+/* 過往訂位樣式 */
+.past-booking {
+    background-color: #fcfcfc;
+}
+.past-booking td {
+    color: #b0b0b0;
+}
+
 /* 讓 input 在單元格內不產生額外邊距 */
 .table-input {
     border-radius: 0;
@@ -161,5 +218,22 @@ const minDate = `${year}-${month}-${day}`;
 .table-input:focus {
     box-shadow: none;
     border-color: #776f54;
+}
+
+.bg-gdg {
+    background-color: #9f9572 !important;
+}
+
+.border-gdg {
+    border-color: #9f9572 !important;
+}
+
+.text-gdg {
+    color: #9f9572 !important;
+}
+
+.page-link:focus, .page-link:hover {
+    color: #8f8562;
+    background-color: #f8f7f2;
 }
 </style>
