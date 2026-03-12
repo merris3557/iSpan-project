@@ -1,18 +1,24 @@
 <script setup>
 
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cart';
 import { useAuthStore } from '@/stores/auth';
 import Swal from 'sweetalert2';
 import { useProductsDepot } from '@/stores/productsDepot';
+import { useMapSearchStore } from '@/stores/mapSearchStore';
 
 const route = useRoute();
 const router = useRouter(); 
 const cartStore = useCartStore();
 const depot = useProductsDepot();
+const mapSearchStore = useMapSearchStore();
 const buyQuantity = ref(1);
 const authStore = useAuthStore();
+const storeId = ref(null);
+const storeName = ref('');
+const storeCoverImage = ref('');
+
 
 const products = computed(() => {
     const routedId = route.params.id;
@@ -25,6 +31,81 @@ const products = computed(() => {
     
     return found;
 });
+
+
+
+// // 頁面載入時獲取店家資訊與商品庫存
+// onMounted(async () => {
+//     fetchStoreInfo();
+//     if (depot.products.length === 0) {
+//         await depot.fetchProducts();
+//     }
+// });
+
+// // 計算屬性：篩選專屬商品
+// const storeProducts = computed(() => {
+//     const storeKw = storeName.value.trim();
+//     if (!storeKw || depot.products.length === 0) return [];
+    
+//     return depot.products.filter(p => 
+//         p.productName.includes(storeKw) || storeKw.includes(p.productName)
+//     );
+// });
+
+// // 跳轉到商品詳細頁面
+// const goToDetail = (id) => {
+//     router.push({ name: 'productsDetail', params: { id } });
+// };
+
+
+
+
+
+
+
+const fetchStoreInfo = async () => {
+    if (depot.products.length === 0) {
+        await depot.fetchProducts();
+    }
+
+    const product = depot.products.find(p => String(p.id) === String(route.params.id));
+    if (!product) return;
+
+    await mapSearchStore.searchStores('');
+
+
+    // await mapSearchStore.searchStores(keyword);
+    // console.log('搜尋結果:', mapSearchStore.results);
+
+    const matched = mapSearchStore.results.
+    find(s => 
+        product.productName.includes(s.storeName)
+    );
+    if (matched) {
+        storeId.value = matched.storeId;
+        console.log('storeId 已設定:', storeId.value);
+        storeName.value = matched.storeName;
+        storeCoverImage.value = matched.coverImage;
+    }
+    console.log('matched 完整資料:', JSON.stringify(matched));
+};
+
+
+onMounted(async () => {
+    await fetchStoreInfo();
+});
+
+
+// 跳轉到商品詳細頁面
+const goToStore = () => {
+    console.log('storeId:', storeId.value);  // 確認有值
+    if (!storeId.value) {
+        console.warn('storeId 是空的，無法跳轉');
+        return;
+    }
+    router.push({ name: 'StoreInfo', params: { id: storeId.value } });
+};
+
 
 const updateQuantity = (val) => {
     const nextQty = buyQuantity.value + val;
@@ -163,6 +244,22 @@ const handleAddToCart = async () => {
             </div>
         </div>
 
+        
+
+        <!-- 所屬店家 -->
+        <div v-if="storeName" class="mt-5">
+            <h3 class="mb-4 border-start border-4 ps-3" style="border-color:#c3ba97!important; color:#c3ba97;">所屬店家</h3>
+            <div class="store-card" @click="goToStore()">
+                <img 
+                    :src="storeCoverImage ? `/pictures/StoreProfile/${storeCoverImage}` : 'https://placehold.co/600x400?text=No+Image'" 
+                    :alt="storeName" 
+                />
+                <div class="store-card-body">
+                    <h5>{{ storeName }}</h5>
+                    <span>查看店家 →</span>
+                </div>
+            </div>
+        </div>
 
 
     </div>
@@ -372,5 +469,38 @@ button:disabled {
     .description-content {
         font-size: 1rem;
     }
+}
+
+.store-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 16px;
+    border: 1px solid #e0ddd0;
+    border-radius: 12px;
+    cursor: pointer;
+    max-width: 500px;
+    transition: box-shadow 0.2s;
+}
+
+.store-card:hover {
+    box-shadow: 0 4px 16px rgba(195,186,151,0.3);
+}
+
+.store-card img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.store-card-body h5 {
+    margin: 0 0 6px;
+    font-weight: 700;
+}
+
+.store-card-body span {
+    color: #c3ba97;
+    font-size: 0.9rem;
 }
 </style>
