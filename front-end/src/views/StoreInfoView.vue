@@ -82,6 +82,17 @@ const goToDetail = (id) => {
     router.push({ name: 'productsDetail', params: { id } });
 };
 
+// 前往訂位頁面
+const goToReservation = () => {
+    if (!authStore.isLoggedIn) {
+        // 如果沒登入，跳轉到登入頁，並帶上當前路徑以便登入後跳回來
+        router.push({ name: 'Login', query: { redirect: route.fullPath } });
+        return;
+    }
+    // 已登入，跳轉到訂位頁
+    router.push({ name: 'Reservation', params: { id: route.params.id } });
+};
+
 // 加入購物車功能 (延用 storeCard.vue 的邏輯)
 const addToCart = async (item) => {
     if (!authStore.isLoggedIn) {
