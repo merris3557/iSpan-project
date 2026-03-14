@@ -111,6 +111,7 @@ const productsList = computed(() => {
         <div class="search-bar">
             <input v-model="searchKeyword" type="text" placeholder="🔍 搜尋商品..." class="search-input" />
         </div>
+        
 
         <!-- 分類 tab -->
         <div class="category-tabs">

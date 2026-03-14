@@ -52,6 +52,8 @@ public class OrderService {
         order.setUser(user);
         order.setReceiverName(dto.getName());
         order.setReceiverPhone(dto.getPhone());
+        order.setNote(dto.getNote()); 
+
 
         String city = dto.getCity();
         String district = dto.getDistrict();

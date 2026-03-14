@@ -237,7 +237,7 @@ public class OrderNotificationService {
             
             // 頭部 - 成功風格
             .append("<tr>")
-            .append("<td align='center' style='padding: 30px 0; background-color: #4CAF50;'>")
+            .append("<td align='center' style='padding: 30px 0; background-color: ").append(primaryColor).append(";'>")
             .append("<h1 style='color: #ffffff; margin: 0; font-size: 24px;'>✓ 支付成功</h1>")
             .append("</td>")
             .append("</tr>")
@@ -253,7 +253,7 @@ public class OrderNotificationService {
             .append("</p>")
             
             // 訂單信息卡片
-            .append("<div style='background: #f0f0f0; padding: 20px; margin: 20px 0; border-left: 4px solid #4CAF50; border-radius: 4px;'>")
+            .append("<div style='background: #f0f0f0; padding: 20px; margin: 20px 0; border-left: 4px solid #856404; border-radius: 4px;'>")
             .append("<p style='margin: 10px 0; color: #333;'><strong>訂單號碼：</strong> ").append(order.getMerchantTradeNo()).append("</p>")
             .append("<p style='margin: 10px 0; color: #333;'><strong>支付日期：</strong> ").append(order.getPaymentDate()).append("</p>")
             .append("</div>")

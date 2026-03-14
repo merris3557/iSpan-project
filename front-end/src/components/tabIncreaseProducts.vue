@@ -64,8 +64,8 @@ const handleImageUpload = (event) => {
     const file = event.target.files[0]; //抓選取的檔案
     if (!file) return;
 
-    if (file.size > 2 *1024 *1024) {
-        Swal.fire('錯誤', '圖片大小不能超過2MB', 'error');
+    if (file.size > 4 *1024 *1024) {
+        Swal.fire('錯誤', '圖片大小不能超過4MB', 'error');
         return;
     }
 

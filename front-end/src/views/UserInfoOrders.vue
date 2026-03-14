@@ -79,6 +79,15 @@ const goToPay = async (orderId) => {
     }
 }
 
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
+const goToCustomerService = () =>{
+    //點擊進入客服頁面
+    router.push('/feedback');
+};
+
+
 </script>
 
 <template>
@@ -139,6 +148,14 @@ const goToPay = async (orderId) => {
                             <div class="col-sm-3 text-muted">付款時間</div>
                             <div class="col-sm-9">{{ formatDate(order.paymentDate) }}</div>
                         </div>
+
+                        <div class="row mb-2">
+                            <div class="col-sm-3 text-muted">備註</div>
+                            <div class="col-sm-9">{{ order.note || '無' }}</div>
+                        </div>
+
+
+
                         <table class="table table-sm mt-3">
                             <thead>
                                 <tr>
@@ -157,6 +174,13 @@ const goToPay = async (orderId) => {
                                 </tr>
                             </tbody>
                         </table>
+
+                        <div  style=" justify-content: flex-end;"class="mt-2">
+                            <button @click.stop="goToCustomerService" class="btn-CS">
+                                聯絡客服
+                            </button>
+                        </div>
+                        
                     </div>
                 </div>
             </div>
@@ -168,6 +192,22 @@ const goToPay = async (orderId) => {
 
 <style scoped>
 .btn-pay {
+    background-color: #efa73a ;
+    color: white;
+    border: none;
+    padding: 6px 70px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: 0.2s;
+    
+}
+
+.btn-pay:hover {
+    background-color: #e8bb79;
+}
+
+.btn-CS {
     background-color: #9f9572;
     color: white;
     border: none;
