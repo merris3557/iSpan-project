@@ -186,7 +186,7 @@ const formatDate = (dateStr) => {
                     id="statusFilter"
                     v-model="filterStatus"
                     @change="onFilterChange"
-                    class="admin-form-control"
+                    class="form-select bg-light"
                     style="width: 200px;"
                 >
                     <option value="">全部</option>
@@ -239,10 +239,10 @@ const formatDate = (dateStr) => {
                                 </td>
                                 <td>
                                     <div :title="item.contents">
-                                        {{ truncate(item.contents, 20) }}
+                                        {{ truncate(item.contents, 15) }}
                                     </div>
                                     <div v-if="item.reply" class="mt-1 small text-success">
-                                        <i class="bi bi-arrow-return-right me-1"></i>已回覆：{{ truncate(item.reply, 20) }}
+                                        <i class="bi bi-arrow-return-right me-1"></i>已回覆：{{ truncate(item.reply, 15) }}
                                     </div>
                                 </td>
                                 <td>
@@ -254,26 +254,29 @@ const formatDate = (dateStr) => {
                                     </span>
                                 </td>
                                 <td>
-                                    <button
-                                        v-if="!item.reply"
-                                        class="btn btn-sm btn-admin-primary"
-                                        @click="openReplyModal(item)"
-                                    >
-                                        <i class="bi bi-reply-fill"></i> 回覆
-                                    </button>
-                                    <button
-                                        v-else
-                                        class="btn btn-sm btn-admin-outline"
-                                        @click="openViewModal(item)"
-                                    >
-                                        <i class="bi bi-eye"></i> 檢視
-                                    </button>
-                                    <button
-                                        class="btn btn-sm btn-danger ms-1 text-white border-0"
-                                        @click="handleDelete(item)"
-                                    >
-                                        <i class="bi bi-trash"></i> 刪除
-                                    </button>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <button
+                                            v-if="!item.reply"
+                                            class="btn btn-sm btn-admin-primary"
+                                            @click="openReplyModal(item)"
+                                        >
+                                            <i class="bi bi-reply-fill"></i> 回覆
+                                        </button>
+                                        <button
+                                            v-else
+                                            class="btn btn-sm btn-admin-outline"
+                                            @click="openViewModal(item)"
+                                        >
+                                            <i class="bi bi-eye"></i> 檢視
+                                        </button>
+                                        <button
+                                            class="btn btn-danger text-white border-0"
+                                            style="padding: 0.15rem 0.4rem; font-size: 0.75rem;"
+                                            @click="handleDelete(item)"
+                                        >
+                                            <i class="bi bi-trash"></i> 刪除
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
 

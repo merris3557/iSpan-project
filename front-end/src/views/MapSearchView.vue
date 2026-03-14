@@ -1,7 +1,16 @@
 <script setup>
+import { onMounted } from 'vue';
+import { useMapSearchStore } from '@/stores/mapSearchStore';
 import MapContainer from '@/components/MapContainer.vue';
 import MapCardContainer from '@/components/MapCardContainer.vue';
 import SearchBar from '@/components/SearchBar.vue';
+
+const mapSearchStore = useMapSearchStore();
+
+onMounted(() => {
+    // 預設載入全部店家(findAll)
+    mapSearchStore.searchStores();
+});
 </script>
 
 <template>
