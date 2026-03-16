@@ -22,7 +22,6 @@ onMounted(() => {
     depot.fetchProducts();
 })
 
-// const cartStore = useCartStore()
 
 
 </script>

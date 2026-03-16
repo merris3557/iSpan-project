@@ -29,6 +29,7 @@ public class OrderService {
     @Autowired private CartDetailsRepository cartDetailsRepository;
     @Autowired private StockRepository stockRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private OrderNotificationService orderNotificationService;
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -51,6 +52,8 @@ public class OrderService {
         order.setUser(user);
         order.setReceiverName(dto.getName());
         order.setReceiverPhone(dto.getPhone());
+        order.setNote(dto.getNote()); 
+
 
         String city = dto.getCity();
         String district = dto.getDistrict();
@@ -59,6 +62,7 @@ public class OrderService {
 
 
         order.setPayMethod(dto.getPaymentMethod());
+        order.setDeliveryMethod(dto.getDeliveryMethod());
         order.setStatus(dto.getPaymentMethod().equals("ECpay") ? "待付款" : "待出貨");
 
         order.setMerchantTradeNo("ORD" + System.currentTimeMillis());
@@ -69,9 +73,12 @@ public class OrderService {
                 .multiply(new BigDecimal(item.getQuantity())))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal shipping = new BigDecimal(dto.getShippingFee() != null ? dto.getShippingFee() : 0);
-            totalPrice = totalPrice.add(shipping);
-            order.setTotalPrice(totalPrice);
+        BigDecimal shipping = BigDecimal.ZERO;
+        if (dto.getShippingFee() != null) {
+            shipping = new BigDecimal(dto.getShippingFee());
+        }
+        totalPrice = totalPrice.add(shipping);
+        order.setTotalPrice(totalPrice);
 
         Orders savedOrder = ordersRepository.save(order);
 
@@ -103,6 +110,9 @@ public class OrderService {
 
         // 5. 清空購物車
         cartDetailsRepository.deleteByUser_Id(user.getId());
+
+        // 6. 發送訂單通知郵件
+        orderNotificationService.sendOrderNotification(savedOrder);
 
         return savedOrder;
     }

@@ -10,6 +10,7 @@ const props = defineProps({
             storeName: '店家名稱N/A',
             coverImage: null,
             openHoursSummary: '營業時間N/A',
+            address: '無地址資訊',
             description: '暫無簡介'
         })
     }
@@ -45,6 +46,11 @@ const getImageUrl = (imgName) => {
                     <p class="card-text mb-1">
                         <small class="text-body-secondary">
                             <i class="bi bi-clock me-1"></i>{{ props.store.openHoursSummary || '營業時間未提供' }}
+                        </small>
+                    </p>
+                    <p class="card-text mb-1">
+                        <small class="text-body-secondary">
+                            <i class="bi bi-geo-alt me-1"></i>{{ props.store.address || '地址未提供' }}
                         </small>
                     </p>
                     <p class="card-text description-text">{{ props.store.description }}</p>

@@ -5,7 +5,6 @@ import tabStock from '@/components/tabStock.vue'
 import tabIncreaseProducts from '@/components/tabIncreaseProducts.vue'
 import tabUpdateProducts from '@/components/tabUpdateProducts.vue'
 
-// 1. 定義頁籤資料
 const tabs = [
     { label: '庫存列表', component: 'tabStock' },
     { label: '新增商品', component: 'tabIncreaseProducts' },
@@ -13,10 +12,9 @@ const tabs = [
     
 ]
 
-// 2. 當前選中的組件名稱
 const currentTab = ref('tabStock')
 
-// 3. 映射組件物件 (如果是 Vite 環境，建議直接存組件物件)
+// 3. 映射組件物件 
 const components = {
     tabStock,
     tabIncreaseProducts,

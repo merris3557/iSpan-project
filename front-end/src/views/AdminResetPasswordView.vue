@@ -57,9 +57,7 @@ const handleResetPassword = async () => {
     };
 
     try {
-        console.log('Admin reset password request with:', data);
         const response = await api.post('/admins/reset-password', data);
-        console.log('Admin reset password success:', response);
         await Swal.fire({
             icon: 'success',
             title: '成功',

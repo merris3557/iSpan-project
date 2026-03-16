@@ -54,9 +54,7 @@ const handleResetPassword = async () => {
     };
 
     try {
-        console.log('Reset password request with:', data);
         const response = await authAPI.resetPassword(data);
-        console.log('Reset password success:', response);
         await Swal.fire({
             icon: 'success',
             title: '成功',

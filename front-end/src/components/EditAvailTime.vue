@@ -47,6 +47,19 @@ const syncAllDays = () => {
         }
     });
 };
+
+const openPickerFromInput = (e) => {
+    if (!e.target.disabled && typeof e.target.showPicker === 'function') {
+        try { e.target.showPicker(); } catch (err) {}
+    }
+};
+
+const openPickerTarget = (e) => {
+    const input = e.currentTarget.previousElementSibling;
+    if (input && !input.disabled && typeof input.showPicker === 'function') {
+        try { input.showPicker(); } catch (err) {}
+    }
+};
 </script>
 
 <template>
@@ -77,12 +90,20 @@ const syncAllDays = () => {
                             </div>
                         </td>
                         <td>
-                            <input type="time" v-model="item.open" :disabled="!item.active"
-                                class="form-control form-control-sm border-gdg">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-gdg text-gdg"><i class="bi bi-clock"></i></span>
+                                <input type="time" v-model="item.open" :disabled="!item.active"
+                                    class="form-control border-gdg custom-picker" @click="openPickerFromInput">
+                                <span class="input-group-text bg-light border-gdg text-secondary" style="cursor: pointer; font-size: 0.85rem;" @click="openPickerTarget" :class="{'disabled-span': !item.active}">編輯</span>
+                            </div>
                         </td>
                         <td>
-                            <input type="time" v-model="item.close" :disabled="!item.active"
-                                class="form-control form-control-sm border-gdg">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-gdg text-gdg"><i class="bi bi-clock"></i></span>
+                                <input type="time" v-model="item.close" :disabled="!item.active"
+                                    class="form-control border-gdg custom-picker" @click="openPickerFromInput">
+                                <span class="input-group-text bg-light border-gdg text-secondary" style="cursor: pointer; font-size: 0.85rem;" @click="openPickerTarget" :class="{'disabled-span': !item.active}">編輯</span>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -94,6 +115,16 @@ const syncAllDays = () => {
 <style scoped>
 .border-gdg {
     border-color: #9f9572;
+}
+
+.custom-picker::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+}
+
+.disabled-span {
+    opacity: 0.5;
+    cursor: not-allowed !important;
 }
 
 .text-gdg {

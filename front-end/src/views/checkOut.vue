@@ -1,12 +1,13 @@
 <script setup>
 import { useCartStore } from '@/stores/cart'
 import { useRouter } from 'vue-router'
-import { ref, computed, onMounted  } from 'vue'
+import { ref, computed, onMounted , onUnmounted, watch } from 'vue'
 import Swal from 'sweetalert2'
 import { useOrderDepot } from '@/stores/orderDepot.js'
 import TwCitySelector from 'tw-city-selector'
 import api from '@/api/config'
 import { shopLog } from '@/utils/shopLogger'
+
 
 const cartStore = useCartStore()
 const router = useRouter()
@@ -29,8 +30,147 @@ const orderForm = ref({
     note: ''
 })
 
+
+
+// 超商選擇器
+const selectedStore = ref(null);
+
+const openStoreMap = async (storeType) => {
+    try {
+        const data = await api.get(`/ecpay/map-form?storeType=${storeType}`);
+        
+        if (!data || !data.actionUrl) {
+            console.error('Invalid response data:', data);
+            Swal.fire('錯誤', '無法取得超商地圖資訊，請稍後重試', 'error');
+            return;
+        }
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = data.actionUrl;
+        form.target = 'ecpayMap';
+
+        const fields = {
+            MerchantID: data.merchantId,
+            LogisticsType: data.logisticsType,
+            LogisticsSubType: data.logisticsSubType,
+            IsCollection: data.isCollection,
+            ServerReplyURL: data.serverReplyURL,
+            CheckMacValue: data.checkMacValue,
+        };
+
+        Object.entries(fields).forEach(([key, value]) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = value;
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        
+        // 先打開窗口
+        const ecpayWindow = window.open('', 'ecpayMap', 'width=1024,height=768');
+        
+        if (!ecpayWindow) {
+            Swal.fire('錯誤', '無法打開超商地圖窗口，請檢查彈出窗口設定', 'error');
+            document.body.removeChild(form);
+            return;
+        }
+        
+        console.log('超商地圖窗口已打開，即將提交表單', {storeType});
+        
+        // 再提交表單（確保窗口已存在）
+        form.submit();
+        document.body.removeChild(form);
+    } catch (error) {
+        console.error('Error opening store map:', error);
+        Swal.fire('錯誤', '打開超商地圖失敗，請稍後重試', 'error');
+    }
+};
+
+const handleMessage = (event) => {
+    console.log('收到消息事件:', event.data, '來源:', event.origin);
+    
+    // 確認消息來自 ngrok URL 或本地後端
+    if (!event.origin.includes('ngrok') && 
+        !event.origin.includes('localhost') && 
+        !event.origin.includes('8080')) {
+        console.warn('來源不信任，忽略消息:', event.origin);
+        return;
+    }
+    
+    if (event.data?.storeName) {
+        console.log('門市數據有效，設置選擇:', event.data);
+        selectedStore.value = {
+            name: event.data.storeName,
+            address: event.data.storeAddress,
+            id: event.data.storeId,
+            phone: event.data.storeTelephone,
+        };
+        console.log('已設置 selectedStore:', selectedStore.value);
+    } else {
+        console.warn('門市數據無效或不完整:', event.data);
+    }
+};
+
+// 選到超商取貨時先讓使用者選超商種類
+watch(() => orderForm.value.deliveryMethod, (val) => {
+    if (val === 'store') {
+        console.log('切換至超商取貨');
+        // 清除之前的選擇
+        selectedStore.value = null;
+        
+        Swal.fire({
+            title: '請選擇超商',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: '全家',
+            denyButtonText: '7-11',
+            cancelButtonText: '萊爾富',
+            confirmButtonColor: '#007bff',
+            denyButtonColor: '#ff6600',
+            cancelButtonColor: '#00b300',
+        }).then((result) => {
+            console.log('對話框結果:', result);
+            if (result.isConfirmed) {
+                console.log('用戶選擇全家');
+                openStoreMap('FAMIC2C');
+            } else if (result.isDenied) {
+                console.log('用戶選擇 7-11');
+                openStoreMap('UNIMARTC2C');
+            } else if (result.isDismissed && result.dismiss === Swal.DismissReason.cancel) {
+                console.log('用戶選擇萊爾富');
+                openStoreMap('HILIFEC2C');
+            } else {
+                console.log('用戶關閉對話框');
+                // 如果用戶關閉對話框，恢復之前的配送方式
+                orderForm.value.deliveryMethod = 'home';
+            }
+        });
+    } else {
+        console.log('切換為非超商取貨，清除超商信息');
+        selectedStore.value = null;
+    }
+});
+
+
+
+
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+
+
 onMounted( async () => {
     await cartStore.fetchCart();
+
+    if(authStore.user) {
+        orderForm.value.name = authStore.user.name || '';
+        orderForm.value.email = authStore.user.email || '';
+    }
+
+    // 監聽來自超商地圖窗口的消息
+    window.addEventListener('message', handleMessage);
 
     new TwCitySelector({
         el: '#twzipcode',
@@ -59,7 +199,10 @@ onMounted( async () => {
     }, 300)
 })
 
-
+// 清理事件監聽器
+onUnmounted(() => {
+    window.removeEventListener('message', handleMessage);
+})
 
 const shippingFee = computed(() => {
     if (!cartStore.items || cartStore.items.length === 0) return 0;
@@ -76,7 +219,7 @@ const isValidEmail = (email) => {
 
 const handleCheckout = async () => {
     shopLog('表單內容：', orderForm.value) 
-    // 簡單表單驗證
+
     
 
     if (!orderForm.value.name || !orderForm.value.phone ||  !orderForm.value.street) {
@@ -100,7 +243,7 @@ const handleCheckout = async () => {
         return
     }
 
-    //建立訂單狀態為待付款、已付款、出貨中、已完成
+    //建立訂單狀態
     const getOrderStatus = () =>{
         if(orderForm.value.paymentMethod === 'ECpay') {
             return '待付款'
@@ -114,7 +257,7 @@ const handleCheckout = async () => {
     const currentStatus= getOrderStatus();
 
 
-    // 這裡模擬送出訂單
+    
     const result = await Swal.fire({
         title: '確認送出訂單？',
         text: `總金額為 NT$ ${cartStore.totalPrice + shippingFee.value}`,
@@ -157,7 +300,6 @@ const handleCheckout = async () => {
 
             // 判斷付款方式
             if (orderForm.value.paymentMethod === 'ECpay') {
-                // 信用卡 → 詢問是否前往綠界付款
                 const payResult = await Swal.fire({
                     icon: 'success',
                     title: '訂單建立成功！',
@@ -282,10 +424,16 @@ const handleCheckout = async () => {
                                     <input type="radio" v-model="orderForm.deliveryMethod" value="home">
                                     <span class="radio-label" >宅配 <span style="color: gray;">(金額未滿2000元運費 NT$ 100)</span></span>
                                 </label>
-                                <label class="payment-radio">
-                                    <input type="radio" v-model="orderForm.deliveryMethod" value="store">
-                                    <span class="radio-label" >超商取貨 <span style="color: gray;">(金額未滿2000元運費 NT$ 60)</span></span>
-                                </label>
+                            <label class="payment-radio">
+                                <input type="radio" v-model="orderForm.deliveryMethod" value="store">
+                                <span class="radio-label">
+                                    超商取貨
+                                    <span style="color: gray;">(金額未滿2000元運費 NT$ 60)</span>
+                                    <span v-if="selectedStore" style="color: #198754; font-weight: bold; margin-left: 8px;">
+                                        ✓ {{ selectedStore.name }}
+                                    </span>
+                                </span>
+                            </label>
                             </div>
                         </div>
                     
@@ -369,12 +517,11 @@ const handleCheckout = async () => {
 
 <style scoped>
 .checkout-container {
-    max-width: 1000px; /* 因為是直排，寬度縮小一點比較好看 */
+    max-width: 1000px; 
     margin: 40px auto;
     padding: 0 20px;
 }
 
-/* 關鍵修改：改為垂直排列 */
 .checkout-layout {
     display: flex;
     flex-direction: column; 
@@ -383,7 +530,7 @@ const handleCheckout = async () => {
 }
 
 .form-section, .summary-section {
-    width: 100%; /* 寬度佔滿 */
+    width: 100%; 
 }
 
 /* 卡片樣式 */

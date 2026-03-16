@@ -26,7 +26,7 @@ public class CartService {
     @Autowired
     private ProductsRepository productsRepository;
     @Autowired
-    private UserRepository userRepository; // 假設你有這個
+    private UserRepository userRepository; 
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -39,22 +39,22 @@ public class CartService {
         User user = getCurrentUser();
         Long userId = user.getId();
 
-        // 1. 找商品與使用者
+        // 找商品與使用者
         Products product = productsRepository.findById(productId)
             .orElseThrow(() -> new RuntimeException("商品不存在"));
         
-        // 2. 檢查購物車是否已有此商品
+        // 檢查購物車是否已有此商品
         Optional<CartDetails> existingItem = cartDetailsRepository.findByUser_IdAndProduct_ProductId(userId, productId);
 
         if (existingItem.isPresent()) {
-            // 3. 已存在則累加數量
+            // 已存在就累加數量
             CartDetails item = existingItem.get();
             item.setQuantity(item.getQuantity() + quantity);
             // 更新小計 (數量 * 單價)
             item.setItemAmount(product.getPrice().multiply(new BigDecimal(item.getQuantity())));
             cartDetailsRepository.save(item);
         } else {
-            // 4. 不存在則新增
+            // 不存在就新增
             CartDetails newItem = new CartDetails();
             newItem.setUser(user);
             newItem.setProduct(product);
@@ -77,7 +77,7 @@ public class CartService {
             dto.setId(item.getId());
             dto.setQuantity(item.getQuantity());
             dto.setItemAmount(item.getItemAmount());
-            //前端不需要知道資料庫的所有欄位（例如：密碼、建立時間），我們只把前端需要看到的（商品名、價格、數量）填進 DTO
+            //把前端需要看到的（商品名、價格、數量）填進 DTO
 
             //從關聯product拿資料寫入DTO
             dto.setProductId(item.getProduct().getProductId());
@@ -92,11 +92,33 @@ public class CartService {
 
     @Transactional
     public void deleteCartItem(Integer cartDetailsId){
-        if (!cartDetailsRepository.existsById(cartDetailsId)){
-            throw new RuntimeException("找不到該購物車項目，無法刪除");
+        try {
+            if (!cartDetailsRepository.existsById(cartDetailsId)){
+                throw new RuntimeException("找不到該購物車項目，無法刪除");
+            }
+            cartDetailsRepository.deleteById(cartDetailsId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
-        cartDetailsRepository.deleteById(cartDetailsId);
     }
+
+
+    public void checkCartStock() {
+    User user = getCurrentUser();
+    List<CartDetails> items = cartDetailsRepository.findByUser_Id(user.getId());
+
+        for (CartDetails item : items) {
+            int stock = item.getProduct().getStock().getAvailableQuantity();
+            if (item.getQuantity() > stock) {
+                throw new RuntimeException(
+                    "庫存不足：" + item.getProduct().getProductName() 
+                    + "：" + stock
+                );
+            }
+        }
+    }
+
 
 
     @Transactional

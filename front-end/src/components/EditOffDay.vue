@@ -36,6 +36,19 @@ const handleTypeChange = (item) => {
         item.dayOfWeek = null;
     }
 };
+
+const openPickerFromInput = (e) => {
+    if (!e.target.disabled && typeof e.target.showPicker === 'function') {
+        try { e.target.showPicker(); } catch (err) {}
+    }
+};
+
+const openPickerTarget = (e) => {
+    const input = e.currentTarget.previousElementSibling;
+    if (input && !input.disabled && typeof input.showPicker === 'function') {
+        try { input.showPicker(); } catch (err) {}
+    }
+};
 </script>
 
 <template>
@@ -65,7 +78,11 @@ const handleTypeChange = (item) => {
 
                     <div class="col-md-3" v-if="item.type === 'date'">
                         <label class="form-label small text-muted mb-1">日期</label>
-                        <input type="date" v-model="item.offDate" class="form-control border-secondary form-control-sm" />
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white border-secondary text-secondary"><i class="bi bi-calendar3"></i></span>
+                            <input type="date" v-model="item.offDate" class="form-control border-secondary custom-picker" @click="openPickerFromInput" />
+                            <span class="input-group-text bg-light border-secondary text-secondary" style="cursor: pointer; font-size: 0.85rem;" @click="openPickerTarget">編輯</span>
+                        </div>
                     </div>
 
                     <div class="col-md-3" v-if="item.type === 'day'">
@@ -82,12 +99,20 @@ const handleTypeChange = (item) => {
 
                     <div class="col-md-2">
                         <label class="form-label small text-muted mb-1">開始時間</label>
-                        <input type="time" v-model="item.startTime" class="form-control border-secondary form-control-sm" />
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white border-secondary text-secondary"><i class="bi bi-clock"></i></span>
+                            <input type="time" v-model="item.startTime" class="form-control border-secondary custom-picker" @click="openPickerFromInput" />
+                            <span class="input-group-text bg-light border-secondary text-secondary" style="cursor: pointer; font-size: 0.85rem;" @click="openPickerTarget">編輯</span>
+                        </div>
                     </div>
                     
                     <div class="col-md-2">
                         <label class="form-label small text-muted mb-1">結束時間</label>
-                        <input type="time" v-model="item.endTime" class="form-control border-secondary form-control-sm" />
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white border-secondary text-secondary"><i class="bi bi-clock"></i></span>
+                            <input type="time" v-model="item.endTime" class="form-control border-secondary custom-picker" @click="openPickerFromInput" />
+                            <span class="input-group-text bg-light border-secondary text-secondary" style="cursor: pointer; font-size: 0.85rem;" @click="openPickerTarget">編輯</span>
+                        </div>
                     </div>
 
                     <div class="col-md-3 mt-3 mt-md-0 d-flex align-items-end">
@@ -110,6 +135,12 @@ const handleTypeChange = (item) => {
 .border-gdg {
     border-color: #9f9572;
 }
+
+.custom-picker::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+}
+
 .text-gdg {
     color: #9f9572;
 }

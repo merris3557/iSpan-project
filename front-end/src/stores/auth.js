@@ -13,6 +13,7 @@ export const useAuthStore = defineStore('auth', {
         // 判斷是否登入：依據記憶體中是否有 user 物件
         isLoggedIn: (state) => !!state.user,
         userName: (state) => state.user ? state.user.name : '',
+        isStoreUser: (state) => state.user ? state.user.isStore === true : false,
     },
 
     actions: {
@@ -81,7 +82,7 @@ export const useAuthStore = defineStore('auth', {
                     const responseData = response?.data || response;
                     const latestUserData = responseData?.data || responseData;
 
-                    console.log('[syncUserProfile] 更新 user 資料，有 name:', latestUserData?.name, '| email:', latestUserData?.email);
+                    console.log('[syncUserProfile] 更新 user 資料，有 name:', latestUserData?.name);
                     this.updateUser(latestUserData);
                 } catch (error) {
                     console.error('[syncUserProfile] API 請求發生錯誤:', error?.response?.status ?? error.message);

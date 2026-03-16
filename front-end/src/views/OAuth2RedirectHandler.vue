@@ -64,11 +64,20 @@ onMounted(async () => {
       });
 
       if (code) {
-        const verifyRes = await authAPI.oauth2Verify2FA({ preAuthToken, code });
-        const { user } = verifyRes.data;
+        await authAPI.oauth2Verify2FA({ preAuthToken, code });
+        
+        // HttpOnly Cookies 已經由後端種下，可直接取得使用者詳細資料
+        const response = await userAPI.getProfile();
+        const user = response.data;
 
         // 登入成功，設定 Pinia store 與本機常規標記
         authStore.login(user);
+
+        //為了登入後立即更新並顯示購物車icon的數字
+        const cartStore = useCartStore();
+        console.log('準備 fetchCart');
+        await cartStore.fetchCart();
+        console.log('fetchCart 完成', cartStore.items);
 
         await Swal.fire({
           icon: 'success',

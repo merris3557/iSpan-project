@@ -63,8 +63,8 @@ import bannerImage from '@/pictures/bannerBrown.jpg';
                             精心繪製的味覺地圖，帶您穿梭巷弄尋覓寶島秘境，發現更多台灣在地美食
                         </p>
                         <div class="service-tags-gdg">
-                            <span class="service-tag-gdg">地圖搜尋</span>
-                            <span class="service-tag-gdg">美食探索</span>
+                            <RouterLink to="/mapSearch" class="service-tag-gdg">地圖搜尋</RouterLink>
+                            <RouterLink to="/mapSearch" class="service-tag-gdg">美食搜尋</RouterLink>
                         </div>
                     </div>
 
@@ -85,7 +85,7 @@ import bannerImage from '@/pictures/bannerBrown.jpg';
                         </p>
                         <div class="service-tags-gdg">
                             <span class="service-tag-gdg">線上訂位</span>
-                            <span class="service-tag-gdg">即時確認</span>
+                            <RouterLink to="/userInfo/bookings" class="service-tag-gdg">即時確認</RouterLink>
                         </div>
                     </div>
 
@@ -103,8 +103,8 @@ import bannerImage from '@/pictures/bannerBrown.jpg';
                             將感動轉化為指尖上的美好，在地嚴選的滋味突破地理限制，隨時傳遞至您的餐桌
                         </p>
                         <div class="service-tags-gdg">
-                            <span class="service-tag-gdg">在地嚴選</span>
-                            <span class="service-tag-gdg">產地直送</span>
+                            <RouterLink to="/shopStore" class="service-tag-gdg">在地嚴選</RouterLink>
+                            <RouterLink to="/shopStore" class="service-tag-gdg">產地直送</RouterLink>
                         </div>
                     </div>
                 </div>
@@ -398,6 +398,7 @@ import bannerImage from '@/pictures/bannerBrown.jpg';
     font-weight: 500;
     letter-spacing: 0.05em;
     border: 1px solid $gdg-gold;
+    text-decoration: none;
     transition: all 0.3s ease;
 
     .service-card-gdg:hover & {

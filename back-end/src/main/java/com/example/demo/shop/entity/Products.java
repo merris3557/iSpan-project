@@ -45,7 +45,7 @@ public class Products{
     @Column(name= "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    @Column(name = "product_description", nullable = true, length = 500)
+    @Column(name = "product_description", nullable = true, columnDefinition = "NVARCHAR(MAX)")
     private String productDescription;
 
 
@@ -67,7 +67,7 @@ public class Products{
     
 
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonManagedReference //加入這個代表"這是父端"
+    @JsonManagedReference //父端
     private Stock stock;
 
 }

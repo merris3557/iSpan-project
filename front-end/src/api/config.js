@@ -143,7 +143,15 @@ const createMethodWrapper = (methodName) => {
             }
             error.config._retry = true; // 註記上去，避免其他外殼再攔
 
-            const isAdminContext = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+            // isAdminContext 應該依據這次請求本身的 Context Hint 來決定，而不是粗暴地看當前網址
+            // 避免前台 API 在後台頁面出現 401 時，錯跑後台的登出流程
+            let isAdminContext = false;
+            const contextHint = error.config?.headers?.['X-Context-Hint'];
+            if (contextHint) {
+                isAdminContext = contextHint === 'ADMIN';
+            } else {
+                isAdminContext = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+            }
 
             try {
                 // 啟動或共用 Refresh 動作

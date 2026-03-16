@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import EditBookingData from '@/components/EditBookingData.vue';
 import Swal from 'sweetalert2';
 import bookingAPI from '@/api/booking';
@@ -8,6 +8,20 @@ import storeAPI from '@/api/store';
 const bookingList = ref([]);
 const isLoading = ref(false);
 const storeId = ref(null);
+const showPastBookings = ref(false);
+
+const filteredBookings = computed(() => {
+    const now = new Date();
+
+    if (showPastBookings.value) {
+        return bookingList.value;
+    } else {
+        return bookingList.value.filter(b => {
+            const bDateTime = new Date(`${b.date}T${b.time}:00`);
+            return bDateTime >= now;
+        });
+    }
+});
 
 // 格式化後端資料以符合 EditBookingData 組件需求 (role="shop")
 const formatBookingForUI = (b) => {
@@ -125,8 +139,14 @@ onMounted(fetchBookings);
 
 <template>
     <div class="container py-4">
-        <h1 class="text-gdg mb-4">訂位管理系統</h1>
-        <EditBookingData :bookings="bookingList" role="shop" @delete="handleDelete" @update="handleUpdate" />
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-gdg mb-0">訂位管理系統</h1>
+            <div class="form-check form-switch fs-5 text-gdg">
+                <input class="form-check-input" type="checkbox" id="showPastSwitch" v-model="showPastBookings" style="cursor: pointer;">
+                <label class="form-check-label fw-bold" for="showPastSwitch" style="cursor: pointer;">包含過往訂位</label>
+            </div>
+        </div>
+        <EditBookingData :bookings="filteredBookings" role="shop" @delete="handleDelete" @update="handleUpdate" />
         <!-- 傳給子層時變成bookings與delete -->
     </div>
 </template>

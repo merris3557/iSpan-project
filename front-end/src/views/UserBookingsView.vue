@@ -53,7 +53,17 @@ const fetchBookings = async () => {
 
         // 如果 response 本身就是陣列，直接使用；如果是 ApiResponse 物件，取 .data
         const rawList = Array.isArray(response) ? response : (response.data || []);
-        bookings.value = rawList.map(formatBookingForUI);
+        
+        // 過濾掉過期的訂位 (包含當日時間已過)
+        const now = new Date();
+
+        bookings.value = rawList
+            .map(formatBookingForUI)
+            .filter(b => {
+                // b.date 格式為 YYYY-MM-DD, b.time 格式為 HH:mm
+                const bDateTime = new Date(`${b.date}T${b.time}:00`);
+                return bDateTime >= now;
+            });
     } catch (error) {
         console.error('獲取訂位列表失敗:', error);
         Swal.fire('錯誤', '無法載入訂位紀錄，請確認後端服務是否正常', 'error');

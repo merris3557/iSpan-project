@@ -20,7 +20,7 @@ const emit = defineEmits(['close']);
 
 // 響應式狀態
 const selectedProduct = ref(null);
-const editMode = ref('set'); // 'add', 'reduce', 'set'
+const editMode = ref('set'); 
 const editValue = ref(0);
 
 

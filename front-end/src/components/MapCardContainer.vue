@@ -30,7 +30,6 @@ const stores = computed(() => mapSearchStore.results);
 
             <!-- 搜尋結果 -->
             <template v-else>
-                <h5 class="mb-3 ps-1 fw-bold text-secondary">搜尋結果 ({{ stores.length }})</h5>
                 <MapStoreCard v-for="store in stores" :key="store.storeId" :store="store" />
             </template>
         </div>

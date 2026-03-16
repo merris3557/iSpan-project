@@ -51,9 +51,7 @@ const handleRegister = async () => {
   };
 
   try {
-    console.log('Register attempt with:', registerData);
     const response = await authAPI.register(registerData);
-    console.log('Register success:', response);
     
     await Swal.fire({
       icon: 'success',

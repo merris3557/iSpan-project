@@ -74,7 +74,7 @@ public class OrderController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateOrder(@PathVariable Integer id, @RequestBody Orders orderData) {
+    public ResponseEntity<?> updateOrder(@PathVariable("id") Integer id, @RequestBody Orders orderData) {
     try {
         Orders order = ordersRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("找不到訂單"));
@@ -90,7 +90,7 @@ public class OrderController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteOrder(@PathVariable Integer id) {
+    public ResponseEntity<?> deleteOrder(@PathVariable("id") Integer id) {
         try {
             System.out.println("刪除訂單：" + id);
             orderDetailsRepository.deleteByOrderId(id);

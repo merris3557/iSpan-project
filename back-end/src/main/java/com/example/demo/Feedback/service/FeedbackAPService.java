@@ -126,4 +126,11 @@ public class FeedbackAPService {
                 feedback.getUser() != null);
     }
 
+    public void deleteFeedback(Long id) {
+        if (!feedbackRepo.existsById(id)) {
+            throw new RuntimeException("Feedback not found with ID: " + id);
+        }
+        feedbackRepo.deleteById(id);
+    }
+
 }

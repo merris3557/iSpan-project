@@ -24,6 +24,11 @@ export const cartAPI = {
         return api.delete(`/cart/${cartDetailsId}`);
     },
 
+
+    checkStock() {
+        return api.get('/cart/check-stock')
+    },
+
     sync() {
         return api.post('/cart/sync');
     },

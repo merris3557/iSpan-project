@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.shop.entity.Orders;
 import com.example.demo.shop.repository.OrdersRepository;
 import com.example.demo.shop.service.EcpayService;
+import com.example.demo.shop.service.OrderNotificationService;
 
 @RestController
 @RequestMapping("/api/ecpay")
@@ -27,18 +28,25 @@ public class EcpayController {
     @Autowired
     private OrdersRepository ordersRepository;
 
+    @Autowired
+    private OrderNotificationService orderNotificationService;
+
     // 產生付款表單
     @GetMapping("/pay/{orderId}")
-    public ResponseEntity<String> pay(@PathVariable Integer orderId) {
+    public ResponseEntity<String> pay(@PathVariable("orderId") Integer orderId) {
         Orders order = ordersRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("找不到訂單"));
 
         String itemName = "Order" + orderId;
         int totalAmount = order.getTotalPrice().intValue();
 
-        String merchantTradeNo = "ORD" + System.currentTimeMillis();
-        order.setMerchantTradeNo(merchantTradeNo);
-        ordersRepository.save(order);
+        // 使用現有的 merchantTradeNo，如果不存在才生成新的
+        String merchantTradeNo = order.getMerchantTradeNo();
+        if (merchantTradeNo == null || merchantTradeNo.isEmpty()) {
+            merchantTradeNo = "ORD" + System.currentTimeMillis();
+            order.setMerchantTradeNo(merchantTradeNo);
+            ordersRepository.save(order);
+        }
 
         String form = ecpayService.generatePaymentForm(orderId, totalAmount, itemName, merchantTradeNo);
 
@@ -62,6 +70,9 @@ public class EcpayController {
                 order.setPaymentDate(java.time.Instant.now());
                 ordersRepository.save(order);
                 System.out.println("付款成功，訂單：" + merchantTradeNo + "，狀態更新為：" + newStatus);
+                
+                // 發送支付成功郵件
+                orderNotificationService.sendPaymentSuccessNotification(order);
             });
         }
 

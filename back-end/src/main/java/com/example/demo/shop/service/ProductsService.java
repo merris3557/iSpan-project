@@ -26,7 +26,7 @@ public class ProductsService {
 
 
     @Transactional //確認商品跟庫存同時成功或同時失敗
-    public void addProductWithStock(ProductsDTO dto){  //ProductsDTO 來接資料，而不直接用 Products Entity。可以避免前端惡意傳送一些不該被修改的欄位（例如：建立時間 createdAt）。
+    public void addProductWithStock(ProductsDTO dto){  
         Products product = new Products();
         product.setProductName(dto.getProductName());
         product.setPrice(dto.getPrice());
@@ -42,7 +42,8 @@ public class ProductsService {
 
         Stock stock = new Stock();
         stock.setAvailableQuantity(dto.getStock());
-        stock.setProduct(saveProduct); //因為在stock使用mapsID關聯productsID，所以這邊jpa會自動把saveproducts ID自動填入stock的productID
+        stock.setProduct(saveProduct); 
+        //因為在stock使用mapsID關聯productsID，所以這邊jpa自動把saveproducts ID自動填入stock的productID
 
         stock.setUpdateAt(java.time.LocalDateTime.now());
 

@@ -2,7 +2,6 @@
 <script setup>
 
 import { ref, computed, onMounted} from 'vue';
-// import productsData from '@/data/productsData.json'
 import {useProductsDepot} from '@/stores/productsDepot';
 
 
@@ -10,9 +9,7 @@ import TabStockCRUD from '@/components/tabStockCRUD.vue';
 
 
 
-// const products = ref(productsData);
 
-//定義展開狀態
 const expandedId = ref(null);
 const depot = useProductsDepot();
 const products = computed(() => depot.products);
@@ -22,7 +19,6 @@ onMounted(() => {
 })
 
 
-//定義切換函式
 const toggleEdit = (id) =>{
     if (expandedId.value === id) {
         expandedId.value = null;    // 點擊同一行則收起
@@ -263,8 +259,8 @@ const displayTime = (item) => {
 
 /* 下拉展開樣式 */
 .edit-row {
-    background-color: #f8fafc; /* 給予淡淡的背景色區隔 */
-    animation: fadeIn 0.3s ease; /* 增加一個簡單的淡入效果 */
+    background-color: #f8fafc; 
+    animation: fadeIn 0.3s ease; 
 }
 
 .edit-container {
@@ -272,7 +268,7 @@ const displayTime = (item) => {
     border: 1px inset #e5e7eb;
 }
 
-/* 當該行正在編輯時，改變底色視覺回饋 */
+
 tr.is-editing {
     background-color: #eff6ff !important;
 }
@@ -282,7 +278,7 @@ tr.is-editing {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* 修正按鈕樣式，確保 button 不會有預設邊框 */
+
 .btn-action {
     border: none;
     outline: none;

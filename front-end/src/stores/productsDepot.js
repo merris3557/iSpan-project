@@ -11,18 +11,18 @@ export const useProductsDepot = defineStore('productDepot', {
         async fetchProducts() {
             const getCategory = (name) => {
                 if (!name) return '其他'
-                if (['鮮蔬', '鮮果', '蔬菜', '水果', '柿', '果禮盒'].some(k => name.includes(k))) return '生鮮'
-                if (['果糖', '辛香料', '香料'].some(k => name.includes(k))) return '食品'
+                if (['鮮蔬', '鮮果', '蔬菜', '水果', '柿', '果禮盒', '冷凍'].some(k => name.includes(k))) return '生鮮'
+                if (['果糖', '辛香料', '香料', '泡菜', '莓果塔', '名餚', '排骨', '獅子頭'].some(k => name.includes(k))) return '食品'
                 if (['餐具', '護理', '運動瓶', '髮蠟', '紙袋'].some(k => name.includes(k))) return '日常用品'
                 return '其他'
             }
 
             try {
-                const response = await apiWrapper.get('/products/all')  // ← 這行不見了
+                const response = await apiWrapper.get('/products/all')
 
                 // apiWrapper 已經把 response.data 取出來了，所以 response 本身就是陣列
                 const data = Array.isArray(response) ? response : (response.data || [])
-                
+
                 this.products = data.map(p => ({
                     id: p.productId,
                     productName: p.productName,

@@ -78,12 +78,26 @@ const fetchStoreConfig = async () => {
 };
 const fetchSlots = async () => {
     if (!bookingForm.value.bookingDate || !bookingForm.value.reservedSeatType) return;
-    const res = await bookingAPI.getAvailableSlots({
-        storeId,
-        date: bookingForm.value.bookingDate,
-        seatType: bookingForm.value.reservedSeatType
-    });
-    availableTimeSlots.value = res.data || res;
+    try {
+        const res = await bookingAPI.getAvailableSlots({
+            storeId,
+            date: bookingForm.value.bookingDate,
+            seatType: bookingForm.value.reservedSeatType
+        });
+        availableTimeSlots.value = res.data || res;
+    } catch (error) {
+        console.error('取得時段失敗:', error);
+        availableTimeSlots.value = [];
+        
+        const errorMsg = error.response?.data?.message || '您選擇的日期不開放或未營業，請重新選擇預約條件。';
+        Swal.fire({
+            icon: 'warning',
+            title: '該日期無法提供訂位',
+            text: errorMsg,
+            confirmButtonText: '確定',
+            confirmButtonColor: '#f8b400'
+        });
+    }
 };
 
 // 重置與送出方法

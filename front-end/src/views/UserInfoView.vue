@@ -63,7 +63,7 @@ const menuItems = [
   { text: '我的訂位', icon: 'bi-calendar-check', name: 'UserBookingsTab' },
   { text: '我的訂單', icon: 'bi-receipt', name: 'UserOrders' },
   { text: '我的訊息', icon: 'bi-chat-dots', name: 'UserInfoStoreReg' },
-  { text: '我的客訴', icon: 'bi-headset', name: 'UserInfoFeedback' }
+  { text: '我的回饋', icon: 'bi-headset', name: 'UserInfoFeedback' }
 ]
 
 const toggleSidebar = () => {

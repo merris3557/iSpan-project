@@ -20,7 +20,7 @@
           </li>
 
           <!-- 前台首頁管理 -->
-          <li class="nav-item has-submenu">
+          <!-- <li class="nav-item has-submenu">
             <a href="#" class="nav-link" @click.prevent="toggleSubmenu('frontend')">
               <i class="bi bi-grid"></i>
               <span v-if="!sidebarCollapsed">前台首頁管理</span>
@@ -30,10 +30,10 @@
               <li><router-link to="/admin/frontend/banners" class="submenu-link">輪播圖管理</router-link></li>
               <li><router-link to="/admin/frontend/content" class="submenu-link">內容管理</router-link></li>
             </ul>
-          </li>
+          </li> -->
 
           <!-- 最新消息管理 -->
-          <li class="nav-item has-submenu">
+          <!-- <li class="nav-item has-submenu">
             <a href="#" class="nav-link" @click.prevent="toggleSubmenu('news')">
               <i class="bi bi-megaphone"></i>
               <span v-if="!sidebarCollapsed">最新消息管理</span>
@@ -43,10 +43,10 @@
               <li><router-link to="/admin/news/list" class="submenu-link">消息列表</router-link></li>
               <li><router-link to="/admin/news/create" class="submenu-link">新增消息</router-link></li>
             </ul>
-          </li>
+          </li> -->
 
           <!-- 擬案知識管理 -->
-          <li class="nav-item has-submenu">
+          <!-- <li class="nav-item has-submenu">
             <a href="#" class="nav-link" @click.prevent="toggleSubmenu('knowledge')">
               <i class="bi bi-journal-text"></i>
               <span v-if="!sidebarCollapsed">擬案知識管理</span>
@@ -56,9 +56,9 @@
               <li><router-link to="/admin/knowledge/list" class="submenu-link">知識列表</router-link></li>
               <li><router-link to="/admin/knowledge/categories" class="submenu-link">分類管理</router-link></li>
             </ul>
-          </li>
+          </li> -->
 
-          <!-- 商品管理 -->
+          <!-- 商品管理
           <li class="nav-item has-submenu">
             <a href="#" class="nav-link" @click.prevent="toggleSubmenu('products')">
               <i class="bi bi-box-seam"></i>
@@ -70,10 +70,10 @@
               <li><router-link to="/admin/products/create" class="submenu-link">新增商品</router-link></li>
               <li><router-link to="/admin/products/categories" class="submenu-link">商品分類</router-link></li>
             </ul>
-          </li>
+          </li> -->
 
           <!-- 銷售管理 -->
-          <li class="nav-item has-submenu">
+          <!-- <li class="nav-item has-submenu">
             <a href="#" class="nav-link" @click.prevent="toggleSubmenu('sales')">
               <i class="bi bi-cart"></i>
               <span v-if="!sidebarCollapsed">銷售管理</span>
@@ -83,13 +83,13 @@
               <li><router-link to="/admin/sales/orders" class="submenu-link">訂單管理</router-link></li>
               <li><router-link to="/admin/sales/reports" class="submenu-link">銷售報表</router-link></li>
             </ul>
-          </li>
+          </li> -->
 
-          <!-- anna 商品管理 -->
-          <li class="nav-item has-submenu">
+          <!-- 商品管理 -->
+          <li class="nav-item has-submenu" v-if="adminAuthStore.hasAnyRole(['SUPER_ADMIN', 'SHOP_MANAGER'])">
               <a href="#" class="nav-link" @click.prevent="toggleSubmenu('products')">
                   <i class="bi bi-box-seam"></i>
-                  <span v-if="!sidebarCollapsed">Anna商品管理</span>
+                  <span v-if="!sidebarCollapsed">商品管理</span>
                   <i v-if="!sidebarCollapsed" class="bi bi-chevron-down submenu-arrow" :class="{ rotated: openSubmenu === 'products' }"></i>
               </a>
               <ul class="submenu" v-if="!sidebarCollapsed && openSubmenu === 'products'">
@@ -100,7 +100,7 @@
 
 
           <!-- 客服管理 -->
-          <li class="nav-item">
+          <li class="nav-item" v-if="adminAuthStore.hasAnyRole(['SUPER_ADMIN', 'CUSTOMER_SERVICE'])">
             <router-link to="/admin/feedbackAP" class="nav-link">
               <i class="bi bi-headset"></i>
               <span v-if="!sidebarCollapsed">客服管理</span>
@@ -108,7 +108,7 @@
           </li>
 
           <!-- 使用者管理 -->
-          <li class="nav-item has-submenu">
+          <li class="nav-item has-submenu" v-if="adminAuthStore.hasAnyRole(['SUPER_ADMIN', 'CUSTOMER_SERVICE'])">
             <a href="#" class="nav-link" @click.prevent="toggleSubmenu('users')">
               <i class="bi bi-people"></i>
               <span v-if="!sidebarCollapsed">使用者管理</span>
@@ -121,7 +121,7 @@
           </li>
 
           <!-- 管理員管理 -->
-          <li class="nav-item">
+          <li class="nav-item" v-if="adminAuthStore.hasAnyRole(['SUPER_ADMIN', 'HUMAN_RESOURCE'])">
             <router-link to="/admin/admins/list" class="nav-link" exact-active-class="active">
               <i class="bi bi-house-door"></i>
               <span v-if="!sidebarCollapsed">管理員列表</span>
@@ -146,11 +146,11 @@
     <div class="admin-main" :class="{ expanded: sidebarCollapsed }">
       <!-- Top Header -->
       <header class="admin-header">
-        <div class="header-left">
+        <!-- <div class="header-left">
           <button class="menu-toggle" @click="toggleMobileSidebar">
             <i class="bi bi-list"></i>
           </button>
-          <!-- Breadcrumb -->
+          
           <nav class="breadcrumb-nav">
             <ol class="breadcrumb">
               <li class="breadcrumb-item"><a href="#">首頁</a></li>
@@ -158,7 +158,7 @@
               <li class="breadcrumb-item active" v-if="currentPage">{{ currentPage }}</li>
             </ol>
           </nav>
-        </div>
+        </div> -->
 
         <div class="header-right">
           <div class="user-menu-container">
@@ -279,7 +279,8 @@ export default {
       currentSection,
       currentPage,
       adminName,
-      handleLogout
+      handleLogout,
+      adminAuthStore
     };
   }
 };
@@ -565,6 +566,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 1rem;
+  margin-left: auto;
 
   .user-menu-container {
     position: relative;

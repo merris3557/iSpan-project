@@ -47,12 +47,18 @@ public class Orders {
 
     @Column(name = "receiver_address", length=(200), nullable = false)
     private String receiverAddress;
+
+    @Column(name ="note",columnDefinition = "NVARCHAR(MAX)",nullable = false)
+    private String note;
     
     @Column( length=(50))
     private String status;
 
     @Column(name ="pay_method", length=(50))
     private String payMethod;
+
+    @Column(name = "delivery_method", length=(50))
+    private String deliveryMethod;
 
     @Column(name = "merchant_trade_no", length = 30)
     private String merchantTradeNo;

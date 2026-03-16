@@ -49,8 +49,17 @@ const handleLogin = async () => {
       showConfirmButton: false
     });
     
-    // 登入成功後跳轉至後台首頁
-    router.push('/admin');
+    // 登入成功後依據職位跳轉至不同首頁
+    const position = adminData.position;
+    if (position === 'SUPER_ADMIN' || position === 'HUMAN_RESOURCE') {
+      router.push('/admin/admins/list');
+    } else if (position === 'CUSTOMER_SERVICE') {
+      router.push('/admin/feedbackAP');
+    } else if (position === 'SHOP_MANAGER') {
+      router.push('/admin/backEnd/productsList');
+    } else {
+      router.push('/admin');
+    }
     
   } catch (error) {
     console.error('Admin login failed:', error);

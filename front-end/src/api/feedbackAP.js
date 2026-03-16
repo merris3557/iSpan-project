@@ -25,3 +25,11 @@ export const getStatusList = () => {
 export const replyFeedback = (payload) => {
     return api.put("/feedbackList/reply", payload);
 };
+
+/**
+ * 刪除意見回饋
+ * @param {number} id - feedback 的 id
+ */
+export const deleteFeedback = (id) => {
+    return api.delete(`/feedbackList/${id}`);
+};

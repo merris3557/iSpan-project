@@ -27,36 +27,45 @@ const goTo = (path) => {
         <!-- Links (Right 2/3) -->
         <div class="col-md-8">
           <div class="row">
-            <!-- Main Navigation -->
-            <div class="col-6 col-md-4 mb-3">
-              <h6 class="text-uppercase mb-3 fw-bold text-gdg">網站導覽</h6>
+            <!-- 關於饗島 -->
+            <div class="col-6 col-md-3 mb-3">
+              <h6 class="text-uppercase mb-3 fw-bold text-gdg">關於饗島</h6>
               <ul class="list-unstyled">
-                <li class="mb-2"><a href="#" @click.prevent="goTo('/')" class="footer-link">首頁</a></li>
                 <li class="mb-2"><a href="#" @click.prevent="goTo('/about')" class="footer-link">島嶼初心</a></li>
-                <li class="mb-2"><a href="#" @click.prevent="goTo('/mapSearch')" class="footer-link">美味座標</a></li>
-                <li class="mb-2"><a href="#" @click.prevent="goTo('/shopStore')" class="footer-link">質感選物</a></li>
+                <li class="mb-2"><span class="footer-link" style="cursor: default;">ESG永續經營</span></li>
+                <li class="mb-2"><span class="footer-link" style="cursor: default;">人才招募</span></li>
               </ul>
             </div>
 
-            <!-- Shop / Member
-            <div class="col-6 col-md-4 mb-3">
-              <h6 class="text-uppercase mb-3 fw-bold text-gdg">會員服務</h6>
+            <!-- 餐廳搜尋 -->
+            <div class="col-6 col-md-3 mb-3">
+              <h6 class="text-uppercase mb-3 fw-bold text-gdg">餐廳搜尋</h6>
               <ul class="list-unstyled">
-                <li class="mb-2"><a href="#" @click.prevent="goTo('/cart')" class="footer-link">購物車</a></li>
-                <li class="mb-2"><a href="#" @click.prevent="goTo('/userInfo')" class="footer-link">會員中心</a></li>
-                <li class="mb-2"><a href="#" @click.prevent="goTo('/storeRegistration')" class="footer-link">申請成為商家</a></li>
+                <li class="mb-2"><a href="#" @click.prevent="goTo('/mapSearch')" class="footer-link">美味座標</a></li>
+                <li class="mb-2"><a href="#" @click.prevent="goTo('/storeInfo/reservation/1')" class="footer-link">餐廳訂位</a></li>
               </ul>
-            </div> -->
+            </div>
 
-            <!-- Owner Services -->
-            <!-- <div class="col-6 col-md-4 mb-3">
-              <h6 class="text-uppercase mb-3 fw-bold text-gdg">商家專區</h6>
+            <!-- 購物商城 -->
+            <div class="col-6 col-md-3 mb-3">
+              <h6 class="text-uppercase mb-3 fw-bold text-gdg">購物商城</h6>
               <ul class="list-unstyled">
-                <li class="mb-2"><a href="#" @click.prevent="goTo('/owner/storeInfo')" class="footer-link">店家資訊編輯</a></li>
-                <li class="mb-2"><a href="#" @click.prevent="goTo('/owner/bookings/seats')" class="footer-link">座位與時段管理</a></li>
-                <li class="mb-2"><a href="#" @click.prevent="goTo('/owner/bookings/data')" class="footer-link">訂位資料管理</a></li>
+                <li class="mb-2"><a href="#" @click.prevent="goTo('/shopStore')" class="footer-link">質感選物</a></li>
+                <li class="mb-2"><span class="footer-link" style="cursor: default;">購物須知</span></li>
+                <li class="mb-2"><span class="footer-link" style="cursor: default;">退貨處理</span></li>
               </ul>
-            </div> -->
+            </div>
+
+            <!-- 會員中心 -->
+            <div class="col-6 col-md-3 mb-3">
+              <h6 class="text-uppercase mb-3 fw-bold text-gdg">會員中心</h6>
+              <ul class="list-unstyled">
+                <li class="mb-2"><a href="#" @click.prevent="goTo('/login')" class="footer-link">會員登入</a></li>
+                <li class="mb-2"><a href="#" @click.prevent="goTo('/register')" class="footer-link">會員註冊</a></li>
+                <li class="mb-2"><span class="footer-link" style="cursor: default;">會員權益</span></li>
+                <li class="mb-2"><span class="footer-link" style="cursor: default;">隱私權政策</span></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
