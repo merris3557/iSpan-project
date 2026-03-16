@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import ReplyForm from '@/components/ReplyForm.vue';
-import { getFeedbackList, getStatusList, replyFeedback } from '@/api/feedbackAP';
+import { getFeedbackList, getStatusList, replyFeedback, deleteFeedback } from '@/api/feedbackAP';
 import { useAdminAuthStore } from '@/stores/adminAuth';
 import Swal from 'sweetalert2';
 
@@ -126,6 +126,31 @@ const handleReplySubmit = async ({ feedbackId, reply, statusId }) => {
     }
 };
 
+// ─── 刪除 ────────────────────────────────────────────
+const handleDelete = async (item) => {
+    const result = await Swal.fire({
+        title: '確定要刪除此意見回饋嗎？',
+        text: '刪除後將無法復原！',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: '確定刪除',
+        cancelButtonText: '取消'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            await deleteFeedback(item.id);
+            Swal.fire({ icon: 'success', title: '已刪除！', text: '該意見回饋已被刪除。', timer: 1500, showConfirmButton: false });
+            await loadFeedbacks(currentPage.value);
+        } catch (err) {
+            console.error('Delete failed:', err);
+            Swal.fire({ icon: 'error', title: '刪除失敗', text: '無法刪除該意見回饋，請稍後再試。' });
+        }
+    }
+};
+
 // ─── 輔助函式 ────────────────────────────────────────
 const getStatusBadgeClass = (statusName) => {
     const styleMap = {
@@ -161,7 +186,7 @@ const formatDate = (dateStr) => {
                     id="statusFilter"
                     v-model="filterStatus"
                     @change="onFilterChange"
-                    class="admin-form-control"
+                    class="form-select bg-light"
                     style="width: 200px;"
                 >
                     <option value="">全部</option>
@@ -214,10 +239,10 @@ const formatDate = (dateStr) => {
                                 </td>
                                 <td>
                                     <div :title="item.contents">
-                                        {{ truncate(item.contents, 20) }}
+                                        {{ truncate(item.contents, 15) }}
                                     </div>
                                     <div v-if="item.reply" class="mt-1 small text-success">
-                                        <i class="bi bi-arrow-return-right me-1"></i>已回覆：{{ truncate(item.reply, 20) }}
+                                        <i class="bi bi-arrow-return-right me-1"></i>已回覆：{{ truncate(item.reply, 15) }}
                                     </div>
                                 </td>
                                 <td>
@@ -229,20 +254,29 @@ const formatDate = (dateStr) => {
                                     </span>
                                 </td>
                                 <td>
-                                    <button
-                                        v-if="!item.reply"
-                                        class="btn btn-sm btn-admin-primary"
-                                        @click="openReplyModal(item)"
-                                    >
-                                        <i class="bi bi-reply-fill"></i> 回覆
-                                    </button>
-                                    <button
-                                        v-else
-                                        class="btn btn-sm btn-admin-outline"
-                                        @click="openViewModal(item)"
-                                    >
-                                        <i class="bi bi-eye"></i> 檢視
-                                    </button>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <button
+                                            v-if="!item.reply"
+                                            class="btn btn-sm btn-admin-primary"
+                                            @click="openReplyModal(item)"
+                                        >
+                                            <i class="bi bi-reply-fill"></i> 回覆
+                                        </button>
+                                        <button
+                                            v-else
+                                            class="btn btn-sm btn-admin-outline"
+                                            @click="openViewModal(item)"
+                                        >
+                                            <i class="bi bi-eye"></i> 檢視
+                                        </button>
+                                        <button
+                                            class="btn btn-danger text-white border-0"
+                                            style="padding: 0.15rem 0.4rem; font-size: 0.75rem;"
+                                            @click="handleDelete(item)"
+                                        >
+                                            <i class="bi bi-trash"></i> 刪除
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
 

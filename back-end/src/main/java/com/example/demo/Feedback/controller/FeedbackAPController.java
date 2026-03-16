@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/api/feedbackList")
@@ -42,6 +44,11 @@ public class FeedbackAPController {
     @PutMapping("/reply")
     public void replyFeedback(@RequestBody ReplyRequestDto dto) {
         feedbackAPService.replyFeedback(dto);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteFeedback(@PathVariable Long id) {
+        feedbackAPService.deleteFeedback(id);
     }
 
 }

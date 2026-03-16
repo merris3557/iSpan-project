@@ -74,7 +74,7 @@ const handleSubmit = () => {
                 <select
                     id="statusSelect"
                     v-model="selectedStatusId"
-                    class="admin-form-control"
+                    class="form-select bg-light"
                     required
                 >
                     <option :value="null" disabled>請選擇狀態</option>
@@ -96,7 +96,7 @@ const handleSubmit = () => {
                 <textarea
                     id="replyContent"
                     v-model="replyContent"
-                    class="admin-form-control"
+                    class="form-control bg-light"
                     rows="5"
                     placeholder="請輸入欲回覆的內容..."
                     required
