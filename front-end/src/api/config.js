@@ -183,15 +183,24 @@ const createMethodWrapper = (methodName) => {
 
                 return finalResult;
             } catch (refreshError) {
-                console.error('[REFRESH-WRAPPER] 徹底失敗，強制登出', refreshError);
-                if (isAdminContext) {
-                    const adminAuthStore = useAdminAuthStore();
-                    await adminAuthStore.handleLogoutAndNotify('timeout');
-                    window.location.href = '/admin/login';
+                const retryStatus = refreshError.response?.status;
+
+                // 只有 Refresh 本身失敗、或重送後依然 401 才代表身份真正失效，才強制登出
+                // 重送後的 400、500 等是業務邏輯錯誤，應直接拋回給呼叫方，不應強制登出
+                if (!retryStatus || retryStatus === 401) {
+                    console.error('[REFRESH-WRAPPER] Refresh 或重送後身份仍無效，強制登出', refreshError);
+                    if (isAdminContext) {
+                        const adminAuthStore = useAdminAuthStore();
+                        await adminAuthStore.handleLogoutAndNotify('timeout');
+                        window.location.href = '/admin/login';
+                    } else {
+                        const authStore = useAuthStore();
+                        await authStore.handleLogoutAndNotify('timeout');
+                        window.location.href = '/login';
+                    }
                 } else {
-                    const authStore = useAuthStore();
-                    await authStore.handleLogoutAndNotify('timeout');
-                    window.location.href = '/login';
+                    // 業務邏輯錯誤（如 400、403、500），直接拋出讓呼叫方自行處理
+                    console.warn(`[REFRESH-WRAPPER] 重送後收到非 auth 錯誤 (${retryStatus})，不登出，拋回錯誤`);
                 }
                 return Promise.reject(refreshError);
             }

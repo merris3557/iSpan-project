@@ -106,7 +106,10 @@ public class SecurityConfig {
                         // /api/feedback/userInfoList 需要登入（使用 @AuthenticationPrincipal）
                         // 客服後台清單與回覆：僅限特定管理員
                         .requestMatchers("/api/feedbackList/**").hasAnyRole("SUPER_ADMIN", "CUSTOMER_SERVICE")
-                        // 商家資訊端點：允許公開查看特定商家資訊
+                        // 商家資訊端點：
+                        // ⚠️ 注意順序！/api/owner/store/me 一定要在 /api/owner/store/{id} 之前
+                        // 因為 {id} 是萬用字元，會匹配字串 "me"，若順序顛倒，me 會被誤判為 permitAll！
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/owner/store/me").fullyAuthenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/owner/store/{id}").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/bookings/config/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/bookings/available-slots").permitAll()
@@ -128,8 +131,12 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/users/*").hasAnyRole("SUPER_ADMIN", "CUSTOMER_SERVICE")
                         // 放行 Spring Boot 預設錯誤處理器路由，防止 API Exception（如403/404）轉送至此時觸發 OAuth 登入重導
                         .requestMatchers("/error").permitAll()
-                        // 其他請求需要認證
-                        .anyRequest().authenticated()
+                        // 其他請求需要完整認證（非匿名用戶）
+                        // 注意：使用 fullyAuthenticated() 而非 authenticated()
+                        // 因為 authenticated() 不會阻擋 Spring Security 的匿名用戶（AnonymousAuthenticationToken），
+                        // 匿名請求會穿透到 Controller 層，導致業務邏輯拋出 403 而非 401
+                        // fullyAuthenticated() 在 Filter 層就阻擋匿名用戶，正確觸發 AuthenticationEntryPoint 回 401
+                        .anyRequest().fullyAuthenticated()
                         
                     )
                 // 處理 /api/** 的未授權請求直接回傳 401 而非重新導向 OAuth2 登入頁
