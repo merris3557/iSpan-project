@@ -17,8 +17,7 @@ public class StoreCreateUpdateDto {
     private String address;
 
     // 電話使用正規表達式(市話或手機格式)
-    // @Pattern(regexp = "^$|^(09\\d{8}|0\\d{1,2}-?\\d{6,8})$", message =
-    // "電話格式不正確，請輸入正確的手機或市話格式")
+    // @Pattern(regexp = "^$|^(09\\d{8}|0\\d{1,2}-?\\d{6,8})$", message = "電話格式不正確，請輸入正確的手機或市話格式")
     private String storePhone;
 
     private Integer timeSlot;

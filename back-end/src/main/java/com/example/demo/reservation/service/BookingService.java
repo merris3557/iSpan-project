@@ -103,34 +103,36 @@ public class BookingService {
         Integer totalTables = seatConfig.getTotalCount();
 
         // -----------------開始寫可訂位時段迴圈------------------
-        List<SlotAvailDto> slots = new ArrayList<>();
-        LocalTime currentTime = openHour.getOpenTime();
+        List<SlotAvailDto> slots = new ArrayList<>(); // 最終回傳的可訂位時段清單
+        LocalTime openTime = openHour.getOpenTime();
         LocalTime closeTime = openHour.getCloseTime(); // 最後可訂位時間
 
-        while (!currentTime.isAfter(closeTime)) {
+        while (!openTime.isAfter(closeTime)) {
             // 1. 計算當前時段的末端
-            LocalTime slotEnd = currentTime.plusMinutes(timeLimit);
+            LocalTime slotEnd = openTime.plusMinutes(timeLimit);
 
             // 2. 檢查是否為店休
-            if (isOffDay(storeId, date, currentTime, slotEnd)) {
-                slots.add(new SlotAvailDto(currentTime.toString(), false));
-                currentTime = currentTime.plusMinutes(timeSlot);
+            if (isOffDay(storeId, date, openTime, slotEnd)) {
+                slots.add(new SlotAvailDto(openTime.toString(), false));
+                openTime = openTime.plusMinutes(timeSlot);
                 continue;
             }
 
             // 3. 調用下方createBooking()方法裡面的 countOverlappingBookings() repository 方法
+            // 查詢這個時段已經被預約了幾桌 (重疊訂單數量)
             long occupied = bookingRepository.countConflicts(
-                    storeId, date, seatType, currentTime, slotEnd);
+                    storeId, date, seatType, openTime, slotEnd);
 
             // 4. 判斷是否為過去時間
-            boolean isPast = date.equals(LocalDate.now()) && currentTime.isBefore(LocalTime.now());
+            boolean isPast = date.equals(LocalDate.now()) && openTime.isBefore(LocalTime.now());
 
-            // 5. 判定並加入清單 (occupied < totalTables)
+            // 5. 判定並加入slots
+            // 如果已預約數量 < 總數，且不是過去時間，則加入
             boolean isAvailable = (occupied < totalTables) && !isPast;
-            slots.add(new SlotAvailDto(currentTime.toString(), isAvailable));
+            slots.add(new SlotAvailDto(openTime.toString(), isAvailable));
 
             // 6. 往後跳過一個時段間隔
-            currentTime = currentTime.plusMinutes(timeSlot);
+            openTime = openTime.plusMinutes(timeSlot);
 
         }
 
