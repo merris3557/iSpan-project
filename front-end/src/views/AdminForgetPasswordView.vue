@@ -39,9 +39,7 @@ const handleSendResetLink = async () => {
     const data = { email: email.value };
 
     try {
-        console.log('Admin forgot password request with:', data);
         const response = await api.post('/admins/forgot-password', data);
-        console.log('Admin forgot password success:', response);
         
         await Swal.fire({
             icon: 'success',

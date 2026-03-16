@@ -82,7 +82,7 @@ export const useAuthStore = defineStore('auth', {
                     const responseData = response?.data || response;
                     const latestUserData = responseData?.data || responseData;
 
-                    console.log('[syncUserProfile] 更新 user 資料，有 name:', latestUserData?.name, '| email:', latestUserData?.email);
+                    console.log('[syncUserProfile] 更新 user 資料，有 name:', latestUserData?.name);
                     this.updateUser(latestUserData);
                 } catch (error) {
                     console.error('[syncUserProfile] API 請求發生錯誤:', error?.response?.status ?? error.message);

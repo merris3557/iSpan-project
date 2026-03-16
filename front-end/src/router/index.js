@@ -366,7 +366,18 @@ router.beforeEach(async (to, from, next) => {
           text: '您沒有訪問此頁面的權限',
           confirmButtonColor: '#1e3c72'
         });
-        return next('/admin'); // 導向預設的 dashboard
+        
+        const position = adminAuthStore.admin?.position;
+        let redirectTo = '/admin';
+        if (position === 'SUPER_ADMIN' || position === 'HUMAN_RESOURCE') {
+          redirectTo = '/admin/admins/list';
+        } else if (position === 'CUSTOMER_SERVICE') {
+          redirectTo = '/admin/feedbackAP';
+        } else if (position === 'SHOP_MANAGER') {
+          redirectTo = '/admin/backEnd/productsList';
+        }
+        
+        return next(redirectTo); // 依據職位導向對應首頁
       }
       console.log('[Router Admin] Role check 通過 ✅');
     }

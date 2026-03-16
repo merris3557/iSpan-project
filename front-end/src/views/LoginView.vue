@@ -26,9 +26,8 @@ const handleGoogleLogin = () => {
 
 const doLogin = async (dataToSubmit) => {
   try {
-    console.log('Login attempt with:', dataToSubmit);
     const response = await authAPI.login(dataToSubmit);
-    console.log('Login success:', response);
+    // console.log('Login success:', response);
     
     // response.data 現在直接是 UserResponse（Token 已由後端設為 HttpOnly Cookie）
     const userData = response.data;

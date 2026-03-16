@@ -78,6 +78,8 @@ public class SecurityConfig {
                         // TODO: 測試完成後，移除此行恢復強制登入檢查
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/admins").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/admins").permitAll() // 暫時放行新增管理員
+                        // 所有管理員都可以獲取自己的資訊
+                        .requestMatchers("/api/admins/me").hasAnyRole("SUPER_ADMIN", "HUMAN_RESOURCE", "CUSTOMER_SERVICE", "SHOP_MANAGER")
                         // 鎖定其他管理員 API，必須具備對應權限才能訪問
                         .requestMatchers("/api/admins/**").hasAnyRole("SUPER_ADMIN", "HUMAN_RESOURCE")
                         // Store Registrations Admin APIs
