@@ -47,6 +47,9 @@ public class Orders {
 
     @Column(name = "receiver_address", length=(200), nullable = false)
     private String receiverAddress;
+
+    @Column(name ="note",columnDefinition = "NVARCHAR(MAX)",nullable = false)
+    private String note;
     
     @Column( length=(50))
     private String status;

@@ -45,7 +45,7 @@ public class Products{
     @Column(name= "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    @Column(name = "product_description", nullable = true, length = 500)
+    @Column(name = "product_description", nullable = true, columnDefinition = "NVARCHAR(MAX)")
     private String productDescription;
 
 

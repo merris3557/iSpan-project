@@ -1,36 +1,38 @@
 package com.example.demo.seeder;
 
 import com.example.demo.Feedback.entity.Feedback;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.demo.Feedback.entity.FeedbackStatus;
 import com.example.demo.Feedback.entity.FeedbackTypes;
 import com.example.demo.Feedback.repository.FeedbackRepository;
 import com.example.demo.Feedback.repository.FeedbackStatusRepository;
 import com.example.demo.Feedback.repository.FeedbackTypesRepository;
+import com.example.demo.MapSearch.service.GeocodingService;
 import com.example.demo.admin.Admin;
 import com.example.demo.admin.AdminPosition;
 import com.example.demo.admin.AdminRepository;
+import com.example.demo.shop.entity.Products;
+import com.example.demo.shop.entity.Stock;
+import com.example.demo.shop.repository.ProductsRepository;
 import com.example.demo.store.entity.Category;
 import com.example.demo.store.entity.StoresInfo;
 import com.example.demo.store.repository.CategoryRepository;
 import com.example.demo.store.repository.StoreInfoRepository;
 import com.example.demo.user.User;
 import com.example.demo.user.UserRepository;
-import net.datafaker.Faker;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import com.example.demo.MapSearch.service.GeocodingService;
-import com.example.demo.shop.entity.Products;
-import com.example.demo.shop.entity.Stock;
-import com.example.demo.shop.repository.ProductsRepository;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import net.datafaker.Faker;
 
 @Component
 public class DatabaseSeeder implements CommandLineRunner {
@@ -295,14 +297,49 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         System.out.println("Starting to seed products...");
 
+        saveProduct("【小時光甜點店】盛宴．森林系莓果塔", "食品", new BigDecimal("1080"),
+            "如同漫步於雨後的森林小徑，這是一款視覺與味覺雙重享受的甜點。\r\n" + //
+            "\r\n" + //
+            "我們選用優質天然發酵奶油製作塔皮，搭配香氣濃郁的本土萊姆，打造出絲滑細緻的內餡。塔面裝飾如同一座繽紛的小花園，莓果的微酸與檸檬的清新完美融合，每一口都能感受到大自然的原始鮮甜。適合與一杯熱紅花茶共同享用，讓下午茶時光變得優雅且放鬆。\r\n" + //
+            "", 10, "/productPictures/cake.jpg");
+
         saveProduct("限量小農鮮蔬盒", "生鮮", new BigDecimal("499"),
-                "嚴選在地小農友善耕作蔬菜，新鮮現採直送。無毒栽培降低農藥殘留風險，吃得更安心。支持在地農業同時減少長途運輸碳排放。", 50, "/productPictures/VeggieBox.jpg");
+            "嚴選在地小農友善耕作蔬菜，新鮮現採直送。無毒栽培降低農藥殘留風險，吃得更安心。支持在地農業同時減少長途運輸碳排放。", 2, "/productPictures/VeggieBox.jpg");
 
         saveProduct("【季節限定】柿柿如意鮮果禮盒", "生鮮", new BigDecimal("799"),
-                "精選當季新鮮柿子，由在地農民用心栽種。自然熟成風味香甜，無過度人工催熟處理。產地直送縮短運輸流程，保留最佳鮮度。", 30, "/productPictures/persimmon.jpg");
+            "精選當季新鮮柿子，由在地農民用心栽種。自然熟成風味香甜，無過度人工催熟處理。產地直送縮短運輸流程，保留最佳鮮度。", 30, "/productPictures/persimmon.jpg");
+        
+        saveProduct("【金月韓式料理】匠心手作雙拼泡菜", "食品", new BigDecimal("180"),
+            "傳承韓式正統發酵工法，嚴選鮮甜大白菜與清脆白蘿蔔，每日由主廚手工揉製。\r\n" + //
+            "韓式大白菜泡菜： 葉片完整吸收韓國進口辣椒粉的辛香，入喉帶有淡淡的果香甘甜，酸爽開胃。\r\n" + //
+            "韓式脆口辣蘿蔔： 切成易入口的正方形丁塊，保留了蘿蔔原始的清甜與爽脆咬勁，是餐桌上最解膩的配角。\r\n" + //
+            "堅持無添加防腐劑，富含益生菌。無論是單吃當小菜、拌飯、或是加入湯底做成泡菜鍋，都能品嚐到最道地的韓式風味。\r\n" + //
+            "。", 55, "/productPictures/Pickle.jpg");
+
+        saveProduct("【海港鮮味餐廳】產地直送冷凍海鮮", "生鮮", new BigDecimal("2680"),
+            "將大海的恩惠完美封存，【海港鮮味餐廳】嚴選當季最肥美的漁獲，捕撈後立即進行低溫極速冷凍，鎖住每一分原始鮮甜，讓您在家也能享有如漁港現場般的極致美味。\r\n" + //
+            "\r\n" + //
+            "頂級刺身級鮪魚： 色澤鮮紅、油脂分布均勻，肉質細嫩，解凍後即可品嚐如同現捕的鮮美。\r\n" + //
+            "\r\n" + //
+            "極鮮野生海蝦與透抽： 蝦肉飽滿 Q 彈，透抽肉質紮實，簡單清蒸或汆燙即可品嚐其清脆甘甜。\r\n" + //
+            "\r\n" + //
+            "當季旬魚系列： 包含現撈鮮魚及精選細鱗漁獲，魚眼清亮，鱗片完整，適合烤、炸或煮湯，展現多變料理風味。\r\n" + //
+            "\r\n" + //
+            "豪華甲殼類與貝類： 嚴選肥美毛蟹與厚實貝類，肉質細緻且富含海味精華，是升級餐桌饗宴的靈魂食材。\r\n" + //
+            "\r\n" + //
+            "品質保證： 全程低溫物流配送，堅持無添加、無化學保鮮，提供您最安心、最純淨的海洋鮮味。", 35, "/productPictures/seafood.jpg");
 
         saveProduct("田野直送鮮蔬箱", "生鮮", new BigDecimal("529"),
-                "嚴選在地小農每日現採蔬菜，新鮮直送到家，保留最自然的風味與營養。採用友善耕作方式種植，減少農藥與化學肥料使用。", 40, "/productPictures/Veggie.jpg");
+            "嚴選在地小農每日現採蔬菜，新鮮直送到家，保留最自然的風味與營養採用友善耕作方式種植，減少農藥與化學肥料使用。", 40, "/productPictures/Veggie.jpg");
+
+        saveProduct("【山海樓私房料理】傳承．中式饗宴套餐", "食品", new BigDecimal("2880"),
+            "匯集多款主廚拿手好菜，將傳統台式與港式精髓完美揉合，讓您一次品嚐多層次的珍饈美味。\r\n" + //
+            "紅燒排翅(盅)： 選用頂級食材，經長時火候慢燉，湯頭濃郁滑順，每一口都能感受到膠質的細膩與鮮甜。\r\n" + //
+            "港式點心拼盤： 包含皮薄餡亮的晶瑩蝦餃與飽滿紮實的招牌燒賣，口口彈牙，盡顯真功夫。\r\n" + //
+            "川味口水雞： 嚴選鮮嫩雞肉，搭配特製香辣醬汁與清爽黃瓜片，麻、辣、鮮、香四味一體，極其開胃。\r\n" + //
+            "糖醋鮮蝦球： 外皮酥脆、蝦肉Q彈，裹上特調酸甜芡汁，是大人小孩都喜愛的經典滋味。\r\n" + //
+            "私房時令熱炒： 搭配當季鮮蔬與主廚推薦小品，為整場饗宴畫下清爽圓滿的句點。\r\n" + //
+            "", 30, "/productPictures/chineseFood.jpg");
 
         saveProduct("旬採鮮果禮盒", "生鮮", new BigDecimal("649"),
                 "精選當季成熟水果，由小農自然栽培，無過度催熟與人工加工。果實在最佳熟度採收，保留最純粹甜味與香氣。", 35, "/productPictures/fruit.jpg");
@@ -314,7 +351,22 @@ public class DatabaseSeeder implements CommandLineRunner {
                 "俐落極簡外型搭配高耐用金屬材質，長期使用不易損耗。適合上班族、學生與外食族隨身攜帶。", 60, "/productPictures/silver.jpg");
 
         saveProduct("植萃癒合．三效美體護理組(三合一)", "日常用品", new BigDecimal("1880"),
-                "結合乳液、精華油與面霜三步驟完整保養。植物來源成分溫和親膚，同時降低對環境負擔。深層滋養與鎖水保濕一次完成。", 25, "/productPictures/cream.jpg");
+            "結合乳液、精華油與面霜三步驟完整保養。植物來源成分溫和親膚，同時降低對環境負擔。深層滋養與鎖水保濕一次完成。", 25, "/productPictures/cream.jpg");
+        
+        saveProduct("【米香台菜餐廳】秘製傳承．無錫排骨", "食品", new BigDecimal("420"),
+            "這道「無錫排骨」是米香台菜的經典功夫菜，展現了燉煮工藝的極致實力。\r\n" + //
+            "嚴選食材： 挑選肥瘦比例完美的溫體豬腩排，保留帶骨的香氣與軟嫩的肉質。\r\n" + //
+            "工序繁複： 經過先炸後滷的多道手續，鎖住肉汁並去除多餘油脂。加入陳年紹興與獨門辛香料慢火細燉數小時，直到骨肉輕易分離。\r\n" + //
+            "層次風味： 醬汁濃稠透亮，入口鹹甜適中、醇厚不膩，搭配清鮮翠綠的青江菜，不僅平衡了口感，更襯托出醬香的深度。\r\n" + //
+            "主廚推薦： 這道菜濃郁的醬汁非常適合搭配白飯，是老饕們心中不可替代的「白飯殺手」。", 20, "/productPictures/meat.jpg");
+
+            saveProduct("【米香台菜餐廳】橙香御品獅子頭", "食品", new BigDecimal("380"),
+            "打破傳統紅燒的厚重感，主廚巧妙將新鮮果香融入經典肉丸，打造視覺與味覺的雙重饗宴。\r\n" + //
+            "職人手打肉丸： 嚴選黃金比例的豬後腿肉，經由數百次甩打確保肉質Ｑ彈紮實，入口即化的同時保有彈牙嚼勁。\r\n" + //
+            "橙汁秘製芡汁： 捨棄傳統重油重鹹的調味，改以新鮮柳橙汁為基底慢火熬製琥珀色醬汁，酸甜甘美，完美平衡肉質的醇厚。\r\n" + //
+            "清新風味組合： 盤底襯以鮮甜橙片，讓每一口果香隨著熱氣滲入肉丸中心，呈現層次分明的清新台式風味，是宴席上老少咸宜的最佳選擇。\r\n" + //
+            "", 20, "/productPictures/meatBall.jpg");
+
 
         saveProduct("【天然原萃】手作無添加果糖(減糖)", "食品", new BigDecimal("250"),
                 "僅使用純天然水果與零卡替代糖，不含人工色素與防腐劑。口感自然清甜，適合大人小孩安心享用。採用可回收包裝。", 80, "/productPictures/candy.jpg");

@@ -16,7 +16,9 @@ public class EcpayService {
     private static final String HASH_KEY = "pwFHCqoQZGmho4w6";
     private static final String HASH_IV = "EkRm7iFT261dpevs";
     private static final String ECPAY_URL = "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5";
-    private static final String NGROK_URL = "https://shily-untusked-yuri.ngrok-free.dev";
+    // private static final String NGROK_URL = "https://shily-untusked-yuri.ngrok-free.dev";
+    // https://retouchable-hypoploid-barbera.ngrok-free.dev -> http://localhost:8080
+    private static final String NGROK_URL = "https://retouchable-hypoploid-barbera.ngrok-free.dev";
 
     public String generatePaymentForm(Integer orderId, int finalTotalPrice, String itemName, String merchantTradeNo) {
         String merchantTradeDate = LocalDateTime.now()

@@ -61,6 +61,17 @@ public class CartController {
 
 
 
+    @GetMapping("/check-stock")
+    public ResponseEntity<?> checkStock() {
+        try {
+            cartService.checkCartStock();
+            return ResponseEntity.ok().body(Map.of("message", "庫存正常"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+
     @PostMapping("/sync")
     public ResponseEntity<List<CartDTO>> syncCart() {
         List<CartDTO> cartList = cartService.syncCartWithStock();

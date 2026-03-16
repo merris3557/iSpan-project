@@ -63,6 +63,20 @@ const addToCart = async (item) => {
 
 
     try{
+        //檢查購物車已有的數量
+        const cartItem = cartStore.items.find(i => String(i.productId) === String(item.id))
+        const alreadyInCart = cartItem ? cartItem.quantity : 0
+
+        if (alreadyInCart + 1 > item.stock) {
+            Swal.fire({
+                icon: 'warning',
+                title: '庫存不足',
+                text: `購物車已有 ${alreadyInCart} 件，已達庫存上限`
+            })
+            return
+        }
+
+
         await cartStore.addToCart({
             id: item.id,
             name: item.productName,
@@ -111,6 +125,7 @@ const productsList = computed(() => {
         <div class="search-bar">
             <input v-model="searchKeyword" type="text" placeholder="🔍 搜尋商品..." class="search-input" />
         </div>
+        
 
         <!-- 分類 tab -->
         <div class="category-tabs">

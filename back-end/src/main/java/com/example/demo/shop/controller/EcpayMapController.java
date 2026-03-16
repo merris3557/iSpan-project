@@ -24,7 +24,8 @@ public class EcpayMapController {
 
     // ECPay 官方測試帳戶 - C2C（超商地圖用）
     private static final String MERCHANT_ID = "2000933";
-    private static final String NGROK_URL = "https://shily-untusked-yuri.ngrok-free.dev";
+    // private static final String NGROK_URL = "https://shily-untusked-yuri.ngrok-free.dev";
+    private static final String NGROK_URL = "https://retouchable-hypoploid-barbera.ngrok-free.dev";
 
     @Autowired
     private EcpayMapService ecpayMapService;

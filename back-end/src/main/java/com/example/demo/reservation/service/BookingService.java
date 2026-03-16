@@ -158,7 +158,17 @@ public class BookingService {
             endTime = startTime.plusMinutes(store.getTimeLimit());
         }
 
-        // 4. 檢查是否為店休
+        // 4. 檢查是否為營業日與店休
+        int dayOfWeek = dto.getBookingDate().getDayOfWeek().getValue();
+        int dbDayValue = (dayOfWeek == 7) ? 0 : dayOfWeek;
+
+        OpenHour openHour = openHourRepository.findByStore_StoreIdAndDayOfWeek(dto.getStoreId(), dbDayValue)
+                .orElseThrow(() -> new RuntimeException("該店家該日未營業"));
+
+        if (startTime.isBefore(openHour.getOpenTime()) || startTime.isAfter(openHour.getCloseTime())) {
+            throw new RuntimeException("所選時段非營業時間或已超過最後預約時間");
+        }
+
         if (isOffDay(dto.getStoreId(), dto.getBookingDate(), startTime, endTime)) {
             throw new RuntimeException("所選時段適逢店休，無法預約");
         }

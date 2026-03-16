@@ -148,6 +148,7 @@ const viewDetail = (order) => {
                     <p><strong>付款時間：</strong>{{ formatDate(selectedOrder.paymentDate) }}</p>
                     <p><strong>狀態：</strong>{{ selectedOrder.status }}</p>
                     <p><strong>總金額：</strong>NT$ {{ selectedOrder.totalPrice }}</p>
+                    <p><strong>備註：</strong>{{ selectedOrder.note || '無' }}</p>
                     <p><strong>建立時間：</strong>{{ formatDate(selectedOrder.createdAt) }}</p>
                 </div>
                 <hr>

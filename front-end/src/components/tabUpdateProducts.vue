@@ -25,6 +25,7 @@ const handleUpdate = async () => {
                 price: editForm.value.price,
                 image: editForm.value.image,
                 productDescription: editForm.value.description,
+                
                 stock: editForm.value.stock
             
         });
@@ -106,6 +107,16 @@ const confirmDelete = async (item) => {
     }
 };
 
+const handleImageUpload = (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+        editForm.value.image = e.target.result // Base64 字串
+    }
+    reader.readAsDataURL(file)
+}
 
 </script>
 
@@ -147,6 +158,19 @@ const confirmDelete = async (item) => {
                 <div class="form-group">
                     <label>商品描述: &nbsp;&nbsp;</label>
                     <textarea v-model="editForm.description" rows="4"></textarea>
+                </div>
+                <br/>
+                <div class="form-group">
+                    <label>商品圖片: &nbsp;&nbsp;</label>
+                    <input 
+                        type="file" 
+                        accept="image/*" 
+                        @change="handleImageUpload" 
+                        style="margin-bottom: 8px;"
+                    />
+                    <div v-if="editForm.image" style="margin-top: 8px;">
+                        <img :src="editForm.image" style="width: 120px; height: 120px; object-fit: contain; border: 1px solid #ddd; border-radius: 6px; background: #f8f7f4;" />
+                    </div>
                 </div>
                 <br/>
                 <button @click="handleUpdate" class="btn-update">儲存修改</button>

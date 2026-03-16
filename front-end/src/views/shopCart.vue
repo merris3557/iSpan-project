@@ -4,6 +4,8 @@ import { useCartStore } from '@/stores/cart'
 import { useRouter } from 'vue-router';
 import BaseButton from '@/components/common/BaseButton.vue';
 import { onMounted } from 'vue';
+import Swal from 'sweetalert2';
+import { cartAPI } from '@/api/cart';
 
 
 const router = useRouter();
@@ -22,10 +24,26 @@ onMounted( async () => {
     }
 })
 
-const goToCheckOut = () =>{
-    //點擊進入結帳
-    router.push({name:'checkOut'});
-};
+const goToCheckout = async () => {
+    try {
+        await cartAPI.checkStock()
+        router.push('/checkout')
+    } catch (error) {
+        const msg = error.response?.data?.error || '庫存檢查失敗'
+        if (msg.includes('庫存不足')) {
+            const parts = msg.split('：')
+            const productName = parts[1] || ''
+            const remainStock = parseInt(parts[2]) || 0
+            await Swal.fire('庫存不足', 
+                `「${productName}」庫存僅剩 ${remainStock} 件，請調整數量`, 
+                'warning')
+            // 同步更新購物車數量
+            await cartStore.updateQuantityToStock(productName, remainStock)
+        } else {
+            Swal.fire('錯誤', msg, 'error')
+        }
+    }
+}
 
 const backToShop = () =>{
     //點擊返回選購商品
@@ -124,7 +142,7 @@ const backToShop = () =>{
             <BaseButton 
                 color="gdg"
                 label="&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp結帳&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp"
-                @click="goToCheckOut"
+                @click="goToCheckout"
             />
         </div>
     </div>

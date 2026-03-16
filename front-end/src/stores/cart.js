@@ -28,10 +28,28 @@ export const useCartStore = defineStore('cart', {
                 console.error('獲取購物車失敗', error)
                 this.items = [];
             }
+            console.log('fetchCart 完成，目前購物車：', this.items)
+
         },
 
         //加入購物車 對應/api/cart/add
         async addToCart(product) {
+
+            const existing = this.items.find(i => String(i.productId) === String(product.id))
+            const alreadyInCart = existing ? existing.quantity : 0
+            console.log('購物車已有：', alreadyInCart, '庫存：', product.stock)
+
+
+            if (product.quantity > 0 && alreadyInCart + product.quantity > product.stock) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '庫存不足',
+                    text: `購物車已有 ${alreadyInCart} 件，庫存僅剩 ${product.stock} 件，無法再加入`,
+                    confirmButtonColor: '#9f9572'
+                })
+                return;
+            }
+
 
             try {
                 await cartAPI.add({
@@ -60,7 +78,11 @@ export const useCartStore = defineStore('cart', {
                     })
                     return
                 }
-                await this.addToCart({ id: item.productId, quantity: 1 })
+                await this.addToCart({
+                    id: item.productId,
+                    quantity: 1,
+                    stock: item.stock
+                }) // 傳入庫存資訊以供檢查
             }
         },
 

@@ -92,11 +92,33 @@ public class CartService {
 
     @Transactional
     public void deleteCartItem(Integer cartDetailsId){
-        if (!cartDetailsRepository.existsById(cartDetailsId)){
-            throw new RuntimeException("找不到該購物車項目，無法刪除");
+        try {
+            if (!cartDetailsRepository.existsById(cartDetailsId)){
+                throw new RuntimeException("找不到該購物車項目，無法刪除");
+            }
+            cartDetailsRepository.deleteById(cartDetailsId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
-        cartDetailsRepository.deleteById(cartDetailsId);
     }
+
+
+    public void checkCartStock() {
+    User user = getCurrentUser();
+    List<CartDetails> items = cartDetailsRepository.findByUser_Id(user.getId());
+
+        for (CartDetails item : items) {
+            int stock = item.getProduct().getStock().getAvailableQuantity();
+            if (item.getQuantity() > stock) {
+                throw new RuntimeException(
+                    "庫存不足：" + item.getProduct().getProductName() 
+                    + "：" + stock
+                );
+            }
+        }
+    }
+
 
 
     @Transactional

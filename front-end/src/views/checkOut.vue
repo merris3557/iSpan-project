@@ -157,11 +157,17 @@ watch(() => orderForm.value.deliveryMethod, (val) => {
 
 
 
-
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
 
 
 onMounted( async () => {
     await cartStore.fetchCart();
+
+    if(authStore.user) {
+        orderForm.value.name = authStore.user.name || '';
+        orderForm.value.email = authStore.user.email || '';
+    }
 
     // 監聽來自超商地圖窗口的消息
     window.addEventListener('message', handleMessage);

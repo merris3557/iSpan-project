@@ -203,16 +203,34 @@ public class MailService {
             helper.setSubject(subjectTag + storeName);
 
             String htmlContent = String.format(
-                    "<h3 style='color:%s;'>親愛的 %s 您好：</h3>" +
-                            "<p>%s！以下是您的預約明細：</p>" +
-                            "<ul>" +
-                            "  <li>餐廳名稱：<b>%s</b></li>" +
-                            "  <li>訂位日期：%s</li>" +
-                            "  <li>訂位時間：%s</li>" +
-                            "  <li>用餐人數：%s 人</li>" + // 這裡傳入轉型後的字串
-                            "</ul>" +
-                            "<p>如有任何問題，請洽餐廳專線。期待再次為您服務！</p>",
-                    color, guestName, headMessage, storeName, date, time, countStr);
+                    "<html>" +
+                    "<body style='margin: 0; padding: 0; background-color: #f9f9f9; font-family: Arial, sans-serif;'>" +
+                    "  <table width='100%%' border='0' cellpadding='0' cellspacing='0'>" +
+                    "    <tr><td style='padding: 20px 0;'>" +
+                    "      <table align='center' width='600' style='background-color: #ffffff; border: 1px solid #eeeeee; border-collapse: collapse;'>" +
+                    "        <tr><td align='center' style='padding: 30px; background-color: #9f9572;'>" +
+                    "          <img src='https://raw.githubusercontent.com/merris3557/Project_TL_picture/refs/heads/main/%%E9%%A5%%97%%E5%%B3%%B6.png' width='100' style='filter: brightness(0) invert(1);'>" +
+                    "        </td></tr>" +
+                    "        <tr><td style='padding: 40px 30px; background-color: rgba(160, 150, 115, 0.05);'>" +
+                    "          <h2 style='color: %s; margin-top: 0;'>%s</h2>" +
+                    "          <p style='color: #555; font-size: 16px; line-height: 1.6;'>親愛的 <strong>%s</strong> 您好：<br>以下是您的預約明細：</p>" +
+                    "          <div style='background: #ffffff; padding: 20px; border-left: 4px solid %s; margin: 20px 0; color: #333; line-height: 1.8;'>" +
+                    "            <strong>餐廳名稱：</strong> %s<br>" +
+                    "            <strong>訂位日期：</strong> %s<br>" +
+                    "            <strong>訂位時間：</strong> %s<br>" +
+                    "            <strong>用餐人數：</strong> %s 人" +
+                    "          </div>" +
+                    "          <p style='font-size: 14px; color: #777; margin-bottom: 0;'>如有任何問題，請洽餐廳專線。期待再次為您服務！</p>" +
+                    "        </td></tr>" +
+                    "        <tr><td style='padding: 20px; text-align: center; font-size: 12px; color: #999;'>" +
+                    "          &copy; 2026 饗島 Taste Land Project. All rights reserved.<br>此為系統自動發送，請勿直接回覆。" +
+                    "        </td></tr>" +
+                    "      </table>" +
+                    "    </td></tr>" +
+                    "  </table>" +
+                    "</body>" +
+                    "</html>",
+                    color, headMessage, guestName, color, storeName, date, time, countStr);
 
             helper.setText(htmlContent, true);
             mailSender.send(mimeMessage);
