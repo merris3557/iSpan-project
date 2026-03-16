@@ -1,4 +1,4 @@
-package com.example.demo.common.security;
+﻿package com.example.demo.common.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -23,6 +23,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider tokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
+
+    /**
+     * Refresh 端點本就是在 access token 過期後才呼叫，
+     * 不應被 access token 的有效性阻擋，因此跳過此 Filter。
+     * 後端 AuthController 自行讀取 refreshToken Cookie 處理換發。
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.equals("/api/auth/refresh") || path.equals("/api/admins/refresh");
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -70,7 +81,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String path = request.getRequestURI();
-        
+
         // 2. 獲取前端明確指定的上下文提示
         String contextHint = request.getHeader("X-Context-Hint");
         boolean isAdminContext;
@@ -79,8 +90,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             isAdminContext = "ADMIN".equals(contextHint);
         } else {
             // 如果沒有標頭 (例如 Postman 或外部系統呼叫)，以 API URL 前綴為準
-            isAdminContext = path.startsWith("/api/admins") || 
-                             path.contains("/review") || 
+            isAdminContext = path.startsWith("/api/admins") ||
+                             path.contains("/review") ||
                              path.startsWith("/api/feedbackList");
         }
 
