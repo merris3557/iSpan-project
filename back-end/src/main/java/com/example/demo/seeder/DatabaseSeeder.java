@@ -495,6 +495,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         Products saved = productsRepository.save(p);
         saved.setProductCode(String.format("PRD-%04d", saved.getProductId()));
+        
         productsRepository.save(saved);
     }
 
@@ -518,7 +519,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     }
 
     List<String> statuses = Arrays.asList("待付款", "待出貨", "處理中", "已完成");
-    List<String> payMethods = Arrays.asList("信用卡", "ATM", "超商代碼");
+    List<String> payMethods = Arrays.asList("ECpay", "cod");
 
     for (int i = 0; i < 15; i++) {
         User buyer = normalUsers.get(faker.number().numberBetween(0, normalUsers.size()));
@@ -534,7 +535,9 @@ public class DatabaseSeeder implements CommandLineRunner {
         order.setStatus(currentStatus);
         order.setPayMethod(payMethods.get(faker.number().numberBetween(0, payMethods.size())));
         order.setDeliveryMethod("宅配");
-        order.setMerchantTradeNo("ECPAY" + System.currentTimeMillis() + i);
+        String tradeNo = "ORD" + System.currentTimeMillis() + i;
+        order.setMerchantTradeNo(tradeNo);
+        
         
         // 建立時間與付款時間 (已出貨才給付款時間)
         order.setCreatedAt(LocalDateTime.now().minusDays(faker.number().numberBetween(1, 10)));

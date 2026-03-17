@@ -119,7 +119,7 @@ const viewDetail = (order) => {
             </thead>
             <tbody>
                 <tr v-for="order in filteredOrders" :key="order.id">
-                    <td>{{ order.id }}</td>
+                    <td>{{ order.merchantTradeNo }}</td>
                     <td>{{ order.receiverName }}</td>
                     <td>NT$ {{ order.totalPrice }}</td>
                     <td>{{ formatPayMethod(order.payMethod) }}</td>

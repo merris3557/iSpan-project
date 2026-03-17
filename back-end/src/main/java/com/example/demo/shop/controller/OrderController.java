@@ -60,7 +60,8 @@ public class OrderController {
             return ResponseEntity.ok().body(Map.of(
                 "message", "訂單建立成功",
                 "orderId", order.getId(),
-                "status", order.getStatus()
+                "status", order.getStatus(),
+                "merchantTradeNo", order.getMerchantTradeNo()
             ));
         } catch (ObjectOptimisticLockingFailureException e) {
         return ResponseEntity.status(409).body(Map.of("error", "結帳失敗，商品庫存已變動，請重新整理購物車再試"));
@@ -82,7 +83,9 @@ public class OrderController {
             order.setReceiverName(orderData.getReceiverName());
             order.setReceiverPhone(orderData.getReceiverPhone());
             order.setReceiverAddress(orderData.getReceiverAddress());
+            order.setPayMethod(orderData.getPayMethod());
             ordersRepository.save(order);
+            
             return ResponseEntity.ok(Map.of("message", "更新成功"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

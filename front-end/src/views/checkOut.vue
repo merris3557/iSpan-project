@@ -234,7 +234,7 @@ const handleCheckout = async () => {
         return;
     }
 
-    const orderNumber = 'ORD' + Date.now();
+    // const orderNumber = 'ORD' + Date.now();
     shopLog('送出地址：', orderForm.value.city, orderForm.value.district, orderForm.value.street)
 
 
@@ -271,6 +271,7 @@ const handleCheckout = async () => {
     if (result.isConfirmed) {
         try {
             const response = await api.post('/orders/checkout', {
+                
                 name: orderForm.value.name,
                 phone: orderForm.value.phone,
                 city: orderForm.value.city,
@@ -281,6 +282,7 @@ const handleCheckout = async () => {
                 note: orderForm.value.note,
                 shippingFee: shippingFee.value
             })
+            console.log('後端回傳：', response)
 
             orderDepot.addOrder({
                 customer: {...orderForm.value},
@@ -303,7 +305,7 @@ const handleCheckout = async () => {
                 const payResult = await Swal.fire({
                     icon: 'success',
                     title: '訂單建立成功！',
-                    html: `狀態：${currentStatus}<br>訂單編號：${orderNumber}`,
+                    html: `狀態：${currentStatus}<br>訂單編號：${response.merchantTradeNo}`,
                     showCancelButton: true,
                     confirmButtonText: '前往付款',
                     cancelButtonText: '稍後再付'
@@ -330,7 +332,7 @@ const handleCheckout = async () => {
                     icon: 'success',
                     title: '成功',
                     text: `訂單已建立！狀態為：${currentStatus}`,
-                    footer: `<p style="font-weight: bold; font-size: 16px; color: 198754;">訂單編號為: ${orderNumber}</p>`
+                    footer: `<p style="...">訂單編號為: ${response.merchantTradeNo}</p>`
                 })
                 router.push('/shopStore')
             }
