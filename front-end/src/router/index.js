@@ -13,6 +13,7 @@ const routes = [
         path: '',
         name: 'Home',
         component: () => import('@/views/HomeView.vue'),
+        meta: { title: '饗島' }
       },
       {
         path: 'login',
@@ -50,7 +51,8 @@ const routes = [
           {
             path: 'feedback',
             name: 'UserInfoFeedback',
-            component: () => import('@/views/UserInfoFeedbackView.vue')
+            component: () => import('@/views/UserInfoFeedbackView.vue'),
+            meta: { title: '我的回饋' }
           }
         ]
       },
@@ -107,22 +109,26 @@ const routes = [
       {
         path: '/about',
         component: () => import('@/views/AboutView.vue'),
-        name: 'About'
+        name: 'About',
+        meta: { title: '島嶼初心' }
       },
       {
         path: '/mapSearch',
         component: () => import('@/views/MapSearchView.vue'),
-        name: 'MapSearch'
+        name: 'MapSearch',
+        meta: { title: '美味座標' }
       },
       {
         path: '/feedback',
         component: () => import('@/views/FeedbackView.vue'),
-        name: 'Feedback'
+        name: 'Feedback',
+        meta: { title: '聯絡我們' }
       },
       {
         path: 'feedbackAP',
         component: () => import('@/views/FeedbackAPView.vue'),
-        name: 'FeedbackAP'
+        name: 'FeedbackAP',
+        meta: { title: '客服管理後台' }
       },
       {
         path: 'productsDetail/:id',
@@ -264,7 +270,7 @@ const routes = [
         path: 'feedbackAP',
         name: 'FeedbackAP',
         component: () => import('@/views/FeedbackAPView.vue'),
-        meta: { roles: ['SUPER_ADMIN', 'CUSTOMER_SERVICE'] }
+        meta: { roles: ['SUPER_ADMIN', 'CUSTOMER_SERVICE'], title: '客服管理後台' }
       },
       {
         path: 'admins/list',
@@ -430,6 +436,14 @@ router.beforeEach(async (to, from, next) => {
     }
   }
   next();
+});
+
+router.afterEach((to) => {
+  if (to.meta.title) {
+    document.title = to.meta.title;
+  } else {
+    document.title = 'ViteApp';
+  }
 });
 
 export default router;

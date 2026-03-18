@@ -175,7 +175,7 @@ const formatDate = (dateStr) => {
 
 <template>
     <div class="page-container-gdg p-4">
-        <h2 class="page-title-gdg mb-2">客服後台管理</h2>
+        <h2 class="page-title-gdg mb-2">客服管理後台</h2>
         <p class="page-description-gdg">管理與回覆客戶意見</p>
 
         <!-- Filter & Toolbar -->
