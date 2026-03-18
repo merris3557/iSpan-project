@@ -1,9 +1,9 @@
 <script setup>
 
 import { ref, computed } from 'vue'
-import tabStock from '@/components/tabStock.vue'
-import tabIncreaseProducts from '@/components/tabIncreaseProducts.vue'
-import tabUpdateProducts from '@/components/tabUpdateProducts.vue'
+import tabStock from '@/components/TabStock.vue'
+import tabIncreaseProducts from '@/components/TabIncreaseProducts.vue'
+import tabUpdateProducts from '@/components/TabUpdateProducts.vue'
 
 const tabs = [
     { label: '庫存列表', component: 'tabStock' },

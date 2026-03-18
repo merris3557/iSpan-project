@@ -404,7 +404,7 @@ const handleAddToCart = async () => {
 .square-btn {
     width: 40px;
     height: 40px;
-    background-color: #c3ba97; /* 配合綠色理念 */
+    background-color: #c3ba97;
     color: white;
     border: none;
     cursor: pointer;

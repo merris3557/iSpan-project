@@ -66,7 +66,7 @@ const backToShop = () =>{
 
         <tbody >
         <tr  v-for="item in cartStore.items"  :key="item.id" :class="{ 'out-of-stock-row': item.outOfStock }">
-            <img :src="item.image " width=200px height="200px" class="card-img-left" :alt="item.productName" />
+            <td ><img :src="item.image " width=200px height="200px" class="card-img-left" :alt="item.productName" /></td>
             <td >{{ item.productName }}
                 <span v-if="item.outOfStock"  
                 style="color: #dc3545; font-size: 0.8rem; display: block;">

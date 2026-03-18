@@ -5,7 +5,7 @@ import { ref, computed, onMounted} from 'vue';
 import {useProductsDepot} from '@/stores/productsDepot';
 
 
-import TabStockCRUD from '@/components/tabStockCRUD.vue';
+import TabStockCRUD from '@/components/TabStockCRUD.vue';
 
 
 
@@ -53,7 +53,6 @@ const displayTime = (item) => {
 <template>
 
 
-<!-- Recent Orders Table -->
 
     <div class="content-card">
         <div class="card-header">

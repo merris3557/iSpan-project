@@ -1,8 +1,14 @@
 package com.example.demo.shop.entity;
 
-import jakarta.persistence.*;
-import lombok.Data;
 import java.time.Instant;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 @Entity
 @Table(name = "order_logs")
@@ -17,13 +23,12 @@ public class OrderLog {
     private String logLevel; // INFO, ERROR, WARN
 
     @Column(name = "action")
-    private String action;   // 例如: ECPAY_CALLBACK, ORDER_CREATE
+    private String action;  
 
-    // 在 MSSQL 中，使用 NVARCHAR(MAX) 存放大數據
     @Column(name = "message", columnDefinition = "NVARCHAR(MAX)")
     private String message;
 
-    // 這是你的面試亮點：紀錄原始 Payload
+    
     @Column(name = "payload", columnDefinition = "NVARCHAR(MAX)")
     private String payload;
 

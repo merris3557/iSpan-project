@@ -62,12 +62,12 @@ const routes = [
       },
       {
         path: '/shopStore',
-        component: () => import('@/views/shopStore.vue'),
+        component: () => import('@/views/ShopStore.vue'),
         name: 'ShopStore'
       },
       {
         path: '/Cart',
-        component: () => import('@/views/shopCart.vue'),
+        component: () => import('@/views/ShopCart.vue'),
         name: 'ShopCart',
         // meta: { requiresAuth: true }
       },
@@ -126,13 +126,13 @@ const routes = [
       },
       {
         path: 'productsDetail/:id',
-        component: () => import('@/views/productsDetail.vue'),
+        component: () => import('@/views/ProductsDetail.vue'),
         name: 'productsDetail'
 
       },
       {
         path: 'checkOut',
-        component: () => import('@/views/checkOut.vue'),
+        component: () => import('@/views/Checkout.vue'),
         name: 'checkOut',
       },
       {
@@ -366,7 +366,7 @@ router.beforeEach(async (to, from, next) => {
           text: '您沒有訪問此頁面的權限',
           confirmButtonColor: '#1e3c72'
         });
-        
+
         const position = adminAuthStore.admin?.position;
         let redirectTo = '/admin';
         if (position === 'SUPER_ADMIN' || position === 'HUMAN_RESOURCE') {
@@ -376,7 +376,7 @@ router.beforeEach(async (to, from, next) => {
         } else if (position === 'SHOP_MANAGER') {
           redirectTo = '/admin/backEnd/productsList';
         }
-        
+
         return next(redirectTo); // 依據職位導向對應首頁
       }
       console.log('[Router Admin] Role check 通過 ✅');
@@ -386,28 +386,6 @@ router.beforeEach(async (to, from, next) => {
 
 
 
-  //   //Anna改的，為了將目標登入後保留原始路徑返回前頁
-  //   if (to.meta.requiresAuth) {
-  //     if (authStore.isExpired || !authStore.isLoggedIn) {
-  //       sessionStorage.setItem('redirectPath', to.fullPath);        //將當前目標路徑存入瀏覽器站存
-
-
-  //       await authStore.handleLogoutAndNotify(authStore.isExpired ? 'timeout' : 'unauthorized');
-  //       return next({ name: 'Login', query: { redirect: to.fullPath } });
-  //     }
-  //   }
-
-  //   //當使用者從/login登入成功切換出來時，自動攔截並導向
-  //   if (from.path === '/login' && authStore.isLoggedIn) {
-  //     const savedPath = sessionStorage.getItem('redirectPath');
-  //     if (savedPath) {
-  //       sessionStorage.removeItem('redirectPath');
-  //       return next({ name: 'Login', query: { redirect: to.fullPath } });
-  //     }
-  //   }
-  //   next();
-
-  // });
 
 
   if (to.meta.requiresAuth) {

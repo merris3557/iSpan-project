@@ -5,7 +5,7 @@ import apiWrapper from '@/api/config'
 
 const orders = ref([])
 const filterStatus = ref('全部')
-const sortOrder = ref('desc') // 新增排序
+const sortOrder = ref('desc') 
 const editingOrder = ref(null)
 const selectedOrder = ref(null)
 
@@ -119,7 +119,7 @@ const viewDetail = (order) => {
             </thead>
             <tbody>
                 <tr v-for="order in filteredOrders" :key="order.id">
-                    <td>{{ order.id }}</td>
+                    <td>{{ order.merchantTradeNo }}</td>
                     <td>{{ order.receiverName }}</td>
                     <td>NT$ {{ order.totalPrice }}</td>
                     <td>{{ formatPayMethod(order.payMethod) }}</td>

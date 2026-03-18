@@ -2,10 +2,10 @@
 
 <script setup>
 
-import storeCard from '../components/storeCard.vue'
+import storeCard from '@/components/StoreCard.vue'
 import { useRouter} from 'vue-router'
 // import { useCartStore } from '@/stores/cart';
-import banner from '../components/common/banner.vue'
+import banner from '@/components/common/Banner.vue'
 import {onMounted} from 'vue';
 import { useProductsDepot } from '@/stores/productsDepot';
 import OrderToast from '@/components/OrderToast.vue'
@@ -13,7 +13,6 @@ import OrderToast from '@/components/OrderToast.vue'
 const depot = useProductsDepot();
 const router =useRouter();
 const goToCart = () => {
-  // 括號內填寫在 router/index.js 設定的 path
     router.push('/cart') 
 }
 
