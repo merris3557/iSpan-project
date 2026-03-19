@@ -41,6 +41,7 @@ const routes = [
             path: 'orders',
             name: 'UserOrders',
             component: () => import('@/views/UserInfoOrders.vue'),
+            meta: { title: '我的訂單' }
           },
           {
             path: 'store-registration',
@@ -63,13 +64,15 @@ const routes = [
       {
         path: '/shopStore',
         component: () => import('@/views/ShopStore.vue'),
-        name: 'ShopStore'
+        name: 'ShopStore',
+        meta: { title: '質感選物' }
       },
       {
         path: '/Cart',
         component: () => import('@/views/ShopCart.vue'),
         name: 'ShopCart',
         // meta: { requiresAuth: true }
+        meta: { title: '購物車' }
       },
       {
         path: '/storeInfo/reservation/:id',
@@ -127,13 +130,15 @@ const routes = [
       {
         path: 'productsDetail/:id',
         component: () => import('@/views/ProductsDetail.vue'),
-        name: 'productsDetail'
+        name: 'productsDetail',
+        meta: { title: '商品介紹' }
 
       },
       {
         path: 'checkOut',
         component: () => import('@/views/Checkout.vue'),
         name: 'checkOut',
+        meta: { title: '結帳' }
       },
       {
         path: 'getusertest',
@@ -143,7 +148,8 @@ const routes = [
       {
         path: '/payment-result',
         component: () => import('@/views/PaymentResult.vue'),
-        name: 'PaymentResult'
+        name: 'PaymentResult',
+        meta: { title: '結帳結果' }
       }
     ]
   },
@@ -252,13 +258,15 @@ const routes = [
         path: 'backEnd/productsList',
         name: 'BackEndProductsList',
         component: () => import('@/views/BackEndProductsList.vue'),
-        meta: { roles: ['SUPER_ADMIN', 'SHOP_MANAGER'] }
+        meta: { roles: ['SUPER_ADMIN', 'SHOP_MANAGER'] },
+        meta: { title: '管理 | 商品&庫存' }
       },
       {
         path: 'backEnd/productsOrders',
         name: 'BackEndproductsOrders',
         component: () => import('@/views/BackEndproductsOrders.vue'),
-        meta: { roles: ['SUPER_ADMIN', 'SHOP_MANAGER'] }
+        meta: { roles: ['SUPER_ADMIN', 'SHOP_MANAGER'] },
+        meta: { title: '管理 | 訂單紀錄' }
       },
       {
         path: 'feedbackAP',
@@ -316,6 +324,7 @@ import { useCartStore } from '@/stores/cart';
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   const adminAuthStore = useAdminAuthStore();
+  document.title = to.meta.title || '饗島'
 
 
   //for登出入狀態攔截，顯示購物車
