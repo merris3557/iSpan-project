@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, watch, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useMapSearchStore } from '@/stores/mapSearchStore';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -16,6 +17,7 @@ L.Icon.Default.mergeOptions({
     shadowUrl: markerShadow
 });
 
+const router = useRouter();
 const mapSearchStore = useMapSearchStore();
 
 let map = null;
@@ -36,7 +38,8 @@ const updateMarkers = (data) => {
         if (!store.latitude || !store.longitude) return;
         const marker = L.marker([store.latitude, store.longitude])
             .bindPopup(
-                `<b>${store.storeName}</b><br>` +
+                `<a class="store-popup-link" data-id="${store.storeId}" style="font-weight:bold;cursor:pointer;color:#9f9572;text-decoration:underline;">` +
+                `${store.storeName}</a><br>` +
                 `<small>${store.address || ''}</small>`
             );
         markersGroup.addLayer(marker);
@@ -57,6 +60,19 @@ onMounted(() => {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
+
+    // 監聽 popup 開啟事件，綁定店名連結的點擊跳轉
+    map.on('popupopen', () => {
+        const link = document.querySelector('.store-popup-link');
+        if (link) {
+            link.addEventListener('click', () => {
+                const storeId = link.getAttribute('data-id');
+                if (storeId) {
+                    router.push({ name: 'StoreInfo', params: { id: storeId } });
+                }
+            });
+        }
+    });
 });
 
 // 監聽 store 中搜尋結果的變化

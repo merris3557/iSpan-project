@@ -42,7 +42,7 @@ const goTo = (path) => {
               <h6 class="text-uppercase mb-3 fw-bold text-gdg">餐廳搜尋</h6>
               <ul class="list-unstyled">
                 <li class="mb-2"><a href="#" @click.prevent="goTo('/mapSearch')" class="footer-link">美味座標</a></li>
-                <li class="mb-2"><a href="#" @click.prevent="goTo('/storeInfo/reservation/1')" class="footer-link">餐廳訂位</a></li>
+                <li class="mb-2"><span class="footer-link" style="cursor: default;">餐廳訂位</span></li>
               </ul>
             </div>
 
