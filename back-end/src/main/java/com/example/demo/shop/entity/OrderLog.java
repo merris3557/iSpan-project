@@ -25,11 +25,11 @@ public class OrderLog {
     @Column(name = "action")
     private String action;  
 
-    @Column(name = "message", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "message", length = 4000)
     private String message;
 
     
-    @Column(name = "payload", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "payload", length = 4000)
     private String payload;
 
     @Column(name = "created_at")

@@ -39,13 +39,13 @@ public class Products{
     @Column(name = "product_code", unique = true, length = 20)
     private String productCode;
 
-    @Column(name = "image", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "image", length = 4000)
     private String image;
 
     @Column(name= "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    @Column(name = "product_description", nullable = true, columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "product_description", nullable = true, length = 4000)
     private String productDescription;
 
 

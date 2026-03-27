@@ -31,7 +31,7 @@ public class StoresInfo {
     @Column(length = 20)
     private String storePhone;
 
-    @Column(columnDefinition = "nvarchar(1000)")
+    @Column(length = 1000)
     private String description;
 
     @Column(length = 255)

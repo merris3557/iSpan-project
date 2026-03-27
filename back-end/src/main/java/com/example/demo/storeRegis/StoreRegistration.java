@@ -32,23 +32,23 @@ public class StoreRegistration {
     @Column(nullable = false, length = 100)
     private String email; // 強制帶入user.email
 
-    @Column(columnDefinition = "nvarchar(100)")
+    @Column(length = 100)
     private String name; // 預設帶入user.name
 
-    @Column(name = "store_name", columnDefinition = "nvarchar(100)")
+    @Column(name = "store_name", length = 100)
     private String storeName; // 店家名稱
 
     @Column(length = 20)
     private String phone; // 店家電話
 
-    @Column(columnDefinition = "nvarchar(255)")
+    @Column(length = 255)
     private String address; // 店家地址
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id")
     private Admin manager; // 負責處理的客服人員
 
-    @Column(columnDefinition = "nvarchar(1000)")
+    @Column(length = 1000)
     private String reply; // 回復訊息 (退回原因)
 
     @Enumerated(EnumType.STRING)
