@@ -36,7 +36,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-@Profile("pord")
+@Profile("prod")
 public class PostgreSQLSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
