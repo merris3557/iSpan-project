@@ -2,10 +2,10 @@
 
 <script setup>
 
-import storeCard from '@/components/StoreCard.vue'
+import storeCard from '@/components/storeCard.vue'
 import { useRouter} from 'vue-router'
 // import { useCartStore } from '@/stores/cart';
-import banner from '@/components/common/Banner.vue'
+import banner from '@/components/common/banner.vue'
 import {onMounted} from 'vue';
 import { useProductsDepot } from '@/stores/productsDepot';
 import OrderToast from '@/components/OrderToast.vue'
