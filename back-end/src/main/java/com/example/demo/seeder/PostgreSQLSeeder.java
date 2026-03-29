@@ -75,8 +75,8 @@ public class PostgreSQLSeeder implements CommandLineRunner {
         this.geocodingService = geocodingService;
         this.productsRepository = productsRepository;
         this.feedbackRepository = feedbackRepository;
-        this.ordersRepository = ordersRepository;
-        this.orderDetailsRepository = orderDetailsRepository;
+        // this.ordersRepository = ordersRepository;
+        // this.orderDetailsRepository = orderDetailsRepository;
     }
 
     @Override
