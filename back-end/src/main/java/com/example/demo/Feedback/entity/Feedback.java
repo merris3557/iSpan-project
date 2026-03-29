@@ -19,7 +19,7 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "case_number", nullable = false, length = 15)
+    @Column(name = "case_number", nullable = false, length = 50)
     private String caseNumber;
 
     @Column(nullable = false, length = 50)

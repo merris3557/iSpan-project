@@ -67,7 +67,19 @@ public class SecurityConfig {
                         // 注意：/api/auth/me 必須在 /api/auth/** 之前，否則 permitAll 會覆蓋它
                         // Token 過期時若 /me 被 permitAll，後端用 anonymousUser 查找會回 404 而非 401，
                         // 導致前端 Refresh 攔截器無法觸發
-                        .requestMatchers("/", "/index.html", "/static/**", "/assets/**", "/*.ico", "/*.js", "/*.css")
+                        .requestMatchers("/",
+                                "/index.html",
+                                "/assets/**",
+                                "/static/**",
+                                "/favicon.ico",
+                                "/*.js",
+                                "/*.css",
+                                "/*.png",
+                                "/*.jpg",
+                                "/*.svg",
+                                "/about",
+                                "/map",
+                                "/feedback")
                         .permitAll()
                         .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/auth/**").permitAll()
