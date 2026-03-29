@@ -5,7 +5,7 @@ import { ref, computed, onMounted} from 'vue';
 import {useProductsDepot} from '@/stores/productsDepot';
 
 
-import TabStockCRUD from '@/components/TabStockCRUD.vue';
+import TabStockCRUD from '@/components/tabStockCRUD.vue';
 
 
 
