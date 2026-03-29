@@ -49,8 +49,10 @@ public class PostgreSQLSeeder implements CommandLineRunner {
     private final GeocodingService geocodingService;
     private final ProductsRepository productsRepository;
     private final FeedbackRepository feedbackRepository;
-    private final com.example.demo.shop.repository.OrdersRepository ordersRepository;
-    private final com.example.demo.shop.repository.OrderDetailsRepository orderDetailsRepository;
+    // private final com.example.demo.shop.repository.OrdersRepository
+    // ordersRepository;
+    // private final com.example.demo.shop.repository.OrderDetailsRepository
+    // orderDetailsRepository;
 
     @Value("${app.seeder.enabled:false}")
     private boolean seederEnabled;
@@ -100,7 +102,7 @@ public class PostgreSQLSeeder implements CommandLineRunner {
         seedUsersAndStores();
         seedProducts();
         seedFeedbacks();
-        seedOrders();
+        // seedOrders();
 
         System.out.println("PostgreSQL Database seeding completed successfully.");
     }
@@ -261,30 +263,31 @@ public class PostgreSQLSeeder implements CommandLineRunner {
         }
     }
 
-    private void seedOrders() {
-        Faker faker = new Faker(Locale.TAIWAN);
-        List<User> buyers = userRepository.findAll().stream().filter(u -> !u.getIsStore()).collect(Collectors.toList());
-        List<Products> prods = productsRepository.findAll();
+    // private void seedOrders() {
+    // Faker faker = new Faker(Locale.TAIWAN);
+    // List<User> buyers = userRepository.findAll().stream().filter(u ->
+    // !u.getIsStore()).collect(Collectors.toList());
+    // List<Products> prods = productsRepository.findAll();
 
-        for (int i = 0; i < 10; i++) {
-            Orders o = new Orders();
-            User b = buyers.get(i % buyers.size());
-            o.setUser(b);
-            o.setReceiverName(b.getName());
-            o.setStatus("待付款");
-            o.setTotalPrice(BigDecimal.ZERO);
-            o.setMerchantTradeNo("ORD" + System.currentTimeMillis() + i);
-            Orders savedO = ordersRepository.save(o);
+    // for (int i = 0; i < 10; i++) {
+    // Orders o = new Orders();
+    // User b = buyers.get(i % buyers.size());
+    // o.setUser(b);
+    // o.setReceiverName(b.getName());
+    // o.setStatus("待付款");
+    // o.setTotalPrice(BigDecimal.ZERO);
+    // o.setMerchantTradeNo("ORD" + System.currentTimeMillis() + i);
+    // Orders savedO = ordersRepository.save(o);
 
-            OrderDetails d = new OrderDetails();
-            d.setOrder(savedO);
-            d.setProduct(prods.get(0));
-            d.setOrderQuantity(1);
-            d.setSubtotal(prods.get(0).getPrice());
-            orderDetailsRepository.save(d);
+    // OrderDetails d = new OrderDetails();
+    // d.setOrder(savedO);
+    // d.setProduct(prods.get(0));
+    // d.setOrderQuantity(1);
+    // d.setSubtotal(prods.get(0).getPrice());
+    // orderDetailsRepository.save(d);
 
-            savedO.setTotalPrice(prods.get(0).getPrice());
-            ordersRepository.save(savedO);
-        }
-    }
+    // savedO.setTotalPrice(prods.get(0).getPrice());
+    // ordersRepository.save(savedO);
+    // }
+    // }
 }
