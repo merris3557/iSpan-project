@@ -1,27 +1,25 @@
-# --- 第一階段：編譯前端 ---
-FROM node:18 AS frontend-build
+# --- 第一階段：前端打包 (Vite) ---
+FROM node:20-slim AS frontend-build
 WORKDIR /app/frontend
-# 複製前端原始碼
+# 💡 注意路徑：從根目錄進入 front-end
 COPY front-end/package*.json ./
 RUN npm install
 COPY front-end/ .
-# 執行打包 (這會產生一個 dist 資料夾)
 RUN npm run build
 
-# --- 第二階段：編譯後端 Java ---
-FROM maven:3.8-openjdk-17 AS backend-build
+# --- 第二階段：後端打包 (Maven) ---
+FROM maven:3.9-eclipse-temurin-17 AS backend-build
 WORKDIR /app
-COPY pom.xml .
-COPY src ./src
-# 將第一階段打包好的前端檔案，複製到 Java 的靜態資源路徑
+# 💡 注意路徑：從根目錄進入 back-end
+COPY back-end/pom.xml .
+COPY back-end/src ./src
+# 將前端產出的 dist 複製到後端的靜態資源目錄
 COPY --from=frontend-build /app/frontend/dist ./src/main/resources/static
-# 編譯並跳過測試
 RUN mvn clean package -DskipTests
 
-# --- 第三階段：執行環境 ---
-FROM openjdk:17-jdk-slim
+# --- 第三階段：運行 ---
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 COPY --from=backend-build /app/target/*.jar app.jar
-
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Xmx400m", "-jar", "app.jar"]
