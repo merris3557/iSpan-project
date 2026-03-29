@@ -67,13 +67,13 @@ const routes = [
       },
       {
         path: '/shopStore',
-        component: () => import('@/views/ShopStore.vue'),
+        component: () => import('@/views/shopStore.vue'),
         name: 'ShopStore',
         meta: { title: '質感選物' }
       },
       {
         path: '/Cart',
-        component: () => import('@/views/ShopCart.vue'),
+        component: () => import('@/views/shopCart.vue'),
         name: 'ShopCart',
         // meta: { requiresAuth: true }
         meta: { title: '購物車' }
@@ -139,14 +139,14 @@ const routes = [
       // },
       {
         path: 'productsDetail/:id',
-        component: () => import('@/views/ProductsDetail.vue'),
+        component: () => import('@/views/productsDetail.vue'),
         name: 'productsDetail',
         meta: { title: '商品介紹' }
 
       },
       {
         path: 'checkOut',
-        component: () => import('@/views/Checkout.vue'),
+        component: () => import('@/views/checkOut.vue'),
         name: 'checkOut',
         meta: { title: '結帳' }
       },
