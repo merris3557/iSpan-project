@@ -67,6 +67,8 @@ public class SecurityConfig {
                         // 注意：/api/auth/me 必須在 /api/auth/** 之前，否則 permitAll 會覆蓋它
                         // Token 過期時若 /me 被 permitAll，後端用 anonymousUser 查找會回 404 而非 401，
                         // 導致前端 Refresh 攔截器無法觸發
+                        .requestMatchers("/", "/index.html", "/static/**", "/assets/**", "/*.ico", "/*.js", "/*.css")
+                        .permitAll()
                         .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/auth/**").permitAll()
                         // 放行管理員登入與相關基礎功能
@@ -79,21 +81,28 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/admins").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/admins").permitAll() // 暫時放行新增管理員
                         // 所有管理員都可以獲取自己的資訊
-                        .requestMatchers("/api/admins/me").hasAnyRole("SUPER_ADMIN", "HUMAN_RESOURCE", "CUSTOMER_SERVICE", "SHOP_MANAGER")
+                        .requestMatchers("/api/admins/me")
+                        .hasAnyRole("SUPER_ADMIN", "HUMAN_RESOURCE", "CUSTOMER_SERVICE", "SHOP_MANAGER")
                         // 鎖定其他管理員 API，必須具備對應權限才能訪問
                         .requestMatchers("/api/admins/**").hasAnyRole("SUPER_ADMIN", "HUMAN_RESOURCE")
                         // Store Registrations Admin APIs
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/store-registrations").hasAnyRole("SUPER_ADMIN", "CUSTOMER_SERVICE")
-                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/store-registrations/*/review").hasAnyRole("SUPER_ADMIN", "CUSTOMER_SERVICE")
-                        // 允許訪問店鋪註冊端點 (註：原先測試時已發現 permitAll 會導致 Token 過期時無法觸發 refresh 且拋出 400 anonymousUser 錯誤)
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/store-registrations")
+                        .hasAnyRole("SUPER_ADMIN", "CUSTOMER_SERVICE")
+                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/store-registrations/*/review")
+                        .hasAnyRole("SUPER_ADMIN", "CUSTOMER_SERVICE")
+                        // 允許訪問店鋪註冊端點 (註：原先測試時已發現 permitAll 會導致 Token 過期時無法觸發 refresh 且拋出 400
+                        // anonymousUser 錯誤)
                         .requestMatchers("/api/store-registrations/**").authenticated()
                         // 放行綠界相關 API（付款、回傳等）
                         .requestMatchers("/api/ecpay/**").permitAll()
-                        //放行選擇超商相關
-                        .requestMatchers("/api/ecpay/return", "/api/ecpay/result", "/api/ecpay/map-callback").permitAll()
+                        // 放行選擇超商相關
+                        .requestMatchers("/api/ecpay/return", "/api/ecpay/result", "/api/ecpay/map-callback")
+                        .permitAll()
                         // 產品相關 API: GET 允許匿名瀏覽，POST/PUT/DELETE 需要驗證或店家/管理員權限
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/products/**").permitAll()
-                        .requestMatchers("/api/products/**").hasAnyRole("SUPER_ADMIN", "SHOP_MANAGER") // 新增、修改、刪除需登入 (若有特定 Role 請自行調整)
+                        .requestMatchers("/api/products/**").hasAnyRole("SUPER_ADMIN", "SHOP_MANAGER") // 新增、修改、刪除需登入
+                                                                                                       // (若有特定 Role
+                                                                                                       // 請自行調整)
                         // OAuth2 登入端點
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         // 地圖搜尋端點：允許匿名存取（搜尋不需要登入）
@@ -109,26 +118,36 @@ public class SecurityConfig {
                         // 商家資訊端點：
                         // ⚠️ 注意順序！/api/owner/store/me 一定要在 /api/owner/store/{id} 之前
                         // 因為 {id} 是萬用字元，會匹配字串 "me"，若順序顛倒，me 會被誤判為 permitAll！
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/owner/store/me").fullyAuthenticated()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/owner/store/me")
+                        .fullyAuthenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/owner/store/{id}").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/bookings/config/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/bookings/available-slots").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/bookings/available-slots")
+                        .permitAll()
                         // 前端商店顯示最新購買資料 (允許匿名查詢最新訂單)
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/orders/latest").permitAll()
                         // 其他訂單 API：必須登入才能結帳或查詢個人的訂單
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/orders/all").hasAnyRole("SUPER_ADMIN", "SHOP_MANAGER")
-                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*").hasAnyRole("SUPER_ADMIN", "SHOP_MANAGER")
-                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/orders/*").hasAnyRole("SUPER_ADMIN", "SHOP_MANAGER")
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/orders/all")
+                        .hasAnyRole("SUPER_ADMIN", "SHOP_MANAGER")
+                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*")
+                        .hasAnyRole("SUPER_ADMIN", "SHOP_MANAGER")
+                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/orders/*")
+                        .hasAnyRole("SUPER_ADMIN", "SHOP_MANAGER")
                         .requestMatchers("/api/orders/**").authenticated()
                         // 管理員權限端點
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/profile").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/users/profile").authenticated()
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users/change-password").authenticated()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users/change-password")
+                        .authenticated()
                         .requestMatchers("/api/users/2fa/**").authenticated()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users").hasAnyRole("SUPER_ADMIN", "CUSTOMER_SERVICE")
-                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/users/*/store-status").hasAnyRole("SUPER_ADMIN", "CUSTOMER_SERVICE")
-                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/users/*").hasAnyRole("SUPER_ADMIN", "CUSTOMER_SERVICE")
-                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/users/*").hasAnyRole("SUPER_ADMIN", "CUSTOMER_SERVICE")
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users")
+                        .hasAnyRole("SUPER_ADMIN", "CUSTOMER_SERVICE")
+                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/users/*/store-status")
+                        .hasAnyRole("SUPER_ADMIN", "CUSTOMER_SERVICE")
+                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/users/*")
+                        .hasAnyRole("SUPER_ADMIN", "CUSTOMER_SERVICE")
+                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/users/*")
+                        .hasAnyRole("SUPER_ADMIN", "CUSTOMER_SERVICE")
                         // 放行 Spring Boot 預設錯誤處理器路由，防止 API Exception（如403/404）轉送至此時觸發 OAuth 登入重導
                         .requestMatchers("/error").permitAll()
                         // 其他請求需要完整認證（非匿名用戶）
@@ -137,8 +156,8 @@ public class SecurityConfig {
                         // 匿名請求會穿透到 Controller 層，導致業務邏輯拋出 403 而非 401
                         // fullyAuthenticated() 在 Filter 層就阻擋匿名用戶，正確觸發 AuthenticationEntryPoint 回 401
                         .anyRequest().fullyAuthenticated()
-                        
-                    )
+
+                )
                 // 處理 /api/** 的未授權請求直接回傳 401 而非重新導向 OAuth2 登入頁
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) -> {
@@ -168,12 +187,13 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration
                 .setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080", "http://localhost:5173",
-                "https://shily-untusked-yuri.ngrok-free.dev",
-                "https://payment-stage.ecpay.com.tw",  
-                "https://payment.ecpay.com.tw",
-                "https://logistics-stage.ecpay.com.tw",
-                "https://logistics.ecpay.com.tw"
-                    
+                        "https://shily-untusked-yuri.ngrok-free.dev",
+                        "https://payment-stage.ecpay.com.tw",
+                        "https://payment.ecpay.com.tw",
+                        "https://logistics-stage.ecpay.com.tw",
+                        "https://logistics.ecpay.com.tw",
+                        "https://tasteland.onrender.com"
+
                 ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
