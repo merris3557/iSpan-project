@@ -23,3 +23,8 @@ WORKDIR /app
 COPY --from=backend-build /app/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-Xmx400m", "-jar", "app.jar"]
+
+# 顯示更詳細的 Hibernate 錯誤
+spring.jpa.show-sql=true
+logging.level.org.hibernate.tool.schema=DEBUG
+logging.level.org.springframework.jdbc.datasource=DEBUG
