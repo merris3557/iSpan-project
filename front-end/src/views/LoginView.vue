@@ -20,9 +20,12 @@ const goToRegister = () => {
   router.push('/register');
 };
 
-const handleGoogleLogin = () => {
-  window.location.href = 'http://localhost:8080/oauth2/authorization/google';
-};
+const handleGoogleLogin = import.meta.env.VITE_API_BASE_URL || ''; 
+window.location.href = `${backendUrl}/oauth2/authorization/google`.replace('/api', '');
+
+// const handleGoogleLogin = () => {
+//   window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+// };
 
 const doLogin = async (dataToSubmit) => {
   try {
