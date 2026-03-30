@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useAdminAuthStore } from '@/stores/adminAuth';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:8080/api');
 
 // ===== 主要 axios 實例 =====
 const api = axios.create({
@@ -170,7 +170,7 @@ const createMethodWrapper = (methodName) => {
                 await doRefresh(isAdminContext);
 
                 const retryConfig = { ...error.config };
-                
+
                 // 註解：不要隨便刪除 transformRequest，否則 FormData 和 JSON 資料格式會跑掉而導致 400 錯誤
                 // 但為了某些相容性問題，只刪除 adapter
                 delete retryConfig.adapter;
