@@ -20,8 +20,16 @@ const goToRegister = () => {
   router.push('/register');
 };
 
-const handleGoogleLogin = import.meta.env.VITE_API_BASE_URL || ''; 
-window.location.href = `${backendUrl}/oauth2/authorization/google`.replace('/api', '');
+const handleGoogleLogin = () => {
+    // 1. 定義變數 (這一行剛才漏掉了)
+    const backendUrl = import.meta.env.VITE_API_BASE_URL || ''; 
+    
+    // 2. 處理跳轉 (這裡要把 /api 拿掉，因為 OAuth2 是 Spring Security 的路徑)
+    const oauthUrl = `${window.location.origin}/oauth2/authorization/google`;
+    
+    console.log("正在導向至:", oauthUrl); // 這樣妳在 F12 就能看到它要去哪
+    window.location.href = oauthUrl;
+};
 
 // const handleGoogleLogin = () => {
 //   window.location.href = 'http://localhost:8080/oauth2/authorization/google';
